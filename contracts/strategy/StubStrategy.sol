@@ -16,8 +16,6 @@ contract StubStrategy is BaseStrategy {
     using Address for address;
     using SafeMath for uint256;
 
-    address token_stub;
-
     constructor(address _vault) public BaseStrategy(_vault) {
         // minReportDelay = 6300;
         // profitFactor = 100;

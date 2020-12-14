@@ -6,6 +6,10 @@ def deployer():
     yield accounts[0]
 
 @pytest.fixture(scope="module")
+def governance():
+    yield accounts[0]
+
+@pytest.fixture(scope="module")
 def strategist():
     yield accounts[1]
 
