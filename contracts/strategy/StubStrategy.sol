@@ -18,8 +18,11 @@ contract StubStrategy is BaseStrategy {
 
     address investmentAddr;
     uint256 dumbYield;
+    bool countProfit;
+    uint256 uncountedProfit;
 
     constructor(address _vault, address _investmentAddr, uint256 _dumbYield) public BaseStrategy(_vault) {
+        minReportDelay = 0;
         investmentAddr = _investmentAddr;
         dumbYield = _dumbYield;
     }
@@ -30,37 +33,44 @@ contract StubStrategy is BaseStrategy {
         return "StubCurveStrategy";
     }
 
-    //normalizedBalance
+    //Analog of normalizedBalance()
     function estimatedTotalAssets() public override view returns (uint256) {
         //want - token registered in strategy, comes from the Vault
         return want.balanceOf(address(this)).add(want.balanceOf(investmentAddr));
     }
 
-    //Return some yield to the Vault or repay the debt (by demand)
+    //Return some yield (profit) to the Vault or repay the debt (by demand)
+    //All available funds are returned to the Vault
     function prepareReturn(uint256 _debtOutstanding) internal override
         returns (
-            uint256 _profit,
+            uint256 _profit, // THIS AMOUNT WILL BE AUTOMATICALLY WITHDRAWN BACK TO THE VAULT if available
             uint256 _loss,
             uint256 _debtPayment
         )
     {
+        if (countProfit && want.balanceOf(investmentAddr) > 0) {
+            IERC20Mintable(address(want)).mint(dumbYield);
+        //    want.transfer(investmentAddr, dumbYield);
+            uncountedProfit = uncountedProfit.add(dumbYield);
+        }
         //No steps to cover debt here. Just keep the yield
-        uint256 balance = want.balanceOf(investmentAddr);
-        if (balance >= _debtOutstanding) {
-            _profit = balance.sub(_debtOutstanding);
-        }
-        else {
-            _loss = _debtOutstanding.sub(balance);
-        }
+        _profit = uncountedProfit;
+        uncountedProfit = 0;
     }
 
     //Re-investment strategy steps
     function adjustPosition(uint256 _debtOutstanding) internal override {
         //Dumb yield emulating
-        IERC20Mintable(address(want)).mint(dumbYield);
-
         uint256 currentBalance = want.balanceOf(address(this));
-        want.transfer(investmentAddr, currentBalance);
+
+        if (currentBalance > 0) {
+            want.transfer(investmentAddr, currentBalance);
+        }
+
+        
+        if (!countProfit) {
+            countProfit = true;
+        }
     }
 
     //Return funds to the strategy contract ready to be withdrawn by Vault
@@ -73,14 +83,10 @@ contract StubStrategy is BaseStrategy {
 
         uint256 currentBalance = want.balanceOf(address(this));
 
-        if (currentBalance >= _debtOutstanding) {
-            _debtPayment = _debtOutstanding;
-            _profit = currentBalance.sub(_debtOutstanding);
-        }
-        else {
-            _debtPayment = currentBalance;
-            _loss = _debtOutstanding.sub(currentBalance);
-        }
+        _debtPayment = currentBalance;
+        _profit = uncountedProfit;
+        uncountedProfit = 0;
+ 
         want.approve(address(vault), currentBalance);
     }
 
@@ -90,9 +96,15 @@ contract StubStrategy is BaseStrategy {
         override
         returns (uint256 _amountFreed)
     {
-        want.transferFrom(investmentAddr, address(this), _amountNeeded);
-
+        if (_amountNeeded == 0) {
+            return 0;
+        }
+        uint256 balanceStrat = want.balanceOf(address(this));
+        if (_amountNeeded > balanceStrat) {
+            want.transferFrom(investmentAddr, address(this), _amountNeeded.sub(balanceStrat));
+        }
         _amountFreed = _amountNeeded;//Here fee should be subtracted
+
     }
 
     //Migrate funds to another strategy
