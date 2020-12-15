@@ -18,9 +18,11 @@ def vault(deployer, token, rewards, Vault):
     yield vault
 
 @pytest.fixture
-def strategy(strategist, deployer, vault, token, StubStrategy):
-    strategy = strategist.deploy(StubStrategy, vault)
+def strategy(strategist, deployer, vault, token, investment, StubStrategy):
+    strategy = strategist.deploy(StubStrategy, vault, investment, 10)
+    token.approve(strategy, 10**18, {"from":investment})
     strategy.setKeeper(strategist, {"from": strategist})
+
     # Addresses
     assert strategy.strategist() == strategist
     assert strategy.rewards() == strategist
@@ -35,7 +37,7 @@ def strategy(strategist, deployer, vault, token, StubStrategy):
     assert not strategy.tendTrigger(0)
     yield strategy
 
-def test_vault_setup_strategy(chain, vault, strategy, token, deployer, strategist, governance):
+def test_vault_setup_strategy(chain, vault, strategy, token, investment, deployer, strategist, governance):
     vault.addStrategy(strategy, STRAT_CREDIT, STRAT_OPERATION_LIMIT, STRAT_OPERATION_FEE, {"from": governance})
 
     assert vault.creditAvailable(strategy) == 0
@@ -58,7 +60,8 @@ def test_vault_setup_strategy(chain, vault, strategy, token, deployer, strategis
     chain.mine(1, start + 1)
     strategy.harvest({"from": strategist})
     
-    assert token.balanceOf(strategy) == STRAT_OPERATION_LIMIT
+    #Funds are invested
+    assert token.balanceOf(investment) == STRAT_CREDIT + STRAT_OPERATION_FEE
     assert vault.debtOutstanding(strategy, {"from": strategy}) == 0
 
 

@@ -19,6 +19,10 @@ def strategist():
 def rewards(accounts):
     yield accounts[2]
 
+@pytest.fixture
+def investment(accounts):
+    yield accounts[3]
+
 @pytest.fixture(scope="module")
 def token(deployer, TestERC20):
     token = deployer.deploy(TestERC20, "Test Token", "TST", 18)
