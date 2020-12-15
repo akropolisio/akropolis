@@ -1,6 +1,8 @@
 import pytest
 from brownie import accounts
 
+TOTAL_TOKENS = 10000000
+
 @pytest.fixture(scope="module")
 def deployer():
     yield accounts[0]
@@ -19,5 +21,8 @@ def rewards(accounts):
 
 @pytest.fixture(scope="module")
 def token(deployer, TestERC20):
-    yield deployer.deploy(TestERC20, "Test Token", "TST", 18)
+    token = deployer.deploy(TestERC20, "Test Token", "TST", 18)
+    token.mint(TOTAL_TOKENS, {"from": deployer})
+    assert token.balanceOf(deployer) == TOTAL_TOKENS
+    yield token
 

@@ -17,9 +17,6 @@ contract StubStrategy is BaseStrategy {
     using SafeMath for uint256;
 
     constructor(address _vault) public BaseStrategy(_vault) {
-        // minReportDelay = 6300;
-        // profitFactor = 100;
-        // debtThreshold = 0;
     }
 
 
@@ -28,12 +25,13 @@ contract StubStrategy is BaseStrategy {
         return "StubCurveStrategy";
     }
 
-    //normaizedBalance
+    //normalizedBalance
     function estimatedTotalAssets() public override view returns (uint256) {
         //want - token registered in strategy, comes from the Vault
         return want.balanceOf(address(this));
     }
 
+    //Strategy steps
     function prepareReturn(uint256 _debtOutstanding)
         internal
         override
@@ -48,6 +46,7 @@ contract StubStrategy is BaseStrategy {
     function adjustPosition(uint256 _debtOutstanding) internal override {
     }
 
+    //Return funds to the strategy ready to be withdrawn by Vault
     function exitPosition(uint256 _debtOutstanding)
         internal
         override

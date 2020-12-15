@@ -1,9 +1,10 @@
 import pytest
 from brownie import accounts
 
-def test_prepare_token(token, deployer):
-    token.mint(10000000, {"from": deployer})
-    assert token.balanceOf(deployer) == 10000000
+TOTAL_TOKENS = 10000000
+STRAT_CREDIT = TOTAL_TOKENS // 2
+STRAT_OPERATION_LIMIT = TOTAL_TOKENS // 4
+STRAT_OPERATION_FEE = 10
 
 @pytest.fixture
 def vault(deployer, token, rewards, Vault):
@@ -19,6 +20,7 @@ def vault(deployer, token, rewards, Vault):
 @pytest.fixture
 def strategy(strategist, deployer, vault, token, StubStrategy):
     strategy = strategist.deploy(StubStrategy, vault)
+    strategy.setKeeper(strategist, {"from": strategist})
     # Addresses
     assert strategy.strategist() == strategist
     assert strategy.rewards() == strategist
@@ -33,27 +35,32 @@ def strategy(strategist, deployer, vault, token, StubStrategy):
     assert not strategy.tendTrigger(0)
     yield strategy
 
-def test_vault_setup_strategy(vault, strategy, governance):
-    vault.addStrategy(strategy, 0, 0, 0, {"from": governance})
+def test_vault_setup_strategy(chain, vault, strategy, token, deployer, strategist, governance):
+    vault.addStrategy(strategy, STRAT_CREDIT, STRAT_OPERATION_LIMIT, STRAT_OPERATION_FEE, {"from": governance})
 
     assert vault.creditAvailable(strategy) == 0
     assert vault.debtOutstanding(strategy) == 0
 
-def test_initial_balance(vault, strategy):
     assert vault.balanceSheetOfStrategy(strategy) == 0
     assert strategy.estimatedTotalAssets() == 0
 
-def test_deposit_to_vault(vault, token, deployer):
-    token.approve(vault, token.balanceOf(deployer) // 2, {"from": deployer})
-    vault.deposit(token.balanceOf(deployer) // 2, {"from": deployer})
+    #deposit to vault
+    deposited_tokens = token.balanceOf(deployer) // 2
+    token.approve(vault, deposited_tokens, {"from": deployer})
+    vault.deposit(deposited_tokens, {"from": deployer})
 
-    assert token.balanceOf(vault) != 0
-    assert token.balanceOf(vault) == token.balanceOf(deployer)
+    assert token.balanceOf(vault) == deposited_tokens
     assert vault.totalDebt() == 0  # No connected strategies yet
+    assert vault.balanceOf(deployer) == deposited_tokens
 
+    #deposit to strategy
+    start = chain.time()
+    chain.mine(1, start + 1)
+    strategy.harvest({"from": strategist})
+    
+    assert token.balanceOf(strategy) == STRAT_OPERATION_LIMIT
+    assert vault.debtOutstanding(strategy, {"from": strategy}) == 0
 
-def test_deposit_to_strategy():
-    pass
 
 def test_yield():
     pass
