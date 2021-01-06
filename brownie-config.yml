@@ -12,6 +12,8 @@ networks:
       port: 8545
       gas_limit: 6721975
       accounts: 10
+  rinkeby:
+    gas_limit: max
 
 
 # automatically fetch contract sources from Etherscan
@@ -29,6 +31,9 @@ compiler:
     remappings:
       - "@yearnvaults=iearn-finance/yearn-vaults@0.2.1"
       - "@openzeppelinV3=OpenZeppelin/openzeppelin-contracts@3.1.0"
+    optimizer:
+      runs: 99999
+
   vyper:
     version: null
 

@@ -5,6 +5,16 @@
         "internalType": "address",
         "name": "_vault",
         "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_investmentAddr",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_dumbYield",
+        "type": "uint256"
       }
     ],
     "stateMutability": "nonpayable",
