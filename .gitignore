@@ -4,6 +4,10 @@ __pycache__
 .hypothesis/
 build/
 reports/
+Lib/
+scripts/
+
+pyvenv.cfg
 
 # Logs
 logs

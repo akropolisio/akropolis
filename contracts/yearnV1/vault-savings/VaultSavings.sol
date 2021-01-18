@@ -13,6 +13,8 @@ import "@ozUpgradesV3/contracts/utils/ReentrancyGuardUpgradeable.sol";
 
 import "../../../interfaces/yearnV1/IVault.sol";
 import "../../../interfaces/yearnV1/IVaultSavings.sol";
+import "../../../interfaces/curvefi/ICurveFiDeposit.sol";
+
 
 import "@ozUpgradesV3/contracts/utils/PausableUpgradeable.sol";
 
@@ -24,9 +26,15 @@ contract VaultSavings is IVaultSavings, OwnableUpgradeable, ReentrancyGuardUpgra
     using AddressUpgradeable for address;
     using SafeMathUpgradeable for uint256;
 
+    struct CurveFiInfo {
+        address deposit;
+        address[] tokens;
+    }
+
     struct VaultInfo {
         bool isActive;
         uint256 blockNumber;
+        CurveFiInfo curveFi;
     }
 
     address[] internal registeredVaults;
@@ -40,6 +48,85 @@ contract VaultSavings is IVaultSavings, OwnableUpgradeable, ReentrancyGuardUpgra
 
     
     // deposit, withdraw
+
+    function deposit(address[] calldata _vaults, address[] calldata _tokens, uint256[] calldata _amounts) external override nonReentrant whenNotPaused {
+        require(_vaults.length > 0, "Nothing to deposit");
+        require(_vaults.length == _amounts.length, "Size of arrays does not match");
+        require(_vaults.length == tokens.length, "Size of arrays does not match");
+
+        address currentVault = _vaults[0]; uint256 vaultStart;
+        for(uint256 v=0; v < _vaults.length; v++){
+            if(currentVault != _vaults[v]) {
+                _deposit_one_vault(currentVault, _tokens[vaultStart:v], _amounts[vaultStart:v]);
+                vaultStart = v;
+                currentVault = _vaults[v];
+            }
+        }
+    }
+
+    function _deposit_one_vault(address _vault, address[] memory _tokens, uint256[] _amounts) internal {
+        require(isVaultRegistered(_vault), "Vault is not Registered");
+        
+        CurveFiInfo cf = registeredVaults[vault].curveFi;
+
+        address baseToken = IVault(_vault).token();
+        uint256 baseAmount;
+
+        uint256[] memory amnts = new uint256[](cfUnderlyingCount);
+        bool cfDepositRequired;
+        for(uint256 t=0; t<_tokens.length; t++){
+            if(_tokens[t] == baseToken){
+                baseAmount = _amounts[t];
+            }else{
+                uint256 pos = _getCurveFiTokenPosition(_tokens[t]);
+                amnts[pos] = _amounts[t];
+                if(amnts[pos] > 0) cfDepositRequired = true;
+            }
+        }
+
+        if(baseAmount > 0){
+            IERC20Upgradeable(baseToken).safeTransferFrom(msg.sender, address(this), baseAmount);
+        }
+
+        if(cfDepositRequired){
+            uint256 convertedAmount = _curveFiDeposit(cf.deposit, baseToken, _amount, 0);
+            baseAmount = baseAmount.add(convertedAmount);
+        }
+    
+
+
+        IERC20Upgradeable(baseToken).safeIncreaseAllowance(_vault, baseAmount);
+        IVault(_vault).deposit(baseAmount);
+
+        lpAmount = IERC20Upgradeable(_vault).balanceOf(address(this));
+        IERC20Upgradeable(_vault).safeTransfer(msg.sender, lpAmount);
+
+        emit  Deposit(_vault, msg.sender, _amount, lpAmount);
+    }
+
+    function _getCurveFiTokenPosition(CurveFiInfo memory cf, address token) {
+        for(uint256 i=0; cf.tokens.length; i++){
+            if(cf.tokens[i] == token) return i;
+        }
+        revert("Token not found in CurveFi");
+    }
+
+    function _curveFiDeposit(address cfDeposit, address cfLPToken, uint256[] memory _amounts, uint256 _minCurveLPAmount) returns(uint256 actualCurveLPAmount){
+        //NOTE: cfDeposit is trusted contract and we have nonReentrant modifier on top level
+        uint256 balanceBefore = IERC20Upgradeable(cfLPToken).balanceOf(address(this));
+        ICurveFiDeposit(cfDeposit).add_liquidity(_amounts, _minCurveLPAmount);
+        uint256 balanceAfter = IERC20Upgradeable(cfLPToken).balanceOf(address(this));
+        return balanceAfter.sub(balanceBefore);
+    }
+
+
+    function _convertUint256Array4(uint256[] memory values) internal return(uint256[4] memory result) {
+        result = [uint256(0), uint256(0), uint256(0), uint256(0)];
+        for(uint256 i=0; i < 4; i++){
+            result[i] = values[i];
+        }
+    }
+
 
     function deposit(address[] calldata _vaults, uint256[] calldata _amounts) external override nonReentrant whenNotPaused {
         require(_vaults.length == _amounts.length, "Size of arrays does not match");
