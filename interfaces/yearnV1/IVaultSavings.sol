@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: AGPL V3.0
 
 pragma solidity >=0.6.0 <0.8.0;
-
+pragma experimental ABIEncoderV2;
 
 //solhint-disable func-order
 interface IVaultSavings {
@@ -12,7 +12,9 @@ interface IVaultSavings {
 
     event Deposit(address indexed vault, address indexed user, uint256 baseAmount, uint256 lpAmount);
     event Withdraw(address indexed vault, address indexed user, uint256 baseAmount, uint256 lpAmount);
+    event CurveDeposit(address indexed curveDeposit, address indexed user, uint256[] inAmounts, uint256 curveLPAmount);
 
+    function deposit(address[] calldata _vaults, address[][] calldata _tokens, uint256[][] calldata _amounts, uint256[] calldata minBaseAmounts) external returns(uint256[] memory amounts);
     function deposit(address[] calldata _vaults, uint256[] calldata _amounts) external;
     function deposit(address _vault, uint256 _amount) external returns(uint256);
 

@@ -14,6 +14,9 @@ import "@ozUpgradesV3/contracts/utils/ReentrancyGuardUpgradeable.sol";
 import "../../../interfaces/yearnV1/IVault.sol";
 import "../../../interfaces/yearnV1/IVaultSavings.sol";
 import "../../../interfaces/curvefi/ICurveFiDeposit.sol";
+import "../../../interfaces/curvefi/ICurveFiDeposit3.sol";
+import "../../../interfaces/curvefi/ICurveFiDeposit4.sol";
+import "../../utils/ArrayConversions.sol";
 
 
 import "@ozUpgradesV3/contracts/utils/PausableUpgradeable.sol";
@@ -49,36 +52,43 @@ contract VaultSavings is IVaultSavings, OwnableUpgradeable, ReentrancyGuardUpgra
     
     // deposit, withdraw
 
-    function deposit(address[] calldata _vaults, address[] calldata _tokens, uint256[] calldata _amounts) external override nonReentrant whenNotPaused {
+    function deposit(address[] calldata _vaults, address[][] calldata _tokens, uint256[][] calldata _amounts, uint256[] calldata minConvertAmounts) external override nonReentrant whenNotPaused 
+    returns(uint256[] memory amounts) {
         require(_vaults.length > 0, "Nothing to deposit");
         require(_vaults.length == _amounts.length, "Size of arrays does not match");
-        require(_vaults.length == tokens.length, "Size of arrays does not match");
+        require(_vaults.length == _tokens.length, "Size of arrays does not match");
 
-        address currentVault = _vaults[0]; uint256 vaultStart;
-        for(uint256 v=0; v < _vaults.length; v++){
-            if(currentVault != _vaults[v]) {
-                _deposit_one_vault(currentVault, _tokens[vaultStart:v], _amounts[vaultStart:v]);
-                vaultStart = v;
-                currentVault = _vaults[v];
-            }
+        amounts = new uint256[](_vaults.length);
+        for(uint256 i=0; i<_vaults.length; i++){
+            _deposit_one_vault(_vaults[i], _tokens[i], _amounts[i], minConvertAmounts[i]);
         }
+
+        // address currentVault = _vaults[0]; uint256 vaultStart;
+        // for(uint256 v=0; v < _vaults.length; v++){
+        //     if(currentVault != _vaults[v]) {
+        //         _deposit_one_vault(currentVault, tokens[vaultStart:v], amounts[vaultStart:v]);
+        //         vaultStart = v;
+        //         currentVault = _vaults[v];
+        //     }
+        // }
+
     }
 
-    function _deposit_one_vault(address _vault, address[] memory _tokens, uint256[] _amounts) internal {
+    function _deposit_one_vault(address _vault, address[] memory _tokens, uint256[] memory _amounts, uint256 minConvertAmount) internal 
+    returns(uint256 baseAmount, uint256 lpAmount) {
         require(isVaultRegistered(_vault), "Vault is not Registered");
         
-        CurveFiInfo cf = registeredVaults[vault].curveFi;
+        CurveFiInfo storage cf = vaults[_vault].curveFi;
 
         address baseToken = IVault(_vault).token();
-        uint256 baseAmount;
 
-        uint256[] memory amnts = new uint256[](cfUnderlyingCount);
+        uint256[] memory amnts = new uint256[](cf.tokens.length);
         bool cfDepositRequired;
         for(uint256 t=0; t<_tokens.length; t++){
             if(_tokens[t] == baseToken){
                 baseAmount = _amounts[t];
             }else{
-                uint256 pos = _getCurveFiTokenPosition(_tokens[t]);
+                uint256 pos = _getCurveFiTokenPosition(cf, _tokens[t]);
                 amnts[pos] = _amounts[t];
                 if(amnts[pos] > 0) cfDepositRequired = true;
             }
@@ -89,10 +99,9 @@ contract VaultSavings is IVaultSavings, OwnableUpgradeable, ReentrancyGuardUpgra
         }
 
         if(cfDepositRequired){
-            uint256 convertedAmount = _curveFiDeposit(cf.deposit, baseToken, _amount, 0);
+            uint256 convertedAmount = _curveFiDeposit(cf, baseToken, amnts, minConvertAmount);
             baseAmount = baseAmount.add(convertedAmount);
         }
-    
 
 
         IERC20Upgradeable(baseToken).safeIncreaseAllowance(_vault, baseAmount);
@@ -101,32 +110,37 @@ contract VaultSavings is IVaultSavings, OwnableUpgradeable, ReentrancyGuardUpgra
         lpAmount = IERC20Upgradeable(_vault).balanceOf(address(this));
         IERC20Upgradeable(_vault).safeTransfer(msg.sender, lpAmount);
 
-        emit  Deposit(_vault, msg.sender, _amount, lpAmount);
+        emit  Deposit(_vault, msg.sender, baseAmount, lpAmount);
+
     }
 
-    function _getCurveFiTokenPosition(CurveFiInfo memory cf, address token) {
-        for(uint256 i=0; cf.tokens.length; i++){
+    function _getCurveFiTokenPosition(CurveFiInfo storage cf, address token) internal returns(uint256) {
+        for(uint256 i=0; i<cf.tokens.length; i++){
             if(cf.tokens[i] == token) return i;
         }
         revert("Token not found in CurveFi");
     }
 
-    function _curveFiDeposit(address cfDeposit, address cfLPToken, uint256[] memory _amounts, uint256 _minCurveLPAmount) returns(uint256 actualCurveLPAmount){
-        //NOTE: cfDeposit is trusted contract and we have nonReentrant modifier on top level
-        uint256 balanceBefore = IERC20Upgradeable(cfLPToken).balanceOf(address(this));
-        ICurveFiDeposit(cfDeposit).add_liquidity(_amounts, _minCurveLPAmount);
-        uint256 balanceAfter = IERC20Upgradeable(cfLPToken).balanceOf(address(this));
-        return balanceAfter.sub(balanceBefore);
-    }
-
-
-    function _convertUint256Array4(uint256[] memory values) internal return(uint256[4] memory result) {
-        result = [uint256(0), uint256(0), uint256(0), uint256(0)];
-        for(uint256 i=0; i < 4; i++){
-            result[i] = values[i];
+    function _curveFiDeposit(CurveFiInfo storage cf, address cfLPToken, uint256[] memory _amounts, uint256 _minCurveLPAmount) internal 
+    returns(uint256 curveLPAmount){
+        // Transfer underlying tokens
+        for(uint256 i=0; i<cf.tokens.length; i++){
+            if(_amounts[i] > 0){
+                IERC20Upgradeable(cf.tokens[i]).safeTransferFrom(msg.sender, address(this), _amounts[i]);
+            }
         }
-    }
 
+        //NOTE: cf.deposit is trusted contract and we have nonReentrant modifier on top level
+        uint256 balanceBefore = IERC20Upgradeable(cfLPToken).balanceOf(address(this));
+        if(_amounts.length == 4){
+            ICurveFiDeposit4(cf.deposit).add_liquidity(ArrayConversions.convertUint256Array4(_amounts), _minCurveLPAmount);
+        }else if(_amounts.length == 3) {
+            ICurveFiDeposit3(cf.deposit).add_liquidity(ArrayConversions.convertUint256Array3(_amounts), _minCurveLPAmount);
+        }
+        uint256 balanceAfter = IERC20Upgradeable(cfLPToken).balanceOf(address(this));
+        curveLPAmount = balanceAfter.sub(balanceBefore);
+        emit CurveDeposit(cf.deposit, msg.sender, _amounts, curveLPAmount);
+    }
 
     function deposit(address[] calldata _vaults, uint256[] calldata _amounts) external override nonReentrant whenNotPaused {
         require(_vaults.length == _amounts.length, "Size of arrays does not match");
@@ -204,7 +218,11 @@ contract VaultSavings is IVaultSavings, OwnableUpgradeable, ReentrancyGuardUpgra
 
         vaults[_vault] = VaultInfo({
             isActive: true,
-            blockNumber: block.number
+            blockNumber: block.number,
+            curveFi: CurveFiInfo({
+                deposit: address(0),
+                tokens: new address[](0)
+            })
         });
 
         address baseToken = IVault(_vault).token();
@@ -215,10 +233,8 @@ contract VaultSavings is IVaultSavings, OwnableUpgradeable, ReentrancyGuardUpgra
     function activateVault(address _vault) external override onlyOwner {
         require(isVaultRegistered(_vault), "Vault is not registered");
     
-        vaults[_vault] = VaultInfo({
-            isActive: true,
-            blockNumber: block.number
-        });
+        vaults[_vault].isActive = true;
+        vaults[_vault].blockNumber = block.number;
 
        emit VaultActivated(_vault);
 
@@ -227,10 +243,8 @@ contract VaultSavings is IVaultSavings, OwnableUpgradeable, ReentrancyGuardUpgra
     function deactivateVault(address _vault) external override onlyOwner {
         require(isVaultRegistered(_vault), "Vault is not registered");
     
-        vaults[_vault] = VaultInfo({
-            isActive: false,
-            blockNumber: block.number
-        });
+        vaults[_vault].isActive = false;
+        vaults[_vault].blockNumber = block.number;
 
        emit VaultDisabled(_vault);
     }
