@@ -55,23 +55,14 @@ contract VaultSavings is IVaultSavings, OwnableUpgradeable, ReentrancyGuardUpgra
     function deposit(address[] calldata _vaults, address[][] calldata _tokens, uint256[][] calldata _amounts, uint256[] calldata minConvertAmounts) external override nonReentrant whenNotPaused 
     returns(uint256[] memory amounts) {
         require(_vaults.length > 0, "Nothing to deposit");
-        require(_vaults.length == _amounts.length, "Size of arrays does not match");
-        require(_vaults.length == _tokens.length, "Size of arrays does not match");
+        require(_vaults.length == _tokens.length, "Size of tokens array does not match vaults");
+        require(_vaults.length == _amounts.length, "Size of amounts array does not match vaults");
 
         amounts = new uint256[](_vaults.length);
         for(uint256 i=0; i<_vaults.length; i++){
-            _deposit_one_vault(_vaults[i], _tokens[i], _amounts[i], minConvertAmounts[i]);
+            require(_tokens[i].length == _amounts[i].length, "Size of tokens array does not match amounts");
+            (amounts[i],) = _deposit_one_vault(_vaults[i], _tokens[i], _amounts[i], minConvertAmounts[i]);
         }
-
-        // address currentVault = _vaults[0]; uint256 vaultStart;
-        // for(uint256 v=0; v < _vaults.length; v++){
-        //     if(currentVault != _vaults[v]) {
-        //         _deposit_one_vault(currentVault, tokens[vaultStart:v], amounts[vaultStart:v]);
-        //         vaultStart = v;
-        //         currentVault = _vaults[v];
-        //     }
-        // }
-
     }
 
     function _deposit_one_vault(address _vault, address[] memory _tokens, uint256[] memory _amounts, uint256 minConvertAmount) internal 
