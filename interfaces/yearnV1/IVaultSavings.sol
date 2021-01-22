@@ -13,6 +13,7 @@ interface IVaultSavings {
     event Deposit(address indexed vault, address indexed user, uint256 baseAmount, uint256 lpAmount);
     event Withdraw(address indexed vault, address indexed user, uint256 baseAmount, uint256 lpAmount);
     event CurveDeposit(address indexed curveDeposit, address indexed user, uint256[] inAmounts, uint256 curveLPAmount);
+    event CurveWithdraw(address indexed curveDeposit, address indexed user, uint256[] outAmounts, uint256 curveLPAmount);
 
     function deposit(address[] calldata _vaults, address[][] calldata _tokens, uint256[][] calldata _amounts, uint256[] calldata minBaseAmounts) external returns(uint256[] memory amounts);
     function deposit(address[] calldata _vaults, uint256[] calldata _amounts) external;
@@ -20,7 +21,7 @@ interface IVaultSavings {
 
     function withdraw(address[] calldata _vaults, uint256[] calldata _amounts) external;
     function withdraw(address _vault, uint256 amount) external returns(uint256);
-    function registerVault(address _vault) external;
+    function registerVault(address _vault, address _cfDeposit, uint256 tokensCount) external;
     
     function activateVault(address _vault) external;
     function deactivateVault(address _vault) external;
