@@ -19,13 +19,17 @@ yarn-error.log*
 .openzeppelin/.session
 .openzeppelin/.lock
 @openzeppelin
+OpenZeppelin/
+iearn-finance/
 
 # Dependency directories
 node_modules/
 
-
 # project artifacts
 build/*
+flattened/*
+solc
+echidna-test*
 
 # TypeScript types
 types/*

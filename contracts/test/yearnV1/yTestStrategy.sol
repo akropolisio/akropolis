@@ -4,11 +4,6 @@ pragma solidity ^0.6.12;
 
 import "@openzeppelinV3/contracts/token/ERC20/IERC20.sol";
 
-import "../../../interfaces/yearnV1/IController.sol";
-import "../../../interfaces/yearnV1/IStrategy.sol";
-import "../../../interfaces/yearnV1/IVault.sol";
-import "../../../interfaces/yearnV1/IWrappedVault.sol";
-
 contract YTestStrategy {
     IERC20 public _want;
 

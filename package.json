@@ -7,13 +7,19 @@
     "license": "MIT",
     "scripts": {
         "compile": "brownie compile --all",
+        "clone-packages": "sh ./security/clone-packages.sh",
         "deploy:rinkeby": "brownie run deploy_vault_savings.py --network rinkeby",
         "deploy:dev": "brownie run deploy_vault_savings.py",
-        "ganache": "npx ganache-cli --gasLimit 0xfffffffffff -e 10000000 --port 8545",
+        "ganache": "npx ganache-cli --gasLimit 0xfffffffffff -e 100000000 --port 8545",
         "generate-abi": "npx truffle-abi -o ./abi",
         "generate-artifacts": "npm run compile && npm run generate-abi",
-        "install": "pip3 install -r requirements-dev.txt --no-index",
-        "postinstall": "npm run generate-artifacts",
+        "install": "pip install -r requirements-dev.txt",
+        "postinstall": "npm run clone-packages && npm run generate-artifacts",
+        "sec:flatten": "sh ./security/flattener-run.sh",
+        "sec:slither": "sh ./security/slither/slither-run.sh",
+        "sec:flatten-echidna": "sh ./security/flattener-run.sh echidna",
+        "sec:load-echidna": "sh ./security/echidna/echidna-download.sh",
+        "sec:echidna": "sh ./security/echidna/echidna-run.sh",
         "test": "brownie test"
     },
     "dependencies": {
@@ -23,7 +29,10 @@
         "truffle-assertions": "^0.9.2"
     },
     "devDependencies": {
-        "@openzeppelin/contracts": "^3.1.0",
-        "@truffle/hdwallet-provider": "^1.0.38"
+        "@openzeppelin/contracts": "^3.3.0",
+        "@openzeppelin/contracts-upgradeable": "^3.3.0",
+        "@truffle/hdwallet-provider": "^1.0.38",
+        "ganache-cli": "^6.10.2",
+        "truffle": "^5.1.34"
     }
 }

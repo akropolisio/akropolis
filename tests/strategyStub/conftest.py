@@ -34,3 +34,4 @@ def token(deployer, regular_user, TestERC20):
     assert token.balanceOf(deployer) == TOTAL_TOKENS
     token.transfer(regular_user, TOTAL_TOKENS, {"from": deployer})
     yield token
+

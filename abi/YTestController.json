@@ -3,38 +3,29 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "",
+        "name": "_rewards",
         "type": "address"
       }
     ],
-    "name": "_strategies",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
+    "stateMutability": "nonpayable",
+    "type": "constructor"
   },
   {
     "inputs": [
       {
         "internalType": "address",
-        "name": "",
+        "name": "_token",
         "type": "address"
-      }
-    ],
-    "name": "_vaults",
-    "outputs": [
+      },
       {
         "internalType": "address",
-        "name": "",
+        "name": "_strategy",
         "type": "address"
       }
     ],
-    "stateMutability": "view",
+    "name": "approveStrategy",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -65,7 +56,7 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "",
+        "name": "_token",
         "type": "address"
       }
     ],
@@ -88,12 +79,93 @@
         "type": "address"
       },
       {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "converters",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_token",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "earn",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "governance",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "max",
+    "outputs": [
+      {
         "internalType": "uint256",
         "name": "",
         "type": "uint256"
       }
     ],
-    "name": "earn",
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "onesplit",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_token",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_strategy",
+        "type": "address"
+      }
+    ],
+    "name": "revokeStrategy",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -109,6 +181,94 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_input",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_output",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_converter",
+        "type": "address"
+      }
+    ],
+    "name": "setConverter",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_governance",
+        "type": "address"
+      }
+    ],
+    "name": "setGovernance",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_onesplit",
+        "type": "address"
+      }
+    ],
+    "name": "setOneSplit",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_rewards",
+        "type": "address"
+      }
+    ],
+    "name": "setRewards",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_split",
+        "type": "uint256"
+      }
+    ],
+    "name": "setSplit",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_strategist",
+        "type": "address"
+      }
+    ],
+    "name": "setStrategist",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -148,10 +308,23 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "split",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
-        "name": "_token",
+        "name": "",
         "type": "address"
       }
     ],
@@ -167,10 +340,23 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "strategist",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
-        "name": "_token",
+        "name": "",
         "type": "address"
       }
     ],
@@ -189,7 +375,7 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "",
+        "name": "_strategy",
         "type": "address"
       }
     ],
@@ -208,16 +394,29 @@
     "inputs": [
       {
         "internalType": "address",
-        "name": "",
+        "name": "_token",
         "type": "address"
       },
       {
         "internalType": "uint256",
-        "name": "",
+        "name": "_amount",
         "type": "uint256"
       }
     ],
     "name": "withdraw",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_token",
+        "type": "address"
+      }
+    ],
+    "name": "withdrawAll",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

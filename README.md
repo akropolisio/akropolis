@@ -23,6 +23,23 @@ cd contracts
 pip install -r requirements.txt
 ```
 
+Run the command:
+```bash
+npm install
+```
+It executes several intallation steps:
+* install all npm dependencies
+* install all python dependencies (if not installed yet) including Brownie framework
+* install Brownie dependency packages (openzeppelin and yearn)
+* copy these packages to the working directory (see explanation below)
+* compile contracts
+* generate abi artifaacts (if needed)
+
+
+Due to the existing [bug in Brownie framework](https://github.com/eth-brownie/brownie/issues/893) you may need to install the packages manually:
+```
+npm run clone-packages
+```
 
 ### Running the Tests
 
@@ -32,9 +49,15 @@ To run the entire suite:
 brownie test
 ```
 
+### Security tools
+
+See [the instruction for running security tools](security/readme.md) upon Akropolis Delphi protocol.
+Slither, Echidna and Manticore are integrated.
+
 
 ### Deployment
 Create *.env* file with *DEPLOYER_PRIVATE_KEY* filled up.
+*.env* file also should contain *ADMIN_PRIVATE_KEY* in case of human-admin or *PROXY_ADMIN_ADDRESS* in case of AdminProxy contract already deployed. Leave both variables empty if new AdminProxy contract should be deployed.
 
 For the local deployment run the command:
 

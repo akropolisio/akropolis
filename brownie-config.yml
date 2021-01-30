@@ -11,10 +11,10 @@ networks:
     cmd_settings:
       port: 8545
       gas_limit: 6721975
-      accounts: 10
+      accounts: 500
+
   rinkeby:
     gas_limit: max
-
 
 # automatically fetch contract sources from Etherscan
 autofetch_sources: True
@@ -22,20 +22,21 @@ autofetch_sources: True
 # require OpenZepplin Contracts
 dependencies:
   - iearn-finance/yearn-vaults@0.2.1
-  - OpenZeppelin/openzeppelin-contracts@3.1.0
-
+  - OpenZeppelin/openzeppelin-contracts@3.3.0
+  - OpenZeppelin/openzeppelin-contracts-upgradeable@3.3.0
 # path remapping to support imports from GitHub/NPM
 compiler:
   solc:
     version: 0.6.12
     remappings:
       - "@yearnvaults=iearn-finance/yearn-vaults@0.2.1"
-      - "@openzeppelinV3=OpenZeppelin/openzeppelin-contracts@3.1.0"
+      - "@openzeppelinV3=OpenZeppelin/openzeppelin-contracts@3.3.0"
+      - "@ozUpgradesV3=OpenZeppelin/openzeppelin-contracts-upgradeable@3.3.0"
     optimizer:
       runs: 99999
 
   vyper:
-    version: null
+    version: 0.2.8
 
 reports:
   exclude_contracts:

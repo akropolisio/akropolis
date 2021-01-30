@@ -1,4 +1,5 @@
 import pytest
+import brownie
 
 @pytest.fixture(scope="module")
 def register_vault(deployer, token, vault, strategy, controller, registry, vaultSavings):
@@ -26,13 +27,13 @@ def register_vault(deployer, token, vault, strategy, controller, registry, vault
     assert active_vaults[0] == vault.address
 
 def test_deactivate_vault(register_vault, vaultSavings, vault, deployer):
-    vaultSavings.deactivateVault.transact(vault.address, {'from': deployer})
+    vaultSavings.deactivateVault(vault.address, {'from': deployer})
 
     assert vaultSavings.isVaultActive(vault.address) == False
     active_vaults = vaultSavings.activeVaults()
     assert len(active_vaults) == 0
 
-    vaultSavings.activateVault.transact(vault.address, {'from': deployer})
+    vaultSavings.activateVault(vault.address, {'from': deployer})
 
     assert vaultSavings.isVaultActive(vault.address) == True
     active_vaults = vaultSavings.activeVaults()
@@ -46,7 +47,7 @@ def test_deposit(register_vault, token, vault, vaultSavings, regular_user, deplo
     # Initial deposit
     user_balance_before = token.balanceOf(regular_user)
     token.approve(vaultSavings.address, DEPOSIT_VALUE, {'from': regular_user})
-    vaultSavings.deposit['address,uint'].transact(vault.address, DEPOSIT_VALUE, {'from': regular_user})
+    vaultSavings.deposit['address,uint'](vault.address, DEPOSIT_VALUE, {'from': regular_user})
 
     user_balance_after = token.balanceOf(regular_user)
 
@@ -104,6 +105,31 @@ def test_withdraw(register_vault, token, vault, vaultSavings, regular_user, depl
     assert user_balance_after - user_balance_before  == DEPOSIT_VALUE
     assert user2_balance_before == user2_balance_after
 
+
+def test_pause_vault(vaultSavings, deployer):
+    vaultSavings.pause({'from': deployer})
+    assert vaultSavings.paused() == True
+
+
+def test_pause_unpause_vault(vaultSavings, deployer):
+    assert vaultSavings.paused() == True
+
+    vaultSavings.unpause({'from': deployer})
+    assert vaultSavings.paused() == False
+
+def test_deposit_unpause_vault_reverts(token, vault, vaultSavings, deployer, regular_user):
+    vaultSavings.pause({'from': deployer})
+    assert vaultSavings.paused() == True
+    with brownie.reverts():
+        user_balance_before = token.balanceOf(regular_user)
+        token.approve(vaultSavings.address, DEPOSIT_VALUE, {'from': regular_user})
+        vaultSavings.deposit['address,uint'](vault.address, DEPOSIT_VALUE, {'from': regular_user})
+        user_balance_after = token.balanceOf(regular_user)
+
+
+def test_pause_vault_reverts(vaultSavings, vault, regular_user):
+    with brownie.reverts():
+        vaultSavings.pause({'from': regular_user})
 
 
 

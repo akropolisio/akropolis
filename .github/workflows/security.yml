@@ -1,0 +1,92 @@
+name: Security-checks
+
+on:
+  push:
+    branches: [ yearn-v1-vaults ]
+  pull_request:
+    branches: [ yearn-v1-vaults ]
+
+jobs:
+  unittests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1.4.4
+        with:
+          node-version: '12'
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - name: Prepare environment
+        run:  |
+          npm install
+      - name: Run tests
+        shell: bash
+        run: |
+          npm run test
+
+  slither:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1.4.4
+        with:
+          node-version: '12'
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - name: Prepare environment
+        run:  |
+          npm install
+          pip3 install slither-analyzer
+      - name: Prepare contracts
+        shell: bash
+        run: |
+          npm run sec:flatten
+      - name: Run slither
+        shell: bash
+        run: |
+          npm run sec:slither >slither_report.txt 2>&1 || true
+      - name: Store the report
+        uses: actions/upload-artifact@v2
+        with:
+          name: slither-report
+          path: ./slither_report.txt
+      - name: Check the report
+        shell: bash
+        run: |
+          sh ./security/slither/slither-check-report.sh
+
+  echidna:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1.4.4
+        with:
+          node-version: '12'
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - name: Prepare environment
+        run:  |
+          pip3 install slither-analyzer
+          npm install
+          npm run sec:load-echidna
+      - name: Prepare contracts
+        shell: bash
+        run: |
+          npm run sec:flatten-echidna
+      - name: Run echidna
+        shell: bash
+        run: |
+          export PATH=.:$PATH
+          npm run sec:echidna >echidna_report.txt 2>&1 || true
+      - name: Store the report
+        uses: actions/upload-artifact@v2
+        with:
+          name: echidna-report
+          path: ./echidna_report.txt
+      - name: Check the report
+        shell: bash
+        run: |
+          sh ./security/echidna/echidna-check-report.sh

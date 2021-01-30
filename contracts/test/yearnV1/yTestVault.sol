@@ -7,7 +7,6 @@ import "@openzeppelinV3/contracts/math/SafeMath.sol";
 import "@openzeppelinV3/contracts/utils/Address.sol";
 import "@openzeppelinV3/contracts/token/ERC20/SafeERC20.sol";
 import "@openzeppelinV3/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelinV3/contracts/Access/Ownable.sol";
 
 import "../../../interfaces/yearnV1/IController.sol";
 

@@ -8,7 +8,6 @@ import "@openzeppelinV3/contracts/utils/Address.sol";
 import "@openzeppelinV3/contracts/token/ERC20/SafeERC20.sol";
 
 import "../../../interfaces/yearnV1/IConverter.sol";
-import "../../../interfaces/yearnV1/IOneSplitAudit.sol";
 import "../../../interfaces/yearnV1/IStrategy.sol";
 
 

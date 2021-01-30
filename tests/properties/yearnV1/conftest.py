@@ -4,11 +4,11 @@ import sys
 
 from utils.deploy_helpers import deploy_proxy, deploy_admin
 
-TOTAL_TOKENS = 10000000
+TOTAL_TOKENS = 100000000000000
 
 @pytest.fixture(scope="module")
 def deployer():
-    yield accounts[1]
+    yield accounts.add('8fa2fdfb89003176a16b707fc860d0881da0d1d8248af210df12d37860996fb2')
 
 @pytest.fixture(scope="module")
 def governance():
@@ -61,4 +61,27 @@ def vaultSavings(deployer, proxy_admin, VaultSavings):
     yield vaultSavingsImplFromProxy
 
 
-    
+@pytest.fixture(scope="module")
+def register_vault(deployer, token, vault, strategy, controller, registry, vaultSavings):
+    controller.setVault(token.address, vault.address, {'from': deployer})
+    controller.approveStrategy(token.address, strategy.address, {'from': deployer})
+    controller.setStrategy(token.address, strategy.address, {'from': deployer})
+
+    assert registry.getVaultsLength() == 0
+    registry.addVault.transact(vault.address, {'from': deployer})
+    assert registry.getVaultsLength() == 1
+    assert registry.getVault(0) == vault.address
+    vaults_arr = registry.getVaults()
+    assert len(vaults_arr) == 1
+    assert vaults_arr[0] == vault.address
+
+    vaultSavings.registerVault.transact(vault.address, {'from': deployer})
+    assert vaultSavings.isVaultRegistered(vault.address) == True
+    assert vaultSavings.isVaultActive(vault.address) == True
+    assert vaultSavings.isBaseTokenForVault(vault.address, token.address) == True
+    supported_vaults = vaultSavings.supportedVaults()
+    assert len(supported_vaults) == 1
+    assert supported_vaults[0] == vault.address
+    active_vaults = vaultSavings.activeVaults()
+    assert len(active_vaults) == 1
+    assert active_vaults[0] == vault.address
