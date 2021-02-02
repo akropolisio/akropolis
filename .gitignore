@@ -5,9 +5,15 @@ __pycache__
 build/
 reports/
 Lib/
-scripts/
 
+#env
 pyvenv.cfg
+
+#platform-specific python
+scripts/*.exe
+scripts/activate*
+scripts/deactivate*
+
 
 # Logs
 logs
