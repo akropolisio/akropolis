@@ -12,7 +12,7 @@ import "@ozUpgradesV3/contracts/access/OwnableUpgradeable.sol";
 import "@ozUpgradesV3/contracts/utils/ReentrancyGuardUpgradeable.sol";
 
 import "../../../interfaces/yearnV1/IVault.sol";
-import "../../../interfaces/yearnV1/IVaultSavings.sol";
+import "../../../interfaces/yearnV1/IVaultSavingsStablecoins.sol";
 import "../../../interfaces/curvefi/ICurveFiDeposit.sol";
 import "../../../interfaces/curvefi/ICurveFiDeposit3.sol";
 import "../../../interfaces/curvefi/ICurveFiDeposit4.sol";
@@ -21,7 +21,7 @@ import "../../utils/ArrayConversions.sol";
 
 import "@ozUpgradesV3/contracts/utils/PausableUpgradeable.sol";
 
-contract VaultSavings is IVaultSavings, OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgradeable {
+contract VaultSavings is IVaultSavingsStablecoins, OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgradeable {
 
     uint256 constant MAX_UINT256 = uint256(-1);
 
@@ -280,6 +280,25 @@ contract VaultSavings is IVaultSavings, OwnableUpgradeable, ReentrancyGuardUpgra
         IERC20Upgradeable(baseToken).safeTransfer(msg.sender, baseAmount);
 
         emit Withdraw(_vault, msg.sender, baseAmount, _amount);
+    }
+
+    function registerVault(address _vault) external override {
+        require(!isVaultRegistered(_vault), "Vault is already registered");
+
+        registeredVaults.push(_vault);
+
+        vaults[_vault] = VaultInfo({
+            isActive: true,
+            blockNumber: block.number,
+            curveFi: CurveFiInfo({
+                deposit: address(0),
+                tokens: new address[](0)
+            })
+        });
+
+        address baseToken = IVault(_vault).token();
+
+        emit VaultRegistered(_vault, baseToken);
     }
 
     function registerVault(address _vault, address _cfDeposit, uint256 tokensCount) external override onlyOwner {
