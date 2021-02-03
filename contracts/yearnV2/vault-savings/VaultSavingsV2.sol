@@ -113,7 +113,7 @@ contract VaultSavingsV2 is IVaultSavings, OwnableUpgradeable, ReentrancyGuardUpg
         emit Withdraw(_vault, msg.sender, baseAmount, _amount);
     }
 
-    function registerVault(address _vault) external override onlyOwner {
+    function registerVault(address _vault, address /*_cfDeposit*/, uint256 /*tokensCount*/) external override onlyOwner {
         require(!isVaultRegistered(_vault), "Vault is already registered");
 
         registeredVaults.push(_vault);

@@ -3,32 +3,40 @@ import brownie
 
 @pytest.fixture(scope="module")
 def stablecoins(deployer, TestERC20):
-    stablecoins = [
-        deployer.deploy(TestERC20, "Dai Stablecoin", "DAI", 18),
-        deployer.deploy(TestERC20, "Tether USD", "USDT", 6),
-        deployer.deploy(TestERC20, "USD Coin", "USDC", 6),
-        deployer.deploy(TestERC20, "TrueUSD", "TUSD", 18),
-    ]
+    stablecoins = {
+        dai: deployer.deploy(TestERC20, "Dai Stablecoin", "DAI", 18),
+        usdt: deployer.deploy(TestERC20, "Tether USD", "USDT", 6),
+        usdc: deployer.deploy(TestERC20, "USD Coin", "USDC", 6),
+        tusd: deployer.deploy(TestERC20, "TrueUSD", "TUSD", 18),
+    }
     yield stablecoins
 
 @pytest.fixture(scope="module")
 def yTokens(deployer, stablecoins, YTokenStub):
-    yTokens = [
-        deployer.deploy(YTokenStub, stablecoins[0].address, "DAI", 18),
-        deployer.deploy(YTokenStub, stablecoins[1].address, "USDT", 6),
-        deployer.deploy(YTokenStub, stablecoins[2].address, "USDC", 6),
-        deployer.deploy(YTokenStub, stablecoins[3].address, "TUSD", 18),
-    ]
+    yTokens = {
+        yDAI: deployer.deploy(YTokenStub, stablecoins['dai'].address, "DAI", 18),
+        yUSDT: deployer.deploy(YTokenStub, stablecoins['usdt'].address, "USDT", 6),
+        yUSDC: deployer.deploy(YTokenStub, stablecoins['usdc'].address, "USDC", 6),
+        yTUSD: deployer.deploy(YTokenStub, stablecoins['tusd'].address, "TUSD", 18),
+    }
     yield yTokens
 
 @pytest.fixture(scope="module")
 def curve(deployer, stablecoins, yTokens, CurveToken_Y, CurveSwap_Y, CurveDeposit_Y):
     token = deployer.deploy(CurveDeposit_Y, "Curve.fi yDAI/yUSDC/yUSDT/yTUSD", "yDAI+yUSDC+yUSDT+yTUSD", 18, 0)
-    swap = deployer.deploy(CurveSwap_Y, yTokens, stablecoins, token, 1000, 4000000) #A = 1000, fee = 4000000 - values from Etherscan 
+    baseTokens = [stablecoins['dai'], stablecoins['usdt'], stablecoins['usdc'], stablecoins['tusd']]
+    underlyingTokens = [yTokens['yDAI'], yTokens["yUSDT"], yTokens["yUSDC"], yTokens["TUSD"]]
+    swap = deployer.deploy(CurveSwap_Y, underlyingTokens, baseTokens, token, 1000, 4000000) #A = 1000, fee = 4000000 - values from Etherscan 
     token.set_minter(swap.address, {from: deployer})
-    deposit = deployer.deploy(CurveDeposit_Y, yTokens, stablecoins, swap.address, token.address)
+    deposit = deployer.deploy(CurveDeposit_Y, underlyingTokens, baseTokens, swap.address, token.address)
     curve = [token, swap, deposit]
     yield curve
+
+
+
+
+
+
 
 @pytest.fixture(scope="module")
 def register_vault(deployer, token, vault, strategy, controller, registry, vaultSavings):

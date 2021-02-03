@@ -4,12 +4,9 @@ pragma solidity >=0.6.0 <0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "../IERC20Mintable.sol";
+import "../TestERC20.sol";
 import "./IYErc20.sol";
-import "./TestERC20.sol";
-
-interface ERC20Mintable {
-    function mint(address account, uint256 amount) returns (bool);
-}
 
 contract YTokenStub is IYErc20, ERC20 {
     //Stub internals
@@ -18,10 +15,10 @@ contract YTokenStub is IYErc20, ERC20 {
     uint256 constant INITIAL_RATE = 1 * EXP_SCALE;
     uint256 constant ANNUAL_SECONDS = 365*24*60*60+(24*60*60/4);  // Seconds in a year + 1/4 day to compensate leap years
 
-    ERC20Mintable public underlying;
+    IERC20Mintable public underlying;
     uint256 created;
 
-    constructor(ERC20Mintable _underlying, string memory uName, uint8 uDecimals) public 
+    constructor(address _underlying, string memory uName, uint8 uDecimals) public 
     ERC20(
         string(abi.encodePacked("iearn ", uName)), 
         string(abi.encodePacked("y", uName))
@@ -30,29 +27,29 @@ contract YTokenStub is IYErc20, ERC20 {
         if (address(_underlying) == address(0)){
             underlying = new TestERC20(uName, uName, uDecimals);
         } else {
-            underlying = _underlying;
+            underlying = IERC20Mintable(_underlying);
         }
         created = now;
     }
 
     //yToken functions
-    function token() public returns(address){
+    function token() public override returns(address){
         return address(underlying);
     }
 
-    function deposit(uint256 amount) public {
+    function deposit(uint256 amount) public override {
         underlying.transferFrom(_msgSender(), address(this), amount);
         uint256 shares = amount.mul(EXP_SCALE).div(_exchangeRate());
         _mint(_msgSender(), shares);
     }
 
-    function withdraw(uint256 shares) public {
+    function withdraw(uint256 shares) public override {
         uint256 redeemAmount = shares.mul(_exchangeRate()).div(EXP_SCALE);
         _burn(_msgSender(), shares);
         _sendUnderlyuing(_msgSender(), redeemAmount);
     }
 
-    function getPricePerFullShare() public view returns (uint256) {
+    function getPricePerFullShare() public view override returns (uint256) {
         return _exchangeRate();
     }
 
