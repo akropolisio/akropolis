@@ -4,6 +4,16 @@ __pycache__
 .hypothesis/
 build/
 reports/
+Lib/
+
+#env
+pyvenv.cfg
+
+#platform-specific python
+scripts/*.exe
+scripts/activate*
+scripts/deactivate*
+
 
 # Logs
 logs

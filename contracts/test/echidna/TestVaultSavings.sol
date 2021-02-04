@@ -1,4 +1,6 @@
+// SPDX-License-Identifier: AGPL V3.0
 pragma solidity ^0.6.12;
+pragma experimental ABIEncoderV2;
 
 import "../../yearnV1/vault-savings/VaultSavings.sol";
 
