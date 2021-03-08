@@ -8,11 +8,18 @@ ADEL_AKRO_RATE = 15
 def get_users():
     users = (
         '0xc97ad401c75e6bfb5694899cd3271485d27c6ea4', # User to swap from wallet
-        '0xf47f63cbb47b75967b29f4749959507db43b1038', # User to swap from stake
+        '0xf42a339f93c1fa4c5d9ace33db308a504e7b0bde', # User to swap from stake
         '0xb1f9a358003ae5145805e936db3af3c22368e324', # User to swap from rewards (Adel staking)
         '0xa215f1b06e7945d331f2df30961027123947a40d', # User to swap from both stake and rewards (Adel staking)
         '0x8efd9addd8de6a4e64664d1893dec51f8c3339e9', # User to swap from wallet and stake to get change to the wallet
-        '0xeb1a799769fc69e84440f9d162d12b196e6e369c'  # User to swap from rewards (Adel and Akro stakings)
+        '0x19870de096523b6eaed10da9fbeb82285451c7bd'  # User to swap from rewards (Adel and Akro stakings)
+    )
+    return users
+
+def get_rewards_users():
+    users = (
+        '0x4dab9b8fca17a37e5ef0eef7d1ac09e2ac1580fb', # User to swap from wallet
+        '0x8e3fabf5a1e4b773c227d2646eb2470263d3a1bf' # User to swap from vesting
     )
     return users
 
@@ -33,20 +40,20 @@ def users_proofs():
                 HexBytes("0x51ef94d740b3c815649161f2c1f4f81d118942748d7121ac264c355b792fd4de"),
                 HexBytes("0xdfac3ac3b255c15c3e887442081cfe319ed70fb9cc8ccc62bf33978d078af849")
             ]},
-        {'amount_rewards_from_adel': 10568296513606745240,
-         'amount_rewards_from_akro': 17638283950673047945,
-         'amount_wallet': 530317137800000000000,
-         'amount_stake': 7906230352639412586431,
-         'amount_rewards': 10568296513606745240 + 17638283950673047945,
+        {'amount_rewards_from_adel': 433118258131121660401,
+         'amount_rewards_from_akro': 528096136280856926374,
+         'amount_wallet': 1428909636600000000000,
+         'amount_stake': 6260010000000000000000,
+         'amount_rewards': 433118258131121660401 + 528096136280856926374,
          'rootIndex': 0,
-         'maxAmount': 8464754070903692379616,
+         'maxAmount': 8650134031011978586775,
          'proofs': [
-            HexBytes("0x8139e229faedffab87a43478e67b81e63df0fcaee7976cecf757924da39cfb6b"),
-            HexBytes("0xab66dbc0d1555593e61fe8ff6538387f646bdcb367f4fb179f3e6b2982fa07b3"),
-            HexBytes("0xa26d66865bffb0870f11c9c5331a474360099d174390825128cf34479909c950"),
-            HexBytes("0x7eae330d27403dc446669c513cdec5ebe7750ccfcb3031a2a93bce63bf31fd8c"),
-            HexBytes("0x59670fe60a33184d3f6224b8911f9af72805185d718b1c936fca8ae17705c5b8"),
-            HexBytes("0x51ef94d740b3c815649161f2c1f4f81d118942748d7121ac264c355b792fd4de"),
+            HexBytes("0x0f960cae0771295455bace46e4aedb07245742c2cf613499798795e943c01bb9"),
+            HexBytes("0xe6af4da2a77655e80f9bd07c2b58fa94728cd5aee278711d8386751e995fae68"),
+            HexBytes("0x2533295b638307210ca1d5adc1094a546ca9593c787552326b36b86fddb92d8e"),
+            HexBytes("0x27d4be9f1c8b9c2398045ed357e2b51a46717b01c9977614dc66932c521aeab8"),
+            HexBytes("0x0a94e0fbf3a4f169b01ce7ca9c8927631c3836b1aa98199d56115ba59bd0885a"),
+            HexBytes("0xb4fb904424d5a825239d24d658ca5e506d30faa49d48c87003f721667afab28e"),
             HexBytes("0xdfac3ac3b255c15c3e887442081cfe319ed70fb9cc8ccc62bf33978d078af849")
         ]},
         {   'amount_wallet': 31481786698989648049,
@@ -91,21 +98,54 @@ def users_proofs():
                 HexBytes("0x51ef94d740b3c815649161f2c1f4f81d118942748d7121ac264c355b792fd4de"),
                 HexBytes("0xdfac3ac3b255c15c3e887442081cfe319ed70fb9cc8ccc62bf33978d078af849")
             ]},
-        {'amount_rewards_from_adel': 69313632956836605332,
-         'amount_rewards_from_akro': 58070532741279831725,
-         'amount_wallet': 24940000000000000000,
-         'amount_stake': 1001814232718785944543,
-         'amount_rewards': 69313632956836605332 + 58070532741279831725,
+        {'amount_rewards_from_adel': 52292486004089295696,
+         'amount_rewards_from_akro': 82950431239994386691,
+         'amount_wallet': 61186896534522935481,
+         'amount_stake': 1455160000000000000000,
+         'amount_rewards': 52292486004089295696 + 82950431239994386691,
          'rootIndex': 0,
-         'maxAmount': 1154138398416902381600,
+         'maxAmount': 1651589813778606617868,
          'proofs': [
-            HexBytes("0x4bf7dc3a11a7d09196e12a905c785b5dd1aff4d11901339da2dfdb2bfca41c4d"),
-            HexBytes("0xd359c34d6f6a0fafeeb0c7a681e6155236461f207cd6c13e6ac31de7e0e77d71"),
-            HexBytes("0x079d7ae5d25d5dfa25259faf9fe3941ceb2b0a893490825226b79dfa920f3c4e"),
-            HexBytes("0x875d4362ebaccfa1b902cdb5d83ba1955208a232823204a46aa40733bc579633"),
-            HexBytes("0x59670fe60a33184d3f6224b8911f9af72805185d718b1c936fca8ae17705c5b8"),
+            HexBytes("0x61684f6b59b4970cce1fd80eebd5d40f6e3d71f7b9dca891f6854b44e649a8a4"),
+            HexBytes("0xb509f4494d50fb73fc7976ad9298add618490fc9ea50d1e4bc41852606667e20"),
+            HexBytes("0x038cc62147df445322e4a1d783365dd76ac4ef0edc0a46fbf7ecba15d4b484b9"),
+            HexBytes("0x3c422af1c5ab9de36ce5eb4c8c0e0eeca9162cc2f6804754bbb336d57cf65dce"),
+            HexBytes("0x5eb88e4222b60f92cd3e512ec4b092b61f3769526b4d3d7a80c43df9b3572b96"),
             HexBytes("0x51ef94d740b3c815649161f2c1f4f81d118942748d7121ac264c355b792fd4de"),
             HexBytes("0xdfac3ac3b255c15c3e887442081cfe319ed70fb9cc8ccc62bf33978d078af849")
+        ]}
+    ]
+
+    return dict(zip(users, proofs))
+
+def users_rewards_proofs():
+    users = get_rewards_users()
+    proofs = [
+        {   'amount_wallet': 935144563208097595471,
+            'amount_vested': 0,
+            'rootIndex': 0,
+            'maxAmount': 935144563208097595471,
+            'proofs': [
+                HexBytes("0x6ab314067ee872a21a665b2c10dbd6193ac8cce52fbd7b850ade87dd976f4b4c"),
+                HexBytes("0x1f79f2bb0908cff2712e7a92ae5d88a3ceec69d17c5d65f049ac8aed5f7f4d52"),
+                HexBytes("0xb2b6f9e2669f042fce6333b63e55d2ac78d33effa84b3224757b598eb4474952"),
+                HexBytes("0x36ea6b77b9f6420cfb61a35c77e7ea9a90eb69edd8f5dc236b9b11595b8dfffd"),
+                HexBytes("0x1b488641573e1e1bd4229613f0f3951b0cf1b145ce9a39c0cdc2c9722acc2825"),
+                HexBytes("0xd98682ae801596b3f45d7b7cd3f362152633ef0f960db1ae5be1e0864fd2499b"),
+                HexBytes("0xad4786576c554b02a7251b934c4809c1061aa8b97042ff8cda306335c5f5bec1")
+            ]},
+        {'amount_wallet': 0,
+         'amount_vested': 4545815708308316933639,
+         'rootIndex': 3,
+         'maxAmount': 4545815708308316933639,
+         'proofs': [
+            HexBytes("0x9b9d0f72cef313828c4088fdbb549be17ea0c749e3a99f5e3d785f6706a39b86"),
+            HexBytes("0xa8dbce1cb2379f6ebec4307fe62769f38ec3be5f797ecd31069ab9f7c59bd0d4"),
+            HexBytes("0x54a9f3dceaa6cc7d34ba3f3b7111b1ceb906066bd8a3333009ef245c257213e6"),
+            HexBytes("0xce034c685c4dc9c3a86616ba12d1a4fa44ad557b4bc7ed9de05fc3b67e0cb368"),
+            HexBytes("0xe943c90f9699b1946eea23633a8a819f1e4a5c96611ddc356bc47a716c9d10af"),
+            HexBytes("0x8c666d62e7bbd178cb2357b1a96aeff7e20fc73218c7af5d06300a7f99647372"),
+            HexBytes("0x592811736d5e4e2b55e88db19d5a827c330253d6494ebe63a2b51638a9003700")
         ]}
     ]
 
@@ -114,6 +154,56 @@ def users_proofs():
 def merkle_roots():
     return [HexBytes('0x15a33c8b140d00e2b0147768296e9d275a2f7ef388e41c292f7eb5e658d5ebef')]
 
+def merkle_rewards_roots():
+    return [
+      HexBytes("0xc9aae6ee58a3aa0ce8f8b9e196d49bce904e3d337e8b2af9eb8b2356c0f16f98"),
+      HexBytes("0x35e17ebe31751f6c855e6ae8bae8ad235f0f9e2f153425e004bc8d83fab026d9"),
+      HexBytes("0x910253d827c936b187b01d8d76b71092c92892ca4e3dc947edf03517b9c0e7ae"),
+      HexBytes("0xcd65bd21bb34e4b834ab41677171206c3a45cc9eb0b03fa6692002c7379439d8"),
+      HexBytes("0x96c66c4814aecaea9318cc43f31244e352e9cf2a848b8bd86d38eca95eafe224"),
+      HexBytes("0x850fac3547709b86dbc90afc6f7126a36339b512764dae5e3c3381ae9f589cf6")
+    ]
+
+def merkle_vested_rewards_roots():
+    return [
+      HexBytes("0x98eae9d462d914ddc95e537dce14f1cfe204cfee6ed2e17342a729b6b020e87b"),
+      HexBytes("0x783223891f4dc45c0bf9ed972c60852bf274332acfce6ee68ef522ce2d11ee7b"),
+      HexBytes("0xb74d78fb97f55c7a66052490ced2a705f500306896ca7d277e0dd2510ea454cc"),
+      HexBytes("0xf56209bae78f84e229e51ee74ee443d0ce3f2f703236f5c082d61d1cd79f2409"),
+      HexBytes("0x144b8a7cd1a3515773567815008119bec4e2d271abf3444157be9f152a580c66"),
+      HexBytes("0x202bec3a5eb253d27af62a97cec06e118464493569822dbd4847f13e2fed63fe"),
+      HexBytes("0xbdd3da479389dd3a446a135c7f11e3a5e0d721a3436344beb6abcbf6b5095186"),
+      HexBytes("0x578d08be95d68f91e191402bc6853125b4874c7e4d7b6260f0dc1c50fdb83279"),
+      HexBytes("0xef0c82459daf220b86da257128e2300f825d910253ae8df419f8c6ef524f7227"),
+      HexBytes("0x757fcec266eb09de3d813192a132e81e92d26beb92a15c0970a40595cccd9712"),
+      HexBytes("0xa8584656c0a14dbf3fef625b8f4c506c14d386a4bd20dc8d6743216c288df194"),
+      HexBytes("0x3382f6e5784b35fc7e5f2f7752ddd5102811d77d0dcb354e16e36b01d2b0606e"),
+      HexBytes("0x0249d59efd59b551bb08403f8034cdffecef0a8ad600f2e5879d4c05a27cd9de"),
+      HexBytes("0x77f2465eaaf77196ded6b7c943aaa9cb7a433e3e9701fe218d1decca58d3c2b9"),
+      HexBytes("0x1eeab0179d98a0d4360c9545116a59a1c64dd6415fe1e8959bb99d29973eb830"),
+      HexBytes("0xba0aacc0f0d46ca703906af99225962b861143bd71465a7480c0c23d1c953f32"),
+      HexBytes("0x2c98ac483fb981452581bff4edc3f34a2015c5dba9ac7c6a02c284dcece428dd"),
+      HexBytes("0x42b4e2736104c3547ca6d8b55f03cfb5d6b8389180b938718c3e489d4ecd0bb7"),
+      HexBytes("0x66e1961787f72a7706c86cb12840914d72205151a8c75cce7d4f48f70b9a7412"),
+      HexBytes("0x5ff319c4ef14bee4d144ccefe189feeae795bc7accf89e80fc349ffb338cd1bc"),
+      HexBytes("0x61920a81e2e18adcc7952b7eba972d38b5ab4db36dcca8fd10dd259e371b7d2b"),
+      HexBytes("0x07a017849273697263f365ccd252e636ee39621c59379e751c477c672f891409"),
+      HexBytes("0x1b11b4994d9ac3e8683fb160fad85ac06643290ca6e6d94341ce5226f206c9da"),
+      HexBytes("0x6917067a40942599463ebf1bbe3b11c1ff9f64653fc7a465ed8f69cb9b23a0a0"),
+      HexBytes("0x11008dfcc447c90f8df6fb63650ed0acf6a3e7ef0251a924520edcaf91203cd6"),
+      HexBytes("0x817d8b993d16c291c8fa365aad4413d904f606b75aadfc8ef527cc4dc4e50f30"),
+      HexBytes("0x182f9e9bfc7c211a2d8d2ce62cc81a5251f8926a57a1d197fa0ef5f39bfc3d5f"),
+      HexBytes("0xa1a42a56dfb1dae4c662a015aab63054d8dd69a5c44c8bae76875a61ab1dded1"),
+      HexBytes("0x0cba2a92f0c52ad0255675f2641c876145bb2c0ea46d30ae62da4402c6df6c1b"),
+      HexBytes("0xad356d6ac79480f0c1a192e095b545b7c5b378d940a81394c0ad422cbf8d8687"),
+      HexBytes("0x283cdce093b0ea3639287e2e25f2406c6259df32a176627e577fbd49d402f326"),
+      HexBytes("0x1049d497634b7ce289b4fdfc7d42006af6c3c68af584dbce45c11b78903edec6"),
+      HexBytes("0xf35165acfc748c12e06dd3676161171fa300f9a2b7bc02dfd3e748692c985a91"),
+      HexBytes("0xbe006aba4ca20d4d8471f73474555aa418baed272f98015b5c65fc40f3c350d1")
+    ]
+
+
+pre_test_swap_adel_amount = 0
 total_adel_swapped = 0
 total_stake_withdrawn = 0
 total_rewards_from_adel = 0
@@ -139,7 +229,8 @@ def test_initial_balances(chain, owner, adel, vakro, vakroSwap, adelstakingpool,
     chain.mine(1)
 
     assert adel.balanceOf(vakro.address) == 0
-    assert adel.balanceOf(vakroSwap.address) == 0
+    global pre_test_swap_adel_amount
+    pre_test_swap_adel_amount = adel.balanceOf(vakroSwap.address)
     assert adel.balanceOf(adelstakingpool.address) != 0
 
 
@@ -439,7 +530,6 @@ def test_swap_adel_6(akro, adel, vakro, vakroSwap, adelstakingpool, akrostakingp
     assert vakro.balanceOf(user_for_both_rewards) == ADEL_AKRO_RATE * proofs_dict[user_for_both_rewards]['amount_rewards']
     assert vakroSwap.adelSwapped(user_for_both_rewards) == proofs_dict[user_for_both_rewards]['amount_rewards']
     
-    
 def test_final_balances(adel, akro, vakro, vakroSwap, adelstakingpool, akrostakingpool):
     ###
     # All calculations match
@@ -457,9 +547,108 @@ def test_final_balances(adel, akro, vakro, vakroSwap, adelstakingpool, akrostaki
     global rewards_on_adel_before
     global rewards_on_akro_before
 
-    assert adel.balanceOf(vakroSwap.address) == total_adel_swapped - total_adel_change
+    assert adel.balanceOf(vakroSwap.address) == pre_test_swap_adel_amount + total_adel_swapped - total_adel_change
     assert staking_adel_before - staking_adel_after == total_stake_withdrawn
     assert rewards_on_adel_before - rewards_on_adel_after == total_rewards_from_adel
     assert rewards_on_akro_before - rewards_on_akro_after == total_rewards_from_akro
     assert akro.balanceOf(vakroSwap.address) == 0
     assert vakro.balanceOf(vakroSwap.address) == 0
+
+def test_post_update(owner, vakroSwapUpdated):
+    proofs_dict = users_proofs()
+    user_for_wallet, user_for_stake, user_for_rewards, user_for_stake_reward, user_for_change, user_for_both_rewards = get_users()
+
+
+    assert vakroSwapUpdated.adelSwapped(user_for_wallet) == proofs_dict[user_for_wallet]['amount_wallet']
+    assert vakroSwapUpdated.adelSwapped(user_for_stake) == proofs_dict[user_for_stake]['amount_stake'] + proofs_dict[user_for_stake]['amount_rewards_from_adel']
+    assert vakroSwapUpdated.adelSwapped(user_for_rewards) == proofs_dict[user_for_rewards]['amount_rewards']
+    assert vakroSwapUpdated.adelSwapped(user_for_stake_reward) == proofs_dict[user_for_stake_reward]['amount_stake'] + proofs_dict[user_for_stake_reward]['amount_rewards']
+    assert vakroSwapUpdated.adelSwapped(user_for_change) == proofs_dict[user_for_change]['maxAmount']
+    assert vakroSwapUpdated.adelSwapped(user_for_both_rewards) == proofs_dict[user_for_both_rewards]['amount_rewards']
+
+
+
+def test_rewards(owner, vakroSwapUpdated):
+
+    vakroSwapUpdated.setMerkleRewardsRoots(merkle_rewards_roots(), {'from': owner})
+    vakroSwapUpdated.setMerkleVestedRewardsRoots(merkle_vested_rewards_roots(), {'from': owner})
+
+
+    proofs_dict = users_rewards_proofs()
+    user_for_wallet, user_for_vesting = get_rewards_users()
+
+    ###
+    # Test with rewards from the wallet
+    ###
+    user_adel_balance_before = adel.balanceOf(user_for_wallet)
+    swap_adel_balance_before = adel.balanceOf(vakroSwapUpdated.address)
+    adel_total_swapped_before = vakroSwapUpdated.adelSwapped(user_for_wallet)
+    adel_rewards_total_swapped_before = vakroSwapUpdated.adelRewardsSwapped(user_for_wallet)
+    vakro_balance_before = vakro.balanceOf(user_for_wallet)
+
+    assert adel_rewards_total_swapped_before == 0
+    assert vakro.balanceOf(user_for_wallet) == 0
+
+    adel.approve(vakroSwap.address, proofs_dict[user_for_wallet]['amount_wallet'], {'from': user_for_wallet})
+    vakroSwap.swapFromAdelWalletRewards(
+        proofs_dict[user_for_wallet]['amount_wallet'],
+        proofs_dict[user_for_wallet]['rootIndex'],
+        proofs_dict[user_for_wallet]['maxAmount'],
+        proofs_dict[user_for_wallet]['proofs'],
+            {'from': user_for_wallet})
+    
+    global total_adel_swapped
+    total_adel_swapped += proofs_dict[user_for_wallet]['amount_wallet']
+
+    user_adel_balance_after = adel.balanceOf(user_for_wallet)
+    swap_adel_balance_after = adel.balanceOf(vakroSwap.address)
+    adel_total_swapped_after = vakroSwapUpdated.adelSwapped(user_for_wallet)
+    adel_rewards_total_swapped_after = vakroSwapUpdated.adelRewardsSwapped(user_for_wallet)
+    vakro_balance_after = vakro.balanceOf(user_for_wallet)
+
+
+    assert user_adel_balance_before - user_adel_balance_after == proofs_dict[user_for_wallet]['amount_wallet']
+    assert swap_adel_balance_after - swap_adel_balance_before == proofs_dict[user_for_wallet]['amount_wallet']
+
+    assert adel_total_swapped_before == adel_total_swapped_after
+    assert adel_rewards_total_swapped_after - adel_rewards_total_swapped_before == proofs_dict[user_for_wallet]['amount_wallet']
+
+    assert vakro_balance_after - vakro_balance_before == ADEL_AKRO_RATE * proofs_dict[user_for_wallet]['amount_wallet']
+
+
+    ###
+    # Test with vesting revards
+    ###
+    user_adel_balance_before = adel.balanceOf(user_for_vesting)
+    swap_adel_balance_before = adel.balanceOf(vakroSwapUpdated.address)
+    adel_total_swapped_before = vakroSwapUpdated.adelSwapped(user_for_vesting)
+    adel_rewards_total_swapped_before = vakroSwapUpdated.adelRewardsSwapped(user_for_vesting)
+    vakro_balance_before = vakro.balanceOf(user_for_vesting)
+
+    assert adel_rewards_total_swapped_before == 0
+    assert vakro.balanceOf(user_for_vesting) == 0
+
+    vakroSwap.swapFromAdelVestedRewards(
+        proofs_dict[user_for_vesting]['amount_vesting'],
+        proofs_dict[user_for_vesting]['rootIndex'],
+        proofs_dict[user_for_vesting]['maxAmount'],
+        proofs_dict[user_for_vesting]['proofs'],
+            {'from': user_for_vesting})
+    
+    total_adel_swapped += proofs_dict[user_for_vesting]['amount_vesting']
+
+    user_adel_balance_after = adel.balanceOf(user_for_vesting)
+    swap_adel_balance_after = adel.balanceOf(vakroSwap.address)
+    adel_total_swapped_after = vakroSwapUpdated.adelSwapped(user_for_vesting)
+    adel_rewards_total_swapped_after = vakroSwapUpdated.adelRewardsSwapped(user_for_vesting)
+    vakro_balance_after = vakro.balanceOf(user_for_vesting)
+
+
+    assert user_adel_balance_before == user_adel_balance_after
+    assert swap_adel_balance_after == swap_adel_balance_before
+
+    assert adel_total_swapped_before == adel_total_swapped_after
+    assert adel_rewards_total_swapped_after - adel_rewards_total_swapped_before == proofs_dict[user_for_vesting]['amount_vesting']
+
+    assert vakro_balance_after - vakro_balance_before == ADEL_AKRO_RATE * proofs_dict[user_for_vesting]['amount_vesting']
+

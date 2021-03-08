@@ -358,7 +358,7 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
      */
     function swap(uint256 _adelAmount, uint256 _adelAllowedToSwap, AdelSource _index) internal
     {
-        uint256 amountSwapped = adelRewardsSwapped(_msgSender());
+        uint256 amountSwapped = adelSwapped(_msgSender());
         require(amountSwapped < _adelAllowedToSwap, "Limit for swap is reached");
         require(_adelAmount != 0 && _adelAmount >= minAmountToSwap, "Not enough ADEL");
 
