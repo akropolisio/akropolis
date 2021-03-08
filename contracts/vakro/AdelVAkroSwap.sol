@@ -281,7 +281,7 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
     ) 
         external nonReentrant swapEnabled enoughAdel(_adelAmount)
     {
-        require(verifyMerkleProofs(_msgSender(), merkleRootIndex, adelAllowedToSwap, merkleProofs), "Merkle proofs not verified");
+        require(verifyRewardsMerkleProofs(_msgSender(), merkleRootIndex, adelAllowedToSwap, merkleProofs), "Merkle proofs not verified");
 
         IERC20Upgradeable(adel).safeTransferFrom(_msgSender(), address(this), _adelAmount);
 
@@ -303,7 +303,7 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
     ) 
         external nonReentrant swapEnabled
     {
-        require(verifyMerkleProofs(_msgSender(), merkleRootIndex, adelAllowedToSwap, merkleProofs), "Merkle proofs not verified");
+        require(verifyVestedRewardsMerkleProofs(_msgSender(), merkleRootIndex, adelAllowedToSwap, merkleProofs), "Merkle proofs not verified");
 
         // No ADEL transfers here
 
@@ -331,6 +331,46 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
     }
 
     /**
+     * @notice Verifies rewards merkle proofs of user to be elligible for swap
+     * @param _account Address of a user
+     * @param _merkleRootIndex Index of a merkle root to be used for calculations
+     * @param _adelAllowedToSwap Maximum ADEL allowed for a user to swap
+     * @param _merkleProofs Array of consiquent merkle hashes
+     */
+    function verifyRewardsMerkleProofs(
+        address _account,
+        uint256 _merkleRootIndex,
+        uint256 _adelAllowedToSwap,
+        bytes32[] memory _merkleProofs) virtual public view returns(bool)
+    {
+        require(_merkleProofs.length > 0, "No Merkle proofs");
+        require(_merkleRootIndex < merkleRootsRewards.length, "Merkle roots are not set");
+
+        bytes32 node = keccak256(abi.encodePacked(_account, _adelAllowedToSwap));
+        return MerkleProofUpgradeable.verify(_merkleProofs, merkleRootsRewards[_merkleRootIndex], node);
+    }
+
+    /**
+     * @notice Verifies vested rewards merkle proofs of user to be elligible for swap
+     * @param _account Address of a user
+     * @param _merkleRootIndex Index of a merkle root to be used for calculations
+     * @param _adelAllowedToSwap Maximum ADEL allowed for a user to swap
+     * @param _merkleProofs Array of consiquent merkle hashes
+     */
+    function verifyVestedRewardsMerkleProofs(
+        address _account,
+        uint256 _merkleRootIndex,
+        uint256 _adelAllowedToSwap,
+        bytes32[] memory _merkleProofs) virtual public view returns(bool)
+    {
+        require(_merkleProofs.length > 0, "No Merkle proofs");
+        require(_merkleRootIndex < merkleRootsRewardsVested.length, "Merkle roots are not set");
+
+        bytes32 node = keccak256(abi.encodePacked(_account, _adelAllowedToSwap));
+        return MerkleProofUpgradeable.verify(_merkleProofs, merkleRootsRewardsVested[_merkleRootIndex], node);
+    }
+
+    /**merkleRoots
      * @notice Returns the actual amount of ADEL swapped by a user
      * @param _account Address of a user
      */

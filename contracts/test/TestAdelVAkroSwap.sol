@@ -11,14 +11,25 @@ contract TestAdelVAkroSwap is AdelVAkroSwap {
         AdelVAkroSwap.initialize(_akro, _adel, _vakro);
     }    
 
-    /**
-     * @notice Verifies merkle proofs of user to be elligible for swap
-     * @param _account Address of a user
-     * @param _merkleRootIndex Index of a merkle root to be used for calculations
-     * @param _adelAllowedToSwap Maximum ADEL allowed for a user to swap
-     * @param _merkleProofs Array of consiquent merkle hashes
-     */
     function verifyMerkleProofs(
+        address _account,
+        uint256 _merkleRootIndex,
+        uint256 _adelAllowedToSwap,
+        bytes32[] memory _merkleProofs) public override view returns(bool)
+    {
+        return true;
+    }
+
+    function verifyRewardsMerkleProofs(
+        address _account,
+        uint256 _merkleRootIndex,
+        uint256 _adelAllowedToSwap,
+        bytes32[] memory _merkleProofs) public override view returns(bool)
+    {
+        return true;
+    }
+
+    function verifyVestedRewardsMerkleProofs(
         address _account,
         uint256 _merkleRootIndex,
         uint256 _adelAllowedToSwap,
