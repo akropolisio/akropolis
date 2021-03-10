@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: AGPL V3.0
 // File: @openzeppelin\upgrades\contracts\Initializable.sol
 
 pragma solidity ^0.6.12;

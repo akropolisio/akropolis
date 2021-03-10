@@ -310,7 +310,7 @@ def test_swap_from_wallet_rewards(deployer, akro, adel, vakro, testVakroSwap, pr
     adel_swapped_before = testVakroSwap.adelSwapped(regular_user)
     adel_swapped_from_rewards_before = testVakroSwap.adelRewardsSwapped(regular_user)
 
-    # Perform swap from rewards
+    # Perform swap from rewards (swaps beacause vested swap is enabled by default)
     adel.approve(testVakroSwap.address, ADEL_REWARDS_TO_SWAP, {'from': regular_user})
     testVakroSwap.swapFromAdelWalletRewards(ADEL_REWARDS_TO_SWAP, 0, ADEL_REWARDS_MAX_ALLOWED, [], {'from': regular_user})
 
@@ -337,6 +337,14 @@ def test_swap_from_vesting_rewards(deployer, akro, adel, vakro, testVakroSwap, p
     vakro_user_before = vakro.balanceOf(regular_user2)
     adel_swapped_before = testVakroSwap.adelSwapped(regular_user2)
     adel_swapped_from_rewards_before = testVakroSwap.adelRewardsSwapped(regular_user2)
+
+    testVakroSwap.toggleVestedSwap({'from': deployer})
+    # Check that swp cannot be performed
+    with brownie.reverts():
+         testVakroSwap.swapFromAdelVestedRewards(ADEL_VESTING_REWARDS_TO_SWAP, 0, ADEL_VESTING_REWARDS_MAX_ALLOWED, [], {'from': regular_user2})
+
+    # Enable again
+    testVakroSwap.toggleVestedSwap({'from': deployer})
 
     # Perform swap from rewards
     testVakroSwap.swapFromAdelVestedRewards(ADEL_VESTING_REWARDS_TO_SWAP, 0, ADEL_VESTING_REWARDS_MAX_ALLOWED, [], {'from': regular_user2})

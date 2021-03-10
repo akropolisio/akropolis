@@ -38,6 +38,7 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
     bytes32[] public merkleRoots;
     mapping (address => uint256[3]) public swappedAdel;
 
+    bool public isVestedSwapEnabled;
     bytes32[] public merkleRootsRewards;
     bytes32[] public merkleRootsRewardsVested;
     mapping (address => uint256[2]) public swappedAdelRewards;
@@ -46,6 +47,11 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
 
     modifier swapEnabled() {
         require(swapRateNumerator != 0, "Swap is disabled");
+        _;
+    }
+
+    modifier vestedSwapEnabled() {
+        require(isVestedSwapEnabled, "Swap is disabled");
         _;
     }
 
@@ -64,6 +70,8 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
         akro = _akro;
         adel = _adel;
         vakro = _vakro;
+
+        isVestedSwapEnabled = true;
     }    
 
     //Setters for the swap tuning
@@ -279,7 +287,7 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
         uint256 adelAllowedToSwap,
         bytes32[] memory merkleProofs
     ) 
-        external nonReentrant swapEnabled enoughAdel(_adelAmount)
+        external nonReentrant swapEnabled vestedSwapEnabled enoughAdel(_adelAmount)
     {
         require(verifyRewardsMerkleProofs(_msgSender(), merkleRootIndex, adelAllowedToSwap, merkleProofs), "Merkle proofs not verified");
 
@@ -301,13 +309,20 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
         uint256 adelAllowedToSwap,
         bytes32[] memory merkleProofs
     ) 
-        external nonReentrant swapEnabled
+        external nonReentrant swapEnabled vestedSwapEnabled
     {
         require(verifyVestedRewardsMerkleProofs(_msgSender(), merkleRootIndex, adelAllowedToSwap, merkleProofs), "Merkle proofs not verified");
 
         // No ADEL transfers here
 
         swapRewards(_adelAmount, adelAllowedToSwap, AdelRewardsSource.VESTED);
+    }
+
+    /**
+     * @notice Toggles vested swap flag from active to inactive or vice versa
+     */
+    function toggleVestedSwap() public onlyOwner {
+        isVestedSwapEnabled = !isVestedSwapEnabled;
     }
 
     /**
