@@ -39,8 +39,8 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
     mapping (address => uint256[3]) public swappedAdel;
 
     bool public isVestedSwapEnabled;
-    bytes32[] public merkleRootsRewards;
-    bytes32[] public merkleRootsRewardsVested;
+    bytes32[] public merkleRootsWalletRewards;
+    bytes32[] public merkleRootsTotalRewardsVested;
     mapping (address => uint256[2]) public swappedAdelRewards;
 
     enum AdelRewardsSource{ WALLET, VESTED }
@@ -131,31 +131,31 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
 
     /**
      * @notice Sets the Merkle roots for the rewards (on wallet)
-     * @param _merkleRootsRewards Array of hashes for on-wallet rewards
+     * @param _merkleRootsWalletRewards Array of hashes for on-wallet rewards
      */
-    function setMerkleRewardsRoots(bytes32[] memory _merkleRootsRewards) external onlyOwner {
-        require(_merkleRootsRewards.length > 0, "Incorrect data");
+    function setMerkleWalletRewardsRoots(bytes32[] memory _merkleRootsWalletRewards) external onlyOwner {
+        require(_merkleRootsWalletRewards.length > 0, "Incorrect data");
         
-        if (merkleRootsRewards.length > 0) {
-            delete merkleRootsRewards;
+        if (merkleRootsWalletRewards.length > 0) {
+            delete merkleRootsWalletRewards;
         }
-        merkleRootsRewards = new bytes32[](_merkleRootsRewards.length);
-        merkleRootsRewards = _merkleRootsRewards;
+        merkleRootsWalletRewards = new bytes32[](_merkleRootsWalletRewards.length);
+        merkleRootsWalletRewards = _merkleRootsWalletRewards;
     }
 
     /**
      * @notice Sets the Merkle roots for the rewards (vested)
-     * @param _merkleRootsRewardsVested Array of hashes for vested rewards
+     * @param _merkleRootsTotalRewardsVested Array of hashes for vested rewards
      */
-    function setMerkleVestedRewardsRoots(bytes32[] memory _merkleRootsRewardsVested) external onlyOwner {
-        require(_merkleRootsRewardsVested.length > 0, "Incorrect data");
+    function setMerkleVestedRewardsRoots(bytes32[] memory _merkleRootsTotalRewardsVested) external onlyOwner {
+        require(_merkleRootsTotalRewardsVested.length > 0, "Incorrect data");
         
-        if (merkleRootsRewardsVested.length > 0) {
-            delete merkleRootsRewardsVested;
+        if (merkleRootsTotalRewardsVested.length > 0) {
+            delete merkleRootsTotalRewardsVested;
         }
 
-        merkleRootsRewardsVested = new bytes32[](_merkleRootsRewardsVested.length);
-        merkleRootsRewardsVested = _merkleRootsRewardsVested;
+        merkleRootsTotalRewardsVested = new bytes32[](_merkleRootsTotalRewardsVested.length);
+        merkleRootsTotalRewardsVested = _merkleRootsTotalRewardsVested;
     }
 
     /**
@@ -289,7 +289,7 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
     ) 
         external nonReentrant swapEnabled vestedSwapEnabled enoughAdel(_adelAmount)
     {
-        require(verifyRewardsMerkleProofs(_msgSender(), merkleRootIndex, adelAllowedToSwap, merkleProofs), "Merkle proofs not verified");
+        require(verifyWalletRewardsMerkleProofs(_msgSender(), merkleRootIndex, adelAllowedToSwap, merkleProofs), "Merkle proofs not verified");
 
         IERC20Upgradeable(adel).safeTransferFrom(_msgSender(), address(this), _adelAmount);
 
@@ -298,24 +298,35 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
 
     /**
      * @notice Allows to swap ADEL token from not sent vested rewards
-     * @param _adelAmount Amout of ADEL vested rewards the user approves for the swap.
-     * @param merkleRootIndex Index of a merkle root to be used for calculations
-     * @param adelAllowedToSwap Maximum ADEL allowed for a user to swap
-     * @param merkleProofs Array of consiquent merkle hashes
+     * @param merkleWalletRootIndex Index of a merkle root to be used for calculations (for rewards on wallet)
+     * @param adelWalletAllowedToSwap Maximum ADEL allowed for a user to swap (for rewards on wallet)
+     * @param merkleWalletProofs Array of consiquent merkle hashes (for rewards on wallet)
+     * @param merkleTotalRootIndex Index of a merkle root to be used for calculations
+     * @param adelTotalAllowedToSwap Maximum ADEL avested rewards llowed for a user to swap
+     * @param merkleTotalProofs Array of consiquent merkle hashes
      */
     function swapFromAdelVestedRewards(
-        uint256 _adelAmount,
-        uint256 merkleRootIndex, 
-        uint256 adelAllowedToSwap,
-        bytes32[] memory merkleProofs
+        uint256 merkleWalletRootIndex, 
+        uint256 adelWalletAllowedToSwap,
+        bytes32[] memory merkleWalletProofs,
+        uint256 merkleTotalRootIndex, 
+        uint256 adelTotalAllowedToSwap,
+        bytes32[] memory merkleTotalProofs
     ) 
         external nonReentrant swapEnabled vestedSwapEnabled
     {
-        require(verifyVestedRewardsMerkleProofs(_msgSender(), merkleRootIndex, adelAllowedToSwap, merkleProofs), "Merkle proofs not verified");
+        require(verifyWalletRewardsMerkleProofs(_msgSender(),
+                                                merkleWalletRootIndex,
+                                                adelWalletAllowedToSwap,
+                                                merkleWalletProofs), "Merkle proofs not verified");
+        require(verifyVestedRewardsMerkleProofs(_msgSender(),
+                                                merkleTotalRootIndex,
+                                                adelTotalAllowedToSwap,
+                                                merkleTotalProofs), "Merkle proofs not verified");
 
         // No ADEL transfers here
-
-        swapRewards(_adelAmount, adelAllowedToSwap, AdelRewardsSource.VESTED);
+        uint256 adelAllowedToSwap = adelTotalAllowedToSwap - adelWalletAllowedToSwap;
+        swapRewards(adelAllowedToSwap, adelAllowedToSwap, AdelRewardsSource.VESTED);
     }
 
     /**
@@ -352,17 +363,17 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
      * @param _adelAllowedToSwap Maximum ADEL allowed for a user to swap
      * @param _merkleProofs Array of consiquent merkle hashes
      */
-    function verifyRewardsMerkleProofs(
+    function verifyWalletRewardsMerkleProofs(
         address _account,
         uint256 _merkleRootIndex,
         uint256 _adelAllowedToSwap,
         bytes32[] memory _merkleProofs) virtual public view returns(bool)
     {
         require(_merkleProofs.length > 0, "No Merkle proofs");
-        require(_merkleRootIndex < merkleRootsRewards.length, "Merkle roots are not set");
+        require(_merkleRootIndex < merkleRootsWalletRewards.length, "Merkle roots are not set");
 
         bytes32 node = keccak256(abi.encodePacked(_account, _adelAllowedToSwap));
-        return MerkleProofUpgradeable.verify(_merkleProofs, merkleRootsRewards[_merkleRootIndex], node);
+        return MerkleProofUpgradeable.verify(_merkleProofs, merkleRootsWalletRewards[_merkleRootIndex], node);
     }
 
     /**
@@ -379,10 +390,10 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
         bytes32[] memory _merkleProofs) virtual public view returns(bool)
     {
         require(_merkleProofs.length > 0, "No Merkle proofs");
-        require(_merkleRootIndex < merkleRootsRewardsVested.length, "Merkle roots are not set");
+        require(_merkleRootIndex < merkleRootsTotalRewardsVested.length, "Merkle roots are not set");
 
         bytes32 node = keccak256(abi.encodePacked(_account, _adelAllowedToSwap));
-        return MerkleProofUpgradeable.verify(_merkleProofs, merkleRootsRewardsVested[_merkleRootIndex], node);
+        return MerkleProofUpgradeable.verify(_merkleProofs, merkleRootsTotalRewardsVested[_merkleRootIndex], node);
     }
 
     /**merkleRoots

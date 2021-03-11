@@ -20,7 +20,7 @@ contract TestAdelVAkroSwap is AdelVAkroSwap {
         return true;
     }
 
-    function verifyRewardsMerkleProofs(
+    function verifyWalletRewardsMerkleProofs(
         address _account,
         uint256 _merkleRootIndex,
         uint256 _adelAllowedToSwap,
