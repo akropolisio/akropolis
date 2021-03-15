@@ -39,7 +39,6 @@ def deploy_proxy_over_impl(deployer, proxy_admin, implementation_address, ImplCo
     @param args Initializer arguments.
     @return Contract container for the proxy wrapped into the implementation interface
             Contract container for the proxy
-            Contract container for the implementation
     """
     cur_project = project.get_loaded_projects()[0]
 

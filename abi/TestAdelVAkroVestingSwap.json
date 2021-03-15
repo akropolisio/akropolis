@@ -64,7 +64,7 @@
         "type": "address"
       }
     ],
-    "name": "adelSwapped",
+    "name": "adelRewardsSwapped",
     "outputs": [
       {
         "internalType": "uint256",
@@ -112,6 +112,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "isVestedSwapEnabled",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "uint256",
@@ -119,7 +132,26 @@
         "type": "uint256"
       }
     ],
-    "name": "merkleRoots",
+    "name": "merkleRootsTotalRewardsVested",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "merkleRootsWalletRewards",
     "outputs": [
       {
         "internalType": "bytes32",
@@ -164,40 +196,27 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "rewardAdelPool",
-    "outputs": [
+    "inputs": [
       {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
+        "internalType": "bytes32[]",
+        "name": "_merkleRootsTotalRewardsVested",
+        "type": "bytes32[]"
       }
     ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "rewardAkroPool",
-    "outputs": [
-      {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "stateMutability": "view",
+    "name": "setMerkleVestedRewardsRoots",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "inputs": [
       {
         "internalType": "bytes32[]",
-        "name": "_merkleRoots",
+        "name": "_merkleRootsWalletRewards",
         "type": "bytes32[]"
       }
     ],
-    "name": "setMerkleRoots",
+    "name": "setMerkleWalletRewardsRoots",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -211,37 +230,6 @@
       }
     ],
     "name": "setMinSwapAmount",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_rewardAkroPool",
-        "type": "address"
-      },
-      {
-        "internalType": "address",
-        "name": "_rewardAdelPool",
-        "type": "address"
-      }
-    ],
-    "name": "setRewardStakingPool",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "_stakingPool",
-        "type": "address"
-      }
-    ],
-    "name": "setStakingPool",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -265,16 +253,41 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "stakingPool",
-    "outputs": [
+    "inputs": [
       {
-        "internalType": "address",
-        "name": "",
-        "type": "address"
+        "internalType": "uint256",
+        "name": "merkleWalletRootIndex",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "adelWalletAllowedToSwap",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32[]",
+        "name": "merkleWalletProofs",
+        "type": "bytes32[]"
+      },
+      {
+        "internalType": "uint256",
+        "name": "merkleTotalRootIndex",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "adelTotalAllowedToSwap",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32[]",
+        "name": "merkleTotalProofs",
+        "type": "bytes32[]"
       }
     ],
-    "stateMutability": "view",
+    "name": "swapFromAdelVestedRewards",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -300,53 +313,7 @@
         "type": "bytes32[]"
       }
     ],
-    "name": "swapFromAdel",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "merkleRootIndex",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "adelAllowedToSwap",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes32[]",
-        "name": "merkleProofs",
-        "type": "bytes32[]"
-      }
-    ],
-    "name": "swapFromRewardAdel",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "merkleRootIndex",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "adelAllowedToSwap",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bytes32[]",
-        "name": "merkleProofs",
-        "type": "bytes32[]"
-      }
-    ],
-    "name": "swapFromStakedAdel",
+    "name": "swapFromAdelWalletRewards",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -390,7 +357,7 @@
         "type": "uint256"
       }
     ],
-    "name": "swappedAdel",
+    "name": "swappedAdelRewards",
     "outputs": [
       {
         "internalType": "uint256",
@@ -399,6 +366,13 @@
       }
     ],
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "toggleVestedSwap",
+    "outputs": [],
+    "stateMutability": "nonpayable",
     "type": "function"
   },
   {
@@ -450,7 +424,41 @@
         "type": "bytes32[]"
       }
     ],
-    "name": "verifyMerkleProofs",
+    "name": "verifyVestedRewardsMerkleProofs",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_account",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_merkleRootIndex",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_adelAllowedToSwap",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bytes32[]",
+        "name": "_merkleProofs",
+        "type": "bytes32[]"
+      }
+    ],
+    "name": "verifyWalletRewardsMerkleProofs",
     "outputs": [
       {
         "internalType": "bool",

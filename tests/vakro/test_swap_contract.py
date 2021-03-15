@@ -15,7 +15,7 @@ ADEL_WALLET_VESTING_REWARDS_MAX_ALLOWED = 1200
 ADEL_TOTAL_VESTING_REWARDS_MAX_ALLOWED = 2000
 
 @pytest.fixture(scope="module")
-def prepare_swap(deployer, adel, akro, vakro, stakingpool, testVakroSwap):
+def prepare_swap(deployer, adel, akro, vakro, stakingpool, testVakroSwap, testVakroVestingSwap):
     vakro.addMinter(testVakroSwap.address, {'from': deployer})
     vakro.addSender(testVakroSwap.address, {'from': deployer})
 
@@ -26,6 +26,12 @@ def prepare_swap(deployer, adel, akro, vakro, stakingpool, testVakroSwap):
     testVakroSwap.setSwapRate(ADEL_AKRO_RATE, 1, {'from': deployer})
     testVakroSwap.setStakingPool(stakingpool, {'from': deployer})
     testVakroSwap.setRewardStakingPool(NULL_ADDRESS, stakingpool, {'from': deployer})
+
+
+    vakro.addMinter(testVakroVestingSwap.address, {'from': deployer})
+    vakro.addSender(testVakroVestingSwap.address, {'from': deployer})
+
+    testVakroVestingSwap.setSwapRate(ADEL_AKRO_RATE, 1, {'from': deployer})
 
 def hexify(s):
     return s.encode("utf-8").hex()
@@ -303,60 +309,55 @@ def test_batch_creation(chain, deployer, akro, adel, vakro, rewardmodule, stakin
     locked, unlocked, unlockable = vakro.balanceInfoOf(regular_user4)
     assert locked == ADEL_TO_SWAP * ADEL_AKRO_RATE
 
-def test_swap_from_wallet_rewards(deployer, akro, adel, vakro, testVakroSwap, prepare_swap, regular_user):
+def test_swap_from_wallet_rewards(deployer, akro, adel, vakro, testVakroVestingSwap, prepare_swap, regular_user):
     # Save current balances
-    adel_on_swap_before = adel.balanceOf(testVakroSwap.address)
+    adel_on_swap_before = adel.balanceOf(testVakroVestingSwap.address)
     adel_user_before = adel.balanceOf(regular_user)
     vakro_user_before = vakro.balanceOf(regular_user)
-    adel_swapped_before = testVakroSwap.adelSwapped(regular_user)
-    adel_swapped_from_rewards_before = testVakroSwap.adelRewardsSwapped(regular_user)
+    adel_swapped_from_rewards_before = testVakroVestingSwap.adelRewardsSwapped(regular_user)
 
     # Perform swap from rewards (swaps beacause vested swap is enabled by default)
-    adel.approve(testVakroSwap.address, ADEL_WALLET_VESTING_REWARDS_TO_SWAP, {'from': regular_user})
-    testVakroSwap.swapFromAdelWalletRewards(ADEL_WALLET_VESTING_REWARDS_TO_SWAP, 0, ADEL_WALLET_VESTING_REWARDS_MAX_ALLOWED, [], {'from': regular_user})
+    adel.approve(testVakroVestingSwap.address, ADEL_WALLET_VESTING_REWARDS_TO_SWAP, {'from': regular_user})
+    testVakroVestingSwap.swapFromAdelWalletRewards(ADEL_WALLET_VESTING_REWARDS_TO_SWAP, 0, ADEL_WALLET_VESTING_REWARDS_MAX_ALLOWED, [], {'from': regular_user})
 
 
     # Check balances after
-    adel_on_swap_after = adel.balanceOf(testVakroSwap.address)
+    adel_on_swap_after = adel.balanceOf(testVakroVestingSwap.address)
     adel_user_after = adel.balanceOf(regular_user)
     vakro_user_after = vakro.balanceOf(regular_user)
-    adel_swapped_after = testVakroSwap.adelSwapped(regular_user)
-    adel_swapped_from_rewards_after = testVakroSwap.adelRewardsSwapped(regular_user)
+    adel_swapped_from_rewards_after = testVakroVestingSwap.adelRewardsSwapped(regular_user)
 
     # Check the results
 
     assert adel_on_swap_after == adel_on_swap_before + ADEL_WALLET_VESTING_REWARDS_TO_SWAP
     assert adel_user_before == adel_user_after + ADEL_WALLET_VESTING_REWARDS_TO_SWAP
     assert vakro_user_after == vakro_user_before + ADEL_WALLET_VESTING_REWARDS_TO_SWAP * ADEL_AKRO_RATE
-    assert adel_swapped_before == adel_swapped_after
     assert adel_swapped_from_rewards_after - adel_swapped_from_rewards_before == ADEL_WALLET_VESTING_REWARDS_TO_SWAP
 
-def test_swap_from_vesting_rewards(deployer, akro, adel, vakro, testVakroSwap, prepare_swap, regular_user2):
+def test_swap_from_vesting_rewards(deployer, akro, adel, vakro, testVakroVestingSwap, prepare_swap, regular_user2):
     # Save current balances
-    adel_on_swap_before = adel.balanceOf(testVakroSwap.address)
+    adel_on_swap_before = adel.balanceOf(testVakroVestingSwap.address)
     adel_user_before = adel.balanceOf(regular_user2)
     vakro_user_before = vakro.balanceOf(regular_user2)
-    adel_swapped_before = testVakroSwap.adelSwapped(regular_user2)
-    adel_swapped_from_rewards_before = testVakroSwap.adelRewardsSwapped(regular_user2)
+    adel_swapped_from_rewards_before = testVakroVestingSwap.adelRewardsSwapped(regular_user2)
 
-    testVakroSwap.toggleVestedSwap({'from': deployer})
+    testVakroVestingSwap.toggleVestedSwap({'from': deployer})
     # Check that swp cannot be performed
     with brownie.reverts():
-        testVakroSwap.swapFromAdelVestedRewards(0, ADEL_WALLET_VESTING_REWARDS_MAX_ALLOWED, [],
+        testVakroVestingSwap.swapFromAdelVestedRewards(0, ADEL_WALLET_VESTING_REWARDS_MAX_ALLOWED, [],
                                                 0, ADEL_TOTAL_VESTING_REWARDS_MAX_ALLOWED, [], {'from': regular_user2})
     # Enable again
-    testVakroSwap.toggleVestedSwap({'from': deployer})
+    testVakroVestingSwap.toggleVestedSwap({'from': deployer})
 
     # Perform swap from rewards
-    testVakroSwap.swapFromAdelVestedRewards(0, ADEL_WALLET_VESTING_REWARDS_MAX_ALLOWED, [],
+    testVakroVestingSwap.swapFromAdelVestedRewards(0, ADEL_WALLET_VESTING_REWARDS_MAX_ALLOWED, [],
                                             0, ADEL_TOTAL_VESTING_REWARDS_MAX_ALLOWED, [], {'from': regular_user2})
 
     # Check balances after
-    adel_on_swap_after = adel.balanceOf(testVakroSwap.address)
+    adel_on_swap_after = adel.balanceOf(testVakroVestingSwap.address)
     adel_user_after = adel.balanceOf(regular_user2)
     vakro_user_after = vakro.balanceOf(regular_user2)
-    adel_swapped_after = testVakroSwap.adelSwapped(regular_user2)
-    adel_swapped_from_rewards_after = testVakroSwap.adelRewardsSwapped(regular_user2)
+    adel_swapped_from_rewards_after = testVakroVestingSwap.adelRewardsSwapped(regular_user2)
 
     swapped_amount = ADEL_TOTAL_VESTING_REWARDS_MAX_ALLOWED - ADEL_WALLET_VESTING_REWARDS_MAX_ALLOWED
 
@@ -364,5 +365,4 @@ def test_swap_from_vesting_rewards(deployer, akro, adel, vakro, testVakroSwap, p
     assert adel_on_swap_after == adel_on_swap_before
     assert adel_user_before == adel_user_after
     assert vakro_user_after == vakro_user_before + swapped_amount * ADEL_AKRO_RATE
-    assert adel_swapped_before == adel_swapped_after
     assert adel_swapped_from_rewards_after - adel_swapped_from_rewards_before == swapped_amount
