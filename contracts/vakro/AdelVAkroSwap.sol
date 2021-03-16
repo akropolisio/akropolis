@@ -247,12 +247,11 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
         require(_merkleProofs.length > 0, "No Merkle proofs");
         require(_merkleRootIndex < merkleRoots.length, "Merkle roots are not set");
 
-
         bytes32 node = keccak256(abi.encodePacked(_account, _adelAllowedToSwap));
         return MerkleProofUpgradeable.verify(_merkleProofs, merkleRoots[_merkleRootIndex], node);
     }
 
-    /**
+    /**merkleRoots
      * @notice Returns the actual amount of ADEL swapped by a user
      * @param _account Address of a user
      */

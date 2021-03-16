@@ -1,7 +1,9 @@
 import pytest
 from brownie import accounts
+from brownie import Contract, project
 import sys
 import os
+import json
 
 from utils.deploy_helpers import deploy_proxy, deploy_admin, upgrade_proxy, get_proxy_admin
 
@@ -71,3 +73,15 @@ def akrostakingpool(env_settings, Contract):
 @pytest.fixture(scope="module")
 def vakroSwap(env_settings, Contract):
     yield Contract.from_explorer(os.getenv("MAINNET_SWAP_PROXY"), as_proxy_for=os.getenv("MAINNET_SWAP"))
+
+@pytest.fixture(scope="module")
+def vakroSwapUpdated(env_settings, owner, vakroSwap, AdelVAkroSwap, Contract):
+    proxy_admin = get_proxy_admin(os.getenv("MAINNET_PROXY_ADMIN"))
+
+    mainnet_swap_new_impl =  Contract.from_explorer(os.getenv("MAINNET_SWAP_NEW"))
+
+    proxy_admin.upgrade(vakroSwap, new_contract_impl.address, {'from': deployer})
+
+    vakroSwapUpdated = Contract.from_abi(AdelVAkroSwap._name, vakroSwap.address, AdelVAkroSwap.abi)
+
+    yield vakroSwapUpdated

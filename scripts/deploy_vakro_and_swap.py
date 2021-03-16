@@ -3,7 +3,7 @@ from dotenv import load_dotenv, find_dotenv
 from brownie import *
 #VestedAkro, AdelVAkroSwap, accounts, network, web3
 
-from utils.deploy_helpers import deploy_proxy, deploy_admin, get_proxy_admin, upgrade_proxy
+from utils.deploy_helpers import deploy_proxy, deploy_admin, get_proxy_admin, upgrade_proxy, deploy_proxy_over_impl
 
 def main():
     #load_dotenv(dotenv_path=Path('..')/".env", override=True)
@@ -58,13 +58,13 @@ def main():
         print(f"Vesting start: {rinkeby_vakro_start_date}")
         print(f"Vesting cliff: {rinkeby_vakro_cliff}")
 
-        
+        vakroSwapImpl = os.getenv("RINKEBY_VAKRO_SWAP")
         # Deploy Swap contract
-        vakroSwapImplFromProxy, vakroSwapProxy, vakroSwapImpl = deploy_proxy(deployer, proxy_admin, AdelVAkroSwap,
+        vakroSwapImplFromProxy, vakroSwapProxy = deploy_proxy_over_impl(deployer, proxy_admin, vakroSwapImpl, AdelVAkroSwap,
                                                                             rinkeby_akro_address, rinkeby_adel_address, vakroImplFromProxy.address)
 
         print(f"Swap proxy deployed at {vakroSwapProxy.address}")
-        print(f"Swap implementation deployed at {vakroSwapImpl.address}")
+        print(f"Swap implementation deployed at {vakroSwapImpl}")
 
         vakroSwapImplFromProxy.setSwapRate(rinkeby_swap_num, rinkeby_swap_denom, {'from': deployer})
         vakroSwapImplFromProxy.setStakingPool(rinkeby_adel_staking_address, {'from': deployer})
@@ -81,6 +81,23 @@ def main():
         vakroImplFromProxy.addSender(rinkeby_vakro_minter, {'from': deployer})
 
         print(f"{rinkeby_vakro_minter} added as minter and sender for vAkro")
+
+
+        # Deploy Vesting Swap contract
+        vakroVestingSwapImpl = os.getenv("RINKEBY_VAKRO_VESTING_SWAP")
+        vakroVestingSwapImplFromProxy, vakroVestingSwapProxy = deploy_proxy_over_impl(deployer, proxy_admin, vakroVestingSwapImpl, AdelVAkroVestingSwap,
+                                                                            rinkeby_akro_address, rinkeby_adel_address, vakroImplFromProxy.address)
+
+        print(f"Swap from vesting proxy deployed at {vakroVestingSwapProxy.address}")
+        print(f"Swap from vesting implementation deployed at {vakroVestingSwapImpl}")
+
+        vakroVestingSwapImplFromProxy.setSwapRate(rinkeby_swap_num, rinkeby_swap_denom, {'from': deployer})        
+
+        vakroImplFromProxy.addMinter(vakroVestingSwapImplFromProxy.address, {'from': deployer})
+        vakroImplFromProxy.addSender(vakroVestingSwapImplFromProxy.address, {'from': deployer})
+
+        print(f"Settings for Swap:")
+        print(f"swap rate: {rinkeby_swap_num / rinkeby_swap_denom}")
 
 
 

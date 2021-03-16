@@ -52,6 +52,7 @@ coverage.json
 
 # Standard and test contracts
 AddressUpgradeable.json
+Address.json
 Base.json
 CapperRole.json
 Context.json
