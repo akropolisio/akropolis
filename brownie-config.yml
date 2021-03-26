@@ -59,7 +59,7 @@ compiler:
   solc:
     version: 0.6.12
     remappings:
-      - "@yearnvaults=iearn-finance/yearn-vaults@0.3.0"
+      - "@yearnvaults=iearn-finance/yearn-vaults@0.3.4"
       - "@openzeppelin=OpenZeppelin/openzeppelin-contracts@3.3.0"
       - "@ozUpgradesV3=OpenZeppelin/openzeppelin-contracts-upgradeable@3.3.0"
     optimizer:

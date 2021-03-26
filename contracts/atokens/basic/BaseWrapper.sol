@@ -2,14 +2,11 @@
 pragma solidity ^0.6.12;
 pragma experimental ABIEncoderV2;
 
-import {IERC20Upgradeable} from "@ozUpgradesV3/contracts/token/ERC20/IERC20Upgradeable.sol";
-import {SafeERC20Upgradeable} from "@ozUpgradesV3/contracts/token/ERC20/SafeERC20Upgradeable.sol";
-import {AddressUpgradeable} from "@ozUpgradesV3/contracts/utils/AddressUpgradeable.sol";
-import {SafeMathUpgradeable} from "@ozUpgradesV3/contracts/math/SafeMathUpgradeable.sol";
-import {MathUpgradeable} from "@ozUpgradesV3/contracts/math/MathUpgradeable.sol";
-
-import {VaultAPI} from "./BaseStrategy.sol";
-import {Initializable} from "@ozUpgradesV3/contracts/proxy/Initializable.sol";
+import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
+import {Math} from "@openzeppelin/contracts/math/Math.sol";
+import {SafeMath} from "@openzeppelin/contracts/math/SafeMath.sol";
+import {VaultAPI} from "@yearnvaults/contracts/BaseStrategy.sol";
 
 interface RegistryAPI {
     function governance() external view returns (address);
@@ -21,13 +18,12 @@ interface RegistryAPI {
     function vaults(address token, uint256 deploymentId) external view returns (address);
 }
 
-abstract contract BaseWrapperUpgradeable is Initializable {
-    using MathUpgradeable for uint256;
-    using SafeMathUpgradeable for uint256;
-    using SafeERC20Upgradeable for IERC20Upgradeable;
-    using AddressUpgradeable for address;
+abstract contract BaseWrapper {
+    using Math for uint256;
+    using SafeMath for uint256;
+    using SafeERC20 for IERC20;
 
-    IERC20Upgradeable public token;
+    IERC20 public token;
 
     // Reduce number of external calls (SLOADs stay the same)
     VaultAPI[] private _cachedVaults;
@@ -44,9 +40,8 @@ abstract contract BaseWrapperUpgradeable is Initializable {
     // VaultsAPI.depositLimit is unlimited
     uint256 constant UNCAPPED_DEPOSITS = type(uint256).max;
 
-
-    function __BaseWrapper_init(address _token, address _registry) internal initializer {
-        token = IERC20Upgradeable(_token);
+    constructor(address _token, address _registry) public {
+        token = IERC20(_token);
         // v2.registry.ychad.eth
         registry = RegistryAPI(_registry);
     }
@@ -163,11 +158,11 @@ abstract contract BaseWrapperUpgradeable is Initializable {
             // Restrict by the allowance that `sender` has to this contract
             // NOTE: No need for allowance check if `sender` is this contract
             if (sender != address(this)) {
-                availableShares = MathUpgradeable.min(availableShares, vaults[id].allowance(sender, address(this)));
+                availableShares = Math.min(availableShares, vaults[id].allowance(sender, address(this)));
             }
 
             // Limit by maximum withdrawal size from each vault
-            availableShares = MathUpgradeable.min(availableShares, vaults[id].maxAvailableShares());
+            availableShares = Math.min(availableShares, vaults[id].maxAvailableShares());
 
             if (availableShares > 0) {
                 // Intermediate step to move shares to this contract before withdrawing
@@ -182,7 +177,7 @@ abstract contract BaseWrapperUpgradeable is Initializable {
                         .div(vaults[id].pricePerShare()); // NOTE: Every Vault is different
 
                     // Limit amount to withdraw to the maximum made available to this contract
-                    uint256 shares = MathUpgradeable.min(estimatedShares, availableShares);
+                    uint256 shares = Math.min(estimatedShares, availableShares);
                     withdrawn = withdrawn.add(vaults[id].withdraw(shares));
                 } else {
                     withdrawn = withdrawn.add(vaults[id].withdraw());
