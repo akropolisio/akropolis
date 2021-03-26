@@ -78,16 +78,17 @@ def test_deposit(token, registry, vault, affiliate_token, gov, rando):
     assert vault.balanceOf(rando) == 0
 
 
-'''
-def test_migrate(token, registry, create_vault, affiliate_token, gov, rando, affiliate):
-    vault1 = create_vault(version="1.0.0", token=token)
-    registry.newRelease(vault1, {"from": gov})
-    registry.endorseVault(vault1, {"from": gov})
+
+def test_migrate(token, registry, affiliate_token, gov, rando, affiliate, create_vault):
+    vault = create_vault(version="1.0.0", token=token)
+    registry.newRelease(vault, {"from": gov})
+    registry.endorseVault(vault, {"from": gov})
     token.transfer(rando, 10000, {"from": gov})
     token.approve(affiliate_token, 10000, {"from": rando})
     affiliate_token.deposit(10000, {"from": rando})
     assert affiliate_token.balanceOf(rando) == 10000
-    assert vault1.balanceOf(affiliate_token) == 10000
+    assert vault.balanceOf(affiliate_token) == 10000
+
 
     vault2 = create_vault(version="2.0.0", token=token)
     registry.newRelease(vault2, {"from": gov})
@@ -99,9 +100,9 @@ def test_migrate(token, registry, create_vault, affiliate_token, gov, rando, aff
     # Only affiliate can call this method
     affiliate_token.migrate({"from": affiliate})
     assert affiliate_token.balanceOf(rando) == 10000
-    assert vault1.balanceOf(affiliate_token) == 0
+    assert vault.balanceOf(affiliate_token) == 0
     assert vault2.balanceOf(affiliate_token) == 10000
-'''
+
 
 def test_transfer(token, registry, vault, affiliate_token, gov, rando, affiliate):
     registry.newRelease(vault, {"from": gov})
@@ -129,8 +130,6 @@ def test_withdraw(token, registry, vault, affiliate_token, gov, rando):
     assert affiliate_token.balanceOf(rando) == 0
     assert token.balanceOf(rando) == 10000
 
-
-'''
 def test_permit(chain, rando, affiliate_token, sign_token_permit):
     owner = Account.create()
     deadline = chain[-1].timestamp + 3600
@@ -138,6 +137,7 @@ def test_permit(chain, rando, affiliate_token, sign_token_permit):
         affiliate_token, owner, str(rando), allowance=AMOUNT, deadline=deadline
     )
     assert affiliate_token.allowance(owner.address, rando) == 0
+    
     affiliate_token.permit(
         owner.address,
         rando,
@@ -148,5 +148,5 @@ def test_permit(chain, rando, affiliate_token, sign_token_permit):
         signature.s,
         {"from": rando},
     )
+    
     assert affiliate_token.allowance(owner.address, rando) == AMOUNT
-'''
