@@ -132,6 +132,31 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
     }
 
     /**
+     * @notice Burns locked token from the user by the Minter
+     * @param sender User to burn tokens from
+     * @param amount Amount to burn
+     */
+    function burnFrom(address sender, uint256 amount) public onlyMinter {
+        require(amount > 0, "Incorrect amount");
+        require(sender != address(0), "Zero address");
+
+        require(block.timestamp <= vestingStart, "Vesting has started");
+
+        Balance storage b = holders[sender];
+
+        require(b.locked >= amount, "Insufficient vAkro");
+        require(b.batches.length > 0 || b.firstUnclaimedBatch < b.batches.length, "Nothing to burn");
+
+        totalSupply = totalSupply.sub(amount);
+        b.locked = b.locked.sub(amount);
+
+        uint256 batchAmount = b.batches[b.firstUnclaimedBatch].amount;
+        b.batches[b.firstUnclaimedBatch].amount = batchAmount.sub(amount);
+
+        emit Transfer(sender, address(0), amount);
+    }
+
+    /**
      * @notice Adds AKRO liquidity to the swap contract
      * @param _amount Amout of AKRO added to the contract.
      */
