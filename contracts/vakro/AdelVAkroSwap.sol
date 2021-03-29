@@ -283,7 +283,7 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
         swappedAdel[_msgSender()][0] = 0;
         swappedAdel[_msgSender()][1] = 0;
         swappedAdel[_msgSender()][2] = 0;
-        IERC20Upgradeable(vakro).safeTransferFrom(_msgSender(), address(this), vAkroCalculated);
+        IERC20Burnable(vakro).burnFrom(_msgSender(), vAkroCalculated);
         IERC20Upgradeable(adel).safeTransfer(_msgSender(), _adelToReverse);
 
         emit AdelReturned(_msgSender(), _adelToReverse, vAkroCalculated);
