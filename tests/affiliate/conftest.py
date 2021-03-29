@@ -161,6 +161,24 @@ def affiliate_token(token, affiliate, registry, AffiliateToken):
         f"af{token.symbol()}",
     )
 
+@pytest.fixture(scope="function")
+def affiliate_by_proxy(token, affiliate, proxy_admin, registry, AffiliateTokenUpgradeable):
+
+    affiliateTokenImplFromProxy, affiliateTokenProxy, affiliateTokenImpl = deploy_proxy(
+        affiliate, 
+        proxy_admin, 
+        AffiliateTokenUpgradeable,
+        token,
+        registry,
+        f"Affiliate {token.symbol()}",
+        f"af{token.symbol()}")
+
+    assert affiliateTokenProxy.admin.call({"from":proxy_admin.address}) == proxy_admin.address
+    assert affiliateTokenProxy.implementation.call({"from":proxy_admin.address}) == affiliateTokenImpl.address
+
+    yield affiliateTokenImplFromProxy
+
+
 
 @pytest.fixture(scope="function")
 def register_vault_in_system(deployer, gov, token, vault, strategy, registry):
