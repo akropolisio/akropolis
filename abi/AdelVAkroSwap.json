@@ -21,6 +21,31 @@
         "type": "uint256"
       }
     ],
+    "name": "AdelReturned",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "receiver",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "adelAmount",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "akroAmount",
+        "type": "uint256"
+      }
+    ],
     "name": "AdelSwapped",
     "type": "event"
   },
@@ -218,6 +243,24 @@
   {
     "inputs": [
       {
+        "internalType": "uint256",
+        "name": "_swapRateNumerator",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_swapRateDenominator",
+        "type": "uint256"
+      }
+    ],
+    "name": "setReverseSwapRate",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "internalType": "address",
         "name": "_rewardAkroPool",
         "type": "address"
@@ -378,6 +421,39 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "swapReverseAdel",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "swapToAdelRateDenominator",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "swapToAdelRateNumerator",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -470,6 +546,19 @@
       }
     ],
     "name": "withdrawAdel",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_recepient",
+        "type": "address"
+      }
+    ],
+    "name": "withdrawVAkro",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
