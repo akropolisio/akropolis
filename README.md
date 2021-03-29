@@ -1,6 +1,6 @@
-# Akropolis+Yearn 
+# Akropolis
 
-Solidity contracts used in [Akropolis Delphi](https://delphi.akropolis.io/) yearn pools.
+Solidity contracts used in [Akropolis](https://akropolis.io/) yearn pools.
 
 
 ## Testing and Development
@@ -18,7 +18,7 @@ Delphi contracts are compiled using [Solidity], however installation of the requ
 To get started, first create and initialize a Python [virtual environment](https://docs.python.org/3/library/venv.html). Next, clone the repo and install the developer dependencies:
 
 ```bash
-git clone https://github.com/akropolisio/delphi-yearn.git
+git clone https://github.com/akropolisio/akropolis.git
 cd contracts
 pip install -r requirements.txt
 ```
