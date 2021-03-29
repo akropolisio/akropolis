@@ -79,7 +79,7 @@ def vault2(deployer, rewards, token2, TestVaultV2):
 
 
 def prepare_strategy(strategist, deployer, vault, token, investment, StubStrategyV2):
-    strategy = strategist.deploy(StubStrategyV2, vault, investment, STUB_YIELD)
+    strategy = strategist.deploy(StubStrategyV2, vault, investment, 1_000)
     token.approve(strategy, 10**18, {"from":investment})
     strategy.setKeeper(strategist, {"from": strategist})
 
@@ -129,19 +129,20 @@ def vaultSavings(deployer, proxy_admin, VaultSavingsV2):
 def register_vault_in_system(deployer, governance, token, vault, strategy, registry):
     assert registry.vaults(token.address, 0) == NULL_ADDRESS
     registry.newRelease(vault.address, {'from': deployer})
+    registry.endorseVault(vault.address, {"from": deployer})
     assert registry.vaults(token.address, 0) == vault.address
     
-    vault.addStrategy(strategy, STRAT_DEBT_RATIO, STRAT_OPERATION_LIMIT, STRAT_OPERATION_FEE, {"from": governance})
+    vault.addStrategy(strategy, 1_000, 10_000, 10_000, 1_000, {"from": governance})
 
 @pytest.fixture(scope="function")
 def vault_add_second_strategy(deployer, governance, token, vault, strategy2, registry):    
-    vault.addStrategy(strategy2, STRAT_DEBT_RATIO, STRAT_OPERATION_LIMIT, STRAT_OPERATION_FEE, {"from": governance})
+    vault.addStrategy(strategy2, 1_000, 10_000, 10_000, 1_000, {"from": governance})
 
 @pytest.fixture(scope="function")
 def register_vault2_in_system(deployer, governance, token2, vault2, strategy_vault2, registry):
     registry.endorseVault(vault2.address, {'from': deployer})
     
-    vault2.addStrategy(strategy_vault2, STRAT_DEBT_RATIO, STRAT_OPERATION_LIMIT, STRAT_OPERATION_FEE, {"from": governance})
+    vault2.addStrategy(strategy_vault2, 1_000, 10_000, 10_000, 1_000, {"from": governance})
 
 
 @pytest.fixture(scope="module")

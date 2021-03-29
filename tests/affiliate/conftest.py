@@ -110,33 +110,6 @@ def vault2(token, create_vault, gov):
     vault = create_vault(version="2.0.0", governance=gov)
     yield vault
 
-
-def prepare_strategy(strategist, deployer, vault, token, investment, StubStrategyV2):
-    strategy = strategist.deploy(StubStrategyV2, vault, investment, STUB_YIELD)
-    token.approve(strategy, 10**18, {"from":investment})
-    strategy.setKeeper(strategist, {"from": strategist})
-
-    return strategy
-
-@pytest.fixture(scope="function")
-def strategy(strategist, deployer, vault, token, investment, StubStrategyV2):
-    strategy = prepare_strategy(strategist, deployer, vault, token, investment, StubStrategyV2)
-
-    yield strategy
-
-
-@pytest.fixture(scope="function")
-def strategy_vault2(strategist, deployer, vault2, token2, investment2, StubStrategyV2):
-    strategy = prepare_strategy(strategist, deployer, vault2, token2, investment2, StubStrategyV2)
-
-    yield strategy
-
-@pytest.fixture(scope="function")
-def strategy2(strategist, deployer, vault, token, investment2, StubStrategyV2):
-    strategy = prepare_strategy(strategist, deployer, vault, token, investment2, StubStrategyV2)
-
-    yield strategy
-
 @pytest.fixture(scope="function")
 def registry(deployer, gov, TestRegistryV2):
     registry = deployer.deploy(TestRegistryV2)
@@ -177,26 +150,6 @@ def affiliate_by_proxy(token, affiliate, proxy_admin, registry, AffiliateTokenUp
     assert affiliateTokenProxy.implementation.call({"from":proxy_admin.address}) == affiliateTokenImpl.address
 
     yield affiliateTokenImplFromProxy
-
-
-
-@pytest.fixture(scope="function")
-def register_vault_in_system(deployer, gov, token, vault, strategy, registry):
-    assert registry.vaults(token.address, 0) == NULL_ADDRESS
-    registry.newRelease(vault.address, {'from': deployer})
-    assert registry.vaults(token.address, 0) == vault.address
-    
-    vault.addStrategy(strategy, STRAT_DEBT_RATIO, STRAT_OPERATION_LIMIT, STRAT_OPERATION_FEE, {"from": gov})
-
-@pytest.fixture(scope="function")
-def vault_add_second_strategy(deployer, gov, token, vault, strategy2, registry):    
-    vault.addStrategy(strategy2, STRAT_DEBT_RATIO, STRAT_OPERATION_LIMIT, STRAT_OPERATION_FEE, {"from": gov})
-
-@pytest.fixture(scope="function")
-def register_vault2_in_system(deployer, gov, token2, vault2, strategy_vault2, registry):
-    registry.endorseVault(vault2.address, {'from': deployer})
-    
-    vault2.addStrategy(strategy_vault2, STRAT_DEBT_RATIO, STRAT_OPERATION_LIMIT, STRAT_OPERATION_FEE, {"from": gov})
 
 @pytest.fixture
 def sign_token_permit():

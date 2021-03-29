@@ -87,13 +87,12 @@ def vaultSavings(deployer, proxy_admin, VaultSavingsV2):
 NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
 
 @pytest.fixture(scope="module")
-def register_vault(deployer, token, vault, strategy, controller, registry, vaultSavings):
-    controller.setVault(token.address, vault.address, {'from': deployer})
-    controller.approveStrategy(token.address, strategy.address, {'from': deployer})
-    controller.setStrategy(token.address, strategy.address, {'from': deployer})
-
+def register_vault(deployer, token, vault, strategy, registry, vaultSavings):
+  
     assert registry.vaults(token.address, 0) == NULL_ADDRESS
     registry.newRelease(vault.address, {'from': deployer})
+    registry.endorseVault(vault.address, {"from": deployer})
+
     assert registry.vaults(token.address, 0) == vault.address
 
     vaultSavings.registerVault(vault.address, {'from': deployer})
