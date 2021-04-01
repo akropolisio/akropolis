@@ -12,7 +12,7 @@ def _flattener(contracts_to_flatten):
 
 
 def main():
-    contracts_to_flatten = [VaultSavings, VestedAkro, AdelVAkroSwap, AdelVAkroVestingSwap, UtilProxy, UtilProxyAdmin]
+    contracts_to_flatten = [AffiliateTokenUpgradeable, VaultSavings, VestedAkro, AdelVAkroSwap, AdelVAkroVestingSwap, UtilProxy, UtilProxyAdmin]
     _flattener(contracts_to_flatten)
 
 

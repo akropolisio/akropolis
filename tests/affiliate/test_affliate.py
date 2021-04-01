@@ -4,6 +4,7 @@ import pytest
 from eth_account import Account
 
 AMOUNT = 100
+MAX_UINT_256 =  2**256-1
 
 @pytest.fixture(scope="module")
 def register_vault(gov, token, vault, strategy, registry):
@@ -74,6 +75,19 @@ def test_deposit(token, registry, vault, affiliate_token, gov, rando):
     # NOTE: Must approve affiliate_token to deposit
     token.approve(affiliate_token, 10000, {"from": rando})
     affiliate_token.deposit(10000, {"from": rando})
+    assert affiliate_token.balanceOf(rando) == 10000
+    assert vault.balanceOf(rando) == 0
+
+def test_deposit_max_uint256(token, registry, vault, affiliate_token, gov, rando):
+    registry.newRelease(vault, {"from": gov})
+    registry.endorseVault(vault, {"from": gov})
+    token.transfer(rando, 10000, {"from": gov})
+    assert affiliate_token.balanceOf(rando) == vault.balanceOf(rando) == 0
+
+    # NOTE: Must approve affiliate_token to deposit
+    token.approve(affiliate_token, 2**256-1, {"from": rando})
+
+    affiliate_token.deposit({"from": rando})
     assert affiliate_token.balanceOf(rando) == 10000
     assert vault.balanceOf(rando) == 0
 

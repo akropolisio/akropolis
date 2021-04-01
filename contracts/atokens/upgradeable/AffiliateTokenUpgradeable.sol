@@ -76,7 +76,7 @@ contract AffiliateTokenUpgradeable is ERC20Upgradeable, BaseWrapperUpgradeable {
     }
 
     function _sharesForValue(uint256 amount) internal view returns (uint256) {
-        uint256 totalWrapperAssets = totalVaultBalance(address(this));
+        uint256 totalWrapperAssets = totalVaultBalance(address(this)) - amount; //total wrapper assets before deposit
 
         if (totalWrapperAssets > 0) {
             return totalSupply().mul(amount).div(totalWrapperAssets);
@@ -90,8 +90,8 @@ contract AffiliateTokenUpgradeable is ERC20Upgradeable, BaseWrapperUpgradeable {
     }
 
     function deposit(uint256 amount) public returns (uint256 deposited) {
-        uint256 shares = _sharesForValue(amount); // NOTE: Must be calculated before deposit is handled
         deposited = _deposit(msg.sender, address(this), amount, true); // `true` = pull from `msg.sender`
+        uint256 shares = _sharesForValue(deposited);
         _mint(msg.sender, shares);
     }
 

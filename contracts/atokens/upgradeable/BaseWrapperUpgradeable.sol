@@ -113,7 +113,12 @@ abstract contract BaseWrapperUpgradeable is Initializable {
         VaultAPI _bestVault = bestVault();
 
         if (pullFunds) {
-            token.safeTransferFrom(depositor, address(this), amount);
+
+            if (amount != DEPOSIT_EVERYTHING) {
+                token.safeTransferFrom(depositor, address(this), amount);
+            } else {
+                token.safeTransferFrom(depositor, address(this), token.balanceOf(depositor));
+            }
         }
 
         if (token.allowance(address(this), address(_bestVault)) < amount) {
