@@ -7,6 +7,8 @@ from constantsV2 import *
 def register_vault(deployer, token, vault, strategy, registry, vaultSavings):
     assert registry.vaults(token.address, 0) == NULL_ADDRESS
     registry.newRelease(vault.address, {'from': deployer})
+    registry.endorseVault(vault.address, {"from": deployer})
+    
     assert registry.vaults(token.address, 0) == vault.address
 
     vaultSavings.registerVault(vault.address, {'from': deployer})

@@ -65,7 +65,7 @@ def test_deposit(register_vault, token, vault, vaultSavings, regular_user, deplo
 
     # For test vault - custom logic
     assert vault.available() == DEPOSIT_VALUE * vault.min() // vault.max()
-    assert vault.balance() == DEPOSIT_VALUE
+    assert token.balanceOf(vault) == DEPOSIT_VALUE
 
 
 def test_earn():

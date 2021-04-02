@@ -54,7 +54,7 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
         require(_vakro != address(0), "Zero address");
 
         __Ownable_init();
-
+        
         akro = _akro;
         adel = _adel;
         vakro = _vakro;
