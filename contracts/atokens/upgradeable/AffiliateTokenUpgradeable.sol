@@ -72,7 +72,7 @@ contract AffiliateTokenUpgradeable is ERC20Upgradeable, BaseWrapperUpgradeable {
     }
 
     function pricePerShare() external view returns (uint256) {
-        return 10**uint256(decimals());
+        return totalVaultBalance(address(this)).mul(10**uint256(decimals())).div(totalSupply());
     }
 
     function _sharesForValue(uint256 amount) internal view returns (uint256) {
