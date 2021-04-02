@@ -370,6 +370,7 @@ def test_swap_from_vesting_rewards(deployer, akro, adel, vakro, testVakroVesting
 
 
 def test_reverse_swap(chain, deployer, akro, adel, vakro, testVakroSwap, prepare_swap, regular_user2, regular_user5):
+    testVakroSwap.setSwapRate(ADEL_AKRO_RATE, 1, {'from': deployer})
 
     vakro.setVestingStart(chain.time() + 100, {'from' : deployer})
     testVakroSwap.withdrawAdel(deployer.address, {'from' : deployer})
