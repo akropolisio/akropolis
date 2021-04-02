@@ -41,6 +41,9 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
     uint256 public swapToAdelRateNumerator;   //Amount of 1 vAkro for 1 ADEL - 0 by default
     uint256 public swapToAdelRateDenominator; // for reverse swap
 
+    mapping (address => uint256) public swappedUsersTimestamps;
+    uint256 public swapRateChangeTimestamp;
+
     event AdelReturned(address indexed receiver, uint256 adelAmount, uint256 akroAmount);
 
     modifier swapEnabled() {
@@ -110,6 +113,8 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
         require(_swapRateDenominator > 0, "Incorrect value");
         swapRateNumerator = _swapRateNumerator;
         swapRateDenominator = _swapRateDenominator;
+
+        swapRateChangeTimestamp = block.timestamp;
     }
 
     /**
@@ -120,6 +125,7 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
      */
     function setReverseSwapRate(uint256 _swapRateNumerator, uint256 _swapRateDenominator) external onlyOwner {
         require(_swapRateDenominator > 0, "Incorrect value");
+
         swapToAdelRateNumerator = _swapRateNumerator;
         swapToAdelRateDenominator = _swapRateDenominator;
     }
@@ -270,6 +276,10 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
     function swapReverseAdel()
         external nonReentrant reverseSwapEnabled
     {
+        require(swapRateChangeTimestamp == 0 ||
+                 swappedUsersTimestamps[_msgSender()] <= swapRateChangeTimestamp, 
+                 "User is not elligible for reverse swap");
+
         uint256 _adelToReverse = adelSwapped(_msgSender());
         require(_adelToReverse > 0, "User hasn't swapped ADEL");
 
@@ -352,5 +362,7 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
 
         if (adelChange > 0)
             IERC20Upgradeable(adel).safeTransfer(_msgSender(), adelChange);
+
+        swappedUsersTimestamps[_msgSender()] = block.timestamp;
     }
 }
