@@ -43,7 +43,7 @@ def deploy_proxy_over_impl(deployer, proxy_admin, implementation_address, ImplCo
     cur_project = project.get_loaded_projects()[0]
 
     #Already have the implementation
-    contract_impl = deployer.deploy(ImplContract)
+    contract_impl = Contract.from_abi(ImplContract._name, implementation_address, ImplContract.abi)
 
     #Deploy proxy next
     initializer_data = contract_impl.initialize.encode_input(*args)
