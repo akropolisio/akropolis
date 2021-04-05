@@ -209,8 +209,8 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
     }
 
     /**
-     * @notice Redeem all already unlocked vAKRO
-     * @return Amount redeemed
+     * @notice Redeem all already unlocked vAKRO. Sends AKRO by the set up rate
+     * @return Amount vAkro redeemed
      */
     function redeemAllUnlocked() public returns(uint256){
         address beneficiary = _msgSender();
