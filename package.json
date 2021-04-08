@@ -24,7 +24,8 @@
         "sec:echidna": "sh ./security/echidna/echidna-run.sh",
         "test": "brownie test",
         "test:add-fork": "brownie networks add Ethereum mainnet-test host=$ALCHEMY_ARCHIVE_NODE chainid=1 explorer=https://api.etherscan.io/api",
-        "test:swap-mainnet": "brownie test tests-mainnet/test_vakro_mainnet_fork.py --network mainnet-fork"
+        "test:swap-mainnet": "brownie test tests-mainnet/vakro/test_vakro_mainnet_fork.py --network mainnet-fork",
+        "test:indices-mainnet": "brownie test tests-mainnet/indices/test_swap.py --network mainnet-fork"
     },
     "dependencies": {
         "@openzeppelin/cli": "^2.8.2",

@@ -9,31 +9,31 @@ MAINNET_NETWORK_ID = 1
 
 def sushi_router():
     if network.chain.id == MAINNET_NETWORK_ID:
-        return "0xd9e1cE17f2641f24aE83637ab66a2cca9C378B9F"
+        return os.getenv("MAINNET_SUSHI_ROUTER")
     raise "unknown network"
 
 def PIPT():
     if network.chain.id == MAINNET_NETWORK_ID:
-        return "0x26607aC599266b21d13c7aCF7942c7701a8b699c"
+        return os.getenv("MAINNET_PIPT")
     raise "unknown network"
 
 def YETI():
     if network.chain.id == MAINNET_NETWORK_ID:
-        return "0xb4bebD34f6DaaFd808f73De0d10235a92Fbb6c3D"
+        return os.getenv("MAINNET_YETI")
     raise "unknown network"
 
 def ASSY():
     if network.chain.id == MAINNET_NETWORK_ID:
-        return "0xFA2562da1Bba7B954f26C74725dF51fb62646313"
+        return os.getenv("MAINNET_ASSY")
     raise "unknown network"
 
 def YLA():
     if network.chain.id == MAINNET_NETWORK_ID:
-        return "0x9ba60bA98413A60dB4C651D4afE5C937bbD8044B"
+        return os.getenv("MAINNET_YLA")
     raise "unknown network"
 
 def main():
-    #load_dotenv(dotenv_path=Path('..')/".env", override=True)
+    load_dotenv(dotenv_path="./.env", override=True)
         
     load_dotenv(find_dotenv())
 
