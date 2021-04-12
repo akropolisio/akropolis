@@ -32,6 +32,10 @@ def akro_staking_owner(env_settings, accounts):
     yield owner_addr
 
 @pytest.fixture(scope="module")
+def proxy_admin(env_settings, accounts):
+    yield os.getenv("MAINNET_PROXY_ADMIN")
+
+@pytest.fixture(scope="module")
 def regular_user(accounts):
     yield accounts[1]
 
@@ -51,6 +55,10 @@ def regular_user4(accounts):
 @pytest.fixture(scope="module")
 def akro(env_settings, Contract):
     yield Contract.from_explorer(os.getenv("MAINNET_AKRO_PROXY"), as_proxy_for=os.getenv("MAINNET_AKRO"))
+
+@pytest.fixture(scope="module")
+def akroowner(env_settings):
+    yield os.getenv("MAINNET_AKRO_OWNER")
 
 
 @pytest.fixture(scope="module")
@@ -75,13 +83,8 @@ def vakroSwap(env_settings, Contract):
     yield Contract.from_explorer(os.getenv("MAINNET_SWAP_PROXY"), as_proxy_for=os.getenv("MAINNET_SWAP"))
 
 @pytest.fixture(scope="module")
-def vakroSwapUpdated(env_settings, owner, vakroSwap, AdelVAkroSwap, Contract):
-    proxy_admin = get_proxy_admin(os.getenv("MAINNET_PROXY_ADMIN"))
+def vakroVestingSwap(env_settings, owner, proxy_admin, AdelVAkroVestingSwap, akro, adel, vakro):
+    vakroVestingSwapImplFromProxy, vakroVestingSwapProxy, vakroVestingSwapImpl = deploy_proxy(owner, proxy_admin, AdelVAkroVestingSwap,
+                                                                            akro.address, adel.address, vakro.address)
+    yield vakroVestingSwapImplFromProxy
 
-    mainnet_swap_new_impl =  Contract.from_explorer(os.getenv("MAINNET_SWAP_NEW"))
-
-    proxy_admin.upgrade(vakroSwap, new_contract_impl.address, {'from': deployer})
-
-    vakroSwapUpdated = Contract.from_abi(AdelVAkroSwap._name, vakroSwap.address, AdelVAkroSwap.abi)
-
-    yield vakroSwapUpdated

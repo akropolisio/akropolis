@@ -15,7 +15,7 @@
         "ganache": "npx ganache-cli --gasLimit 0xfffffffffff -e 100000000 --port 8545",
         "generate-abi": "npx truffle-abi -o ./abi",
         "generate-artifacts": "npm run compile && npm run generate-abi",
-        "install": "pip install -r requirements-dev.txt",
+        "install": "pip3 install -r requirements-dev.txt",
         "postinstall": "npm run clone-packages && npm run generate-artifacts",
         "sec:flatten": "sh ./security/flattener-run.sh",
         "sec:slither": "sh ./security/slither/slither-run.sh",

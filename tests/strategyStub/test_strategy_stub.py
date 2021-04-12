@@ -47,9 +47,6 @@ def strategy(strategist, deployer, vault, token, investment, StubStrategyV2):
 
     assert not strategy.emergencyExit()
 
-    # Should not trigger until it is approved
-    assert not strategy.harvestTrigger(0)
-    assert not strategy.tendTrigger(0)
     yield strategy
 
 def test_vault_setup_strategy(chain, vault, strategy, token, investment, deployer, strategist, governance, rewards, regular_user):
