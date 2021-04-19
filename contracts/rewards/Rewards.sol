@@ -30,6 +30,10 @@ contract Rewards is OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgr
         _;
     }
 
+    /**
+     * @param _token Token in which rewards will be paid
+     * if_succeeds {:msg "you must specify token"} _token != address(0);
+     */
     function initialize(address _token) virtual public initializer {
         __Ownable_init();
         __Pausable_init();
@@ -49,6 +53,7 @@ contract Rewards is OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgr
     /**
      * @notice Sets the Merkle roots
      * @param _merkleRoots Array of hashes
+     * if_succeeds {:msg "merkle root not updated"} merkleRoots.length == _merkleRoots.length;
      */
     function setMerkleRoots(bytes32[] memory _merkleRoots) external onlyOwner {
         require(_merkleRoots.length > 0, "Incorrect data");
@@ -62,6 +67,7 @@ contract Rewards is OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgr
     /**
      * @notice Withdraws all tokens collected on a Rewards contract
      * @param _recipient Recepient of token.
+     * if_succeeds {:msg "you must specify recipient"} _recipient != address(0);
      */
     function withdrawToken(address _recipient) external onlyOwner {
         require(_recipient != address(0), "Zero address");
@@ -74,6 +80,12 @@ contract Rewards is OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgr
      * @param _merkleRootIndex Index of a merkle root to be used for calculations
      * @param _amountAllowedToClaim Maximum token allowed for a user to swap
      * @param _merkleProofs Array of consiquent merkle hashes
+     * if_succeeds {:msg "wrong _merkleRootIndex"} _merkleRootIndex >= 0 && _merkleRootIndex < merkleRoots.length;
+     * if_succeeds {:msg "wrong _amountAllowedToClaim"} _amountAllowedToClaim > 0;
+     * if_succeeds {:msg "wrong _merkleProofs"} _merkleProofs.length > 0;
+     * if_succeeds {:msg "reward not paid"} old(token.balanceOf(address(this))) - (_amountAllowedToClaim - old(claimed[_msgSender()])) == token.balanceOf(address(this));
+     * if_succeeds {:msg "reward not paid"} old(token.balanceOf(_msgSender())) + (_amountAllowedToClaim - old(claimed[_msgSender()])) == token.balanceOf(_msgSender());
+     * if_succeeds {:msg "no data about receiving a reward is saved"} old(claimed[_msgSender()]) + (_amountAllowedToClaim - old(claimed[_msgSender()])) == claimed[_msgSender()];
      */
     function claim(
         uint256 _merkleRootIndex,
@@ -96,6 +108,9 @@ contract Rewards is OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgr
      * @param _merkleRootIndex Index of a merkle root to be used for calculations
      * @param _amountAllowedToClaim Maximum ADEL allowed for a user to swap
      * @param _merkleProofs Array of consiquent merkle hashes
+     * if_succeeds {:msg "you must specify account"} _account != address(0);
+     * if_succeeds {:msg "wrong merkleRootIndex"} _merkleRootIndex >= 0 && _merkleRootIndex < merkleRoots.length;
+     * if-succeeds {:msg "wrong amountAllowedToClaim"} _amountAllowedToClaim > 0;
      */
     function verifyMerkleProofs(
         address _account,
@@ -112,6 +127,7 @@ contract Rewards is OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgr
 
     /**
      * @notice Called by the owner to pause, deny claim reward
+     * if_succeeds {:msg "not paused"} paused() == true;
      */
     function pause() onlyOwner whenNotPaused external {
         _pause();
@@ -119,6 +135,7 @@ contract Rewards is OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgr
 
     /**
      * @notice Called by the owner to unpause, allow claim reward
+     * if_succeeds {:msg "paused"} paused() == false;
      */
     function unpause() onlyOwner whenPaused external {
         _unpause();
