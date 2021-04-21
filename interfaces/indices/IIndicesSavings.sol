@@ -40,7 +40,7 @@ interface IIndicesSavings {
         uint256 _amountIn,
         uint256 _amountOutMin,
         address[] calldata _path
-    ) external payable;
+    ) external;
 
     function buy(
         address[] calldata _lpIndices,

@@ -131,7 +131,7 @@ contract IndicesSavings is IIndicesSavings, OwnableUpgradeable, ReentrancyGuardU
         uint256 _amountIn,
         uint256 _amountOutMin,
         address[] calldata _path
-    ) public payable override nonReentrant whenNotPaused {
+    ) external payable override nonReentrant whenNotPaused {
         _buy(IERC20(_lpIndex), IERC20(_tokenIn), _amountIn, _amountOutMin, _path);
     }
 
@@ -141,7 +141,7 @@ contract IndicesSavings is IIndicesSavings, OwnableUpgradeable, ReentrancyGuardU
         uint256 _amountIn,
         uint256 _amountOutMin,
         address[] calldata _path
-    ) public payable override nonReentrant whenNotPaused {
+    ) external override nonReentrant whenNotPaused {
         _sell(IERC20(_lpIndex), IERC20(_tokenOut), _amountIn, _amountOutMin, _path);
     }
 
