@@ -38,13 +38,27 @@ contract IndicesSavings is IIndicesSavings, OwnableUpgradeable, ReentrancyGuardU
     mapping(address => IndexInfo) indices;
     IHelperWETH internal helperWETH;
 
+    /// if_succeeds {:msg "Wrong helper"} _helperWETH != address(0);
     function initialize(address _helperWETH) public initializer {
         __Ownable_init();
         __ReentrancyGuard_init();
         __Pausable_init();
+        require(_helperWETH != address(0), "Wrong helper");
         helperWETH = IHelperWETH(_helperWETH);
     }
 
+    /// if_succeeds {:msg "wrong index"} address(_lpIndex) != address(0);
+    /// if_succeeds {:msg "wrong token"} address(_tokenIn) != address(0);
+    /// if_succeeds {:msg "wrong amount in"} _amountIn > 0;
+    /// if_succeeds {:msg "wrong amount out"} _amountOutMin > 0;
+    /// if_succeeds {:msg "wrong path"} _path.length > 0;
+    /// if_succeeds {:msg "not paid or paid extra"} old(IERC20(_lpIndex).balanceOf(address(this))) == IERC20(_lpIndex).balanceOf(address(this));
+    /// if_succeeds {:msg "not paid or paid extra"} !(UniversalERC20.isETH(_tokenIn)) ==> old(UniversalERC20.isETH(_tokenIn) ? 0 : IERC20(_tokenIn).balanceOf(address(this))) == IERC20(_tokenIn).balanceOf(address(this));
+    /// if_succeeds {:msg "not paid or paid extra"} (UniversalERC20.isETH(_tokenIn)) ==> old(UniversalERC20.isETH(_tokenIn) ? 0 : address(this).balance) == address(this).balance;
+    /// if_succeeds {:msg "not paid or paid extra"} old(IERC20(_lpIndex).balanceOf(address(msg.sender))) < IERC20(_lpIndex).balanceOf(address(msg.sender));
+    /// if_succeeds {:msg "not paid or paid extra"} old(IERC20(_lpIndex).balanceOf(address(msg.sender))) + _amountOutMin <= IERC20(_lpIndex).balanceOf(address(msg.sender));
+    /// if_succeeds {:msg "not paid or paid extra"} !(UniversalERC20.isETH(_tokenIn)) ==> old(UniversalERC20.isETH(_tokenIn) ? 0 : IERC20(_tokenIn).balanceOf(address(msg.sender))) > IERC20(_tokenIn).balanceOf(address(msg.sender));
+    /// if_succeeds {:msg "not paid or paid extra"} !(UniversalERC20.isETH(_tokenIn)) ==> old(UniversalERC20.isETH(_tokenIn) ? 0 : IERC20(_tokenIn).balanceOf(address(msg.sender))) - _amountIn == IERC20(_tokenIn).balanceOf(address(msg.sender));
     function _buy(
         IERC20 _lpIndex,
         IERC20 _tokenIn,
@@ -85,6 +99,20 @@ contract IndicesSavings is IIndicesSavings, OwnableUpgradeable, ReentrancyGuardU
         emit Buy(address(_lpIndex), convertedAmount, msg.sender, address(_tokenIn), _amountIn);
     }
 
+    /// if_succeeds {:msg "wrong index"} address(_lpIndex) != address(0);
+    /// if_succeeds {:msg "wrong token"} address(_tokenOut) != address(0);
+    /// if_succeeds {:msg "wrong amount in"} _amountIn > 0;
+    /// if_succeeds {:msg "wrong amount out"} _amountOutMin > 0;
+    /// if_succeeds {:msg "wrong path"} _path.length > 0;
+    /// if_succeeds {:msg "not paid or paid extra"} old(IERC20(_lpIndex).balanceOf(address(this))) == IERC20(_lpIndex).balanceOf(address(this));
+    /// if_succeeds {:msg "not paid or paid extra"} !(UniversalERC20.isETH(_tokenOut)) ==> old(UniversalERC20.isETH(_tokenOut) ? 0 : IERC20(_tokenOut).balanceOf(address(this))) == IERC20(_tokenOut).balanceOf(address(this));
+    /// if_succeeds {:msg "not paid or paid extra"} (UniversalERC20.isETH(_tokenOut)) ==> old(UniversalERC20.isETH(_tokenOut) ? 0 : address(this).balance) == address(this).balance;
+    /// if_succeeds {:msg "not paid or paid extra"} old(IERC20(_lpIndex).balanceOf(address(msg.sender))) > IERC20(_lpIndex).balanceOf(address(msg.sender));
+    /// if_succeeds {:msg "not paid or paid extra"} old(IERC20(_lpIndex).balanceOf(address(msg.sender))) - _amountIn == IERC20(_lpIndex).balanceOf(address(msg.sender));
+    /// if_succeeds {:msg "not paid or paid extra"} !(UniversalERC20.isETH(_tokenOut)) ==> old(UniversalERC20.isETH(_tokenOut) ? 0 : IERC20(_tokenOut).balanceOf(address(msg.sender))) < IERC20(_tokenOut).balanceOf(address(msg.sender));
+    /// if_succeeds {:msg "not paid or paid extra"} !(UniversalERC20.isETH(_tokenOut)) ==> old(UniversalERC20.isETH(_tokenOut) ? 0 : IERC20(_tokenOut).balanceOf(address(msg.sender))) + _amountOutMin >= IERC20(_tokenOut).balanceOf(address(msg.sender));
+    /// if_succeeds {:msg "not paid or paid extra"} (UniversalERC20.isETH(_tokenOut)) ==> old(UniversalERC20.isETH(_tokenOut) ? 0 : address(msg.sender).balance) < address(msg.sender).balance;
+    /// if_succeeds {:msg "not paid or paid extra"} (UniversalERC20.isETH(_tokenOut)) ==> old(UniversalERC20.isETH(_tokenOut) ? 0 : address(msg.sender).balance) + _amountOutMin <= address(msg.sender).balance;
     function _sell(
         IERC20 _lpIndex,
         IERC20 _tokenOut,
@@ -125,6 +153,9 @@ contract IndicesSavings is IIndicesSavings, OwnableUpgradeable, ReentrancyGuardU
         emit Sell(address(_lpIndex), _amountIn, msg.sender, address(tokenOut), convertedAmount);
     }
 
+    /// if_succeeds {:msg "wrong token"} address(_tokenIn) != address(0);
+    /// if_succeeds {:msg "not ETH"} !(UniversalERC20.isETH(IERC20(_tokenIn))) ==> msg.value == 0;
+    /// if_succeeds {:msg "wrong ETH value"} (UniversalERC20.isETH(IERC20(_tokenIn))) ==> msg.value == _amountIn;
     function buy(
         address _lpIndex,
         address _tokenIn,
@@ -141,10 +172,12 @@ contract IndicesSavings is IIndicesSavings, OwnableUpgradeable, ReentrancyGuardU
         uint256 _amountIn,
         uint256 _amountOutMin,
         address[] calldata _path
-    ) external override nonReentrant whenNotPaused {
+    ) public override nonReentrant whenNotPaused {
         _sell(IERC20(_lpIndex), IERC20(_tokenOut), _amountIn, _amountOutMin, _path);
     }
 
+    /// if_succeeds {:msg "wrong length of indices"} _lpIndices.length > 0;
+    /// if_succeeds {:msg "wrong length of input params"} _lpIndices.length == _tokensIn.length && _lpIndices.length == _amountsIn.length &&_lpIndices.length == _amountsOutMin.length &&_lpIndices.length == _paths.length;
     function buy(
         address[] calldata _lpIndices,
         address[] calldata _tokensIn,
@@ -165,6 +198,8 @@ contract IndicesSavings is IIndicesSavings, OwnableUpgradeable, ReentrancyGuardU
         }
     }
 
+    /// if_succeeds {:msg "wrong length of indices"} _lpIndices.length > 0;
+    /// if_succeeds {:msg "wrong length of input params"} _lpIndices.length == _tokensOut.length && _lpIndices.length == _amountsIn.length &&_lpIndices.length == _amountsOutMin.length &&_lpIndices.length == _paths.length;
     function sell(
         address[] calldata _lpIndices,
         address[] calldata _tokensOut,
@@ -185,9 +220,11 @@ contract IndicesSavings is IIndicesSavings, OwnableUpgradeable, ReentrancyGuardU
         }
     }
 
+    /// if_succeeds {:msg "wrong input params"} address(_lpIndex) != address(0) && address(_lpRouter) != address(0);
+    /// if_succeeds {:msg "not registered"} indices[_lpIndex].isActive && indices[_lpIndex].blockNumber == block.number && indices[_lpIndex].lpRouter == _lpRouter;
     function registerIndex(address _lpIndex, address _lpRouter) external override onlyOwner {
         require(!isIndexRegistered(_lpIndex), "Index is already registered");
-        require(_lpRouter != address(0x0000000000000000000000000000000000000000), "Wrong address of router");
+        require(_lpRouter != address(0), "Wrong address of router");
 
         registeredIndices.push(_lpIndex);
 
@@ -200,9 +237,11 @@ contract IndicesSavings is IIndicesSavings, OwnableUpgradeable, ReentrancyGuardU
         emit IndexRegistered(_lpIndex, _lpRouter);
     }
 
+    /// if_succeeds {:msg "wrong input params"} address(_lpIndex) != address(0) && address(_lpRouter) != address(0);
+    /// if_succeeds {:msg "not activated"} indices[_lpIndex].isActive && indices[_lpIndex].blockNumber == block.number && indices[_lpIndex].lpRouter == _lpRouter;
     function activateIndex(address _lpIndex, address _lpRouter) external override onlyOwner {
         require(isIndexRegistered(_lpIndex), "Index is not registered");
-        require(_lpRouter != address(0x0000000000000000000000000000000000000000), "Wrong address of router");
+        require(_lpRouter != address(0), "Wrong address of router");
         indices[_lpIndex] = IndexInfo({
             isActive : true,
             blockNumber : block.number,
@@ -212,13 +251,15 @@ contract IndicesSavings is IIndicesSavings, OwnableUpgradeable, ReentrancyGuardU
         emit IndexActivated(_lpIndex, _lpRouter);
     }
 
+    /// if_succeeds {:msg "wrong index"} address(_index) != address(0);
+    /// if_succeeds {:msg "not deactivated"} !indices[_index].isActive && indices[_index].blockNumber == block.number && indices[_index].lpRouter == address(0);
     function deactivateIndex(address _index) external override onlyOwner {
         require(isIndexRegistered(_index), "Index is not registered");
 
         indices[_index] = IndexInfo({
             isActive : false,
             blockNumber : block.number,
-            lpRouter : address(0x0000000000000000000000000000000000000000)
+            lpRouter : address(0)
             });
 
         emit IndexDisabled(_index);

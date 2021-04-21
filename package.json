@@ -25,7 +25,11 @@
         "test": "brownie test",
         "test:add-fork": "brownie networks add Ethereum mainnet-test host=$ALCHEMY_ARCHIVE_NODE chainid=1 explorer=https://api.etherscan.io/api",
         "test:swap-mainnet": "brownie test tests-mainnet/vakro/test_vakro_mainnet_fork.py --network mainnet-fork",
-        "test:indices-mainnet": "brownie test tests-mainnet/indices/test_swap.py --network mainnet-fork"
+        "test:indices-mainnet": "brownie test tests-mainnet/indices/test_swap.py --network mainnet-fork",
+        "scribble:arm": "sh ./security/scribble/scribble.sh --arm",
+        "scribble:disarm": "sh ./security/scribble/scribble.sh --disarm",
+        "scribble:arm:all": "sh ./security/scribble/scribble_all.sh --arm",
+        "scribble:disarm:all": "sh ./security/scribble/scribble_all.sh --disarm"
     },
     "dependencies": {
         "@openzeppelin/cli": "^2.8.2",
