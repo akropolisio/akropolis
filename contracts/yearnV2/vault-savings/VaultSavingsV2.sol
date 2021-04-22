@@ -40,7 +40,9 @@ contract VaultSavingsV2 is IVaultSavings, OwnableUpgradeable, ReentrancyGuardUpg
 
     
     // deposit, withdraw
-
+    /// if_succeeds {:msg "wrong length of vaults"} _vaults.length > 0;
+    /// if_succeeds {:msg "wrong length of amounts"} _vaults.length == _amounts.length;
+    /// if_succeeds {:msg "paused"} paused() == false;
     function deposit(address[] calldata _vaults, uint256[] calldata _amounts) external override nonReentrant whenNotPaused {
         require(_vaults.length == _amounts.length, "Size of arrays does not match");
         
@@ -49,11 +51,18 @@ contract VaultSavingsV2 is IVaultSavings, OwnableUpgradeable, ReentrancyGuardUpg
         }
     }
 
+    /// if_succeeds {:msg "paused"} paused() == false;
     function deposit(address _vault, uint256 _amount) external override nonReentrant whenNotPaused returns(uint256 lpAmount)  {
         lpAmount = _deposit(_vault, _amount);
     }
-   
 
+
+    /// if_succeeds {:msg "wrong vault"} address(_vault) != address(0) && isVaultRegistered(_vault) && isVaultActive(_vault);
+    /// if_succeeds {:msg "wrong amount"} _amount > 0;
+    /// if_succeeds {:msg "paused"} paused() == false;
+    /// if_succeeds {:msg "wrong balance at this contract"} old(IERC20Upgradeable(IVaultV2(_vault).token()).balanceOf(address(this))) == IERC20Upgradeable(IVaultV2(_vault).token()).balanceOf(address(this));
+    /// if_succeeds {:msg "wrong balance at vault"} old(IERC20Upgradeable(IVaultV2(_vault).token()).balanceOf(address(_vault))) + _amount == IERC20Upgradeable(IVaultV2(_vault).token()).balanceOf(address(_vault));
+    /// if_succeeds {:msg "wrong balance at msg.sender"} old(IERC20Upgradeable(_vault).balanceOf(msg.sender)) < IERC20Upgradeable(_vault).balanceOf(msg.sender);
     function _deposit(address _vault, uint256 _amount) internal returns(uint256 lpAmount) {
         require(_amount > 0, "Depositing zero amount");
         //check vault
@@ -79,6 +88,9 @@ contract VaultSavingsV2 is IVaultSavings, OwnableUpgradeable, ReentrancyGuardUpg
     }
 
 
+    /// if_succeeds {:msg "wrong length of vaults"} _vaults.length > 0;
+    /// if_succeeds {:msg "wrong length of amounts"} _vaults.length == _amounts.length;
+    /// if_succeeds {:msg "paused"} paused() == false;
     function withdraw(address[] calldata _vaults, uint256[] calldata _amounts) external override nonReentrant whenNotPaused {
         require(_vaults.length == _amounts.length, "Size of arrays does not match");
 
@@ -88,10 +100,17 @@ contract VaultSavingsV2 is IVaultSavings, OwnableUpgradeable, ReentrancyGuardUpg
 
     }
 
+    /// if_succeeds {:msg "paused"} paused() == false;
     function withdraw(address _vault, uint256 _amount) external override nonReentrant whenNotPaused returns(uint256 baseAmount) {
         baseAmount = _withdraw(_vault, _amount);
     }
 
+    /// if_succeeds {:msg "wrong vault"} address(_vault) != address(0) && isVaultRegistered(_vault) && isVaultActive(_vault);
+    /// if_succeeds {:msg "wrong amount"} _amount > 0;
+    /// if_succeeds {:msg "wrong balance at this contract"} old(IERC20Upgradeable(IVaultV2(_vault).token()).balanceOf(address(this))) == IERC20Upgradeable(IVaultV2(_vault).token()).balanceOf(address(this));
+    /// if_succeeds {:msg "wrong balance at vault"} old(IERC20Upgradeable(IVaultV2(_vault).token()).balanceOf(_vault)) > IERC20Upgradeable(IVaultV2(_vault).token()).balanceOf(_vault);
+    /// if_succeeds {:msg "wrong balance at msg.sender"} old(IERC20Upgradeable(_vault).balanceOf(msg.sender)) - _amount == IERC20Upgradeable(_vault).balanceOf(msg.sender);
+    /// if_succeeds {:msg "wrong balance at msg.sender"} old(IERC20Upgradeable(IVaultV2(_vault).token()).balanceOf(msg.sender)) < IERC20Upgradeable(IVaultV2(_vault).token()).balanceOf(msg.sender);
     function _withdraw(address _vault, uint256 _amount) internal returns(uint256 baseAmount) {
         require(_amount > 0, "Withdrawing zero amount");
         require(isVaultRegistered(_vault), "Vault is not Registered");
@@ -113,6 +132,9 @@ contract VaultSavingsV2 is IVaultSavings, OwnableUpgradeable, ReentrancyGuardUpg
         emit Withdraw(_vault, msg.sender, baseAmount, _amount);
     }
 
+    /// if_succeeds {:msg "wrong vault"} _vault != address(0);
+    /// if_succeeds {:msg "not registered"} vaults[_vault].isActive && vaults[_vault].blockNumber == block.number;
+    /// if_succeeds {:msg "onlyOwner"} msg.sender == owner();
     function registerVault(address _vault) external override onlyOwner {
         require(!isVaultRegistered(_vault), "Vault is already registered");
 
@@ -128,6 +150,9 @@ contract VaultSavingsV2 is IVaultSavings, OwnableUpgradeable, ReentrancyGuardUpg
         emit VaultRegistered(_vault, baseToken);
     }
 
+    /// if_succeeds {:msg "wrong vault"} _vault != address(0);
+    /// if_succeeds {:msg "not activated"} vaults[_vault].isActive && vaults[_vault].blockNumber == block.number;
+    /// if_succeeds {:msg "onlyOwner"} msg.sender == owner();
     function activateVault(address _vault) external override onlyOwner {
         require(isVaultRegistered(_vault), "Vault is not registered");
     
@@ -140,6 +165,9 @@ contract VaultSavingsV2 is IVaultSavings, OwnableUpgradeable, ReentrancyGuardUpg
 
     }
 
+    /// if_succeeds {:msg "wrong vault"} _vault != address(0);
+    /// if_succeeds {:msg "not deactivated"} vaults[_vault].isActive == false && vaults[_vault].blockNumber == block.number;
+    /// if_succeeds {:msg "onlyOwner"} msg.sender == owner();
     function deactivateVault(address _vault) external override onlyOwner {
         require(isVaultRegistered(_vault), "Vault is not registered");
     
@@ -151,10 +179,14 @@ contract VaultSavingsV2 is IVaultSavings, OwnableUpgradeable, ReentrancyGuardUpg
        emit VaultDisabled(_vault);
     }
 
+    /// if_succeeds {:msg "not paused"} paused() == true;
+    /// if_succeeds {:msg "onlyOwner"} msg.sender == owner();
     function pause() external onlyOwner {
         _pause();
     }
 
+    /// if_succeeds {:msg "paused"} paused() == false;
+    /// if_succeeds {:msg "onlyOwner"} msg.sender == owner();
     function unpause() external onlyOwner {
         _unpause();
     }
