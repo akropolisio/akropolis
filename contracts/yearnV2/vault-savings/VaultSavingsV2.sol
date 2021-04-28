@@ -134,7 +134,7 @@ contract VaultSavingsV2 is IVaultSavings, OwnableUpgradeable, ReentrancyGuardUpg
 
     /// if_succeeds {:msg "wrong vault"} _vault != address(0);
     /// if_succeeds {:msg "not registered"} vaults[_vault].isActive && vaults[_vault].blockNumber == block.number;
-    /// if_succeeds {:msg "onlyOwner"} msg.sender == owner();
+    /// if_succeeds {:msg "onlyOwner"} old(msg.sender == owner());
     function registerVault(address _vault) external override onlyOwner {
         require(!isVaultRegistered(_vault), "Vault is already registered");
 
@@ -152,7 +152,7 @@ contract VaultSavingsV2 is IVaultSavings, OwnableUpgradeable, ReentrancyGuardUpg
 
     /// if_succeeds {:msg "wrong vault"} _vault != address(0);
     /// if_succeeds {:msg "not activated"} vaults[_vault].isActive && vaults[_vault].blockNumber == block.number;
-    /// if_succeeds {:msg "onlyOwner"} msg.sender == owner();
+    /// if_succeeds {:msg "onlyOwner"} old(msg.sender == owner());
     function activateVault(address _vault) external override onlyOwner {
         require(isVaultRegistered(_vault), "Vault is not registered");
     
@@ -167,7 +167,7 @@ contract VaultSavingsV2 is IVaultSavings, OwnableUpgradeable, ReentrancyGuardUpg
 
     /// if_succeeds {:msg "wrong vault"} _vault != address(0);
     /// if_succeeds {:msg "not deactivated"} vaults[_vault].isActive == false && vaults[_vault].blockNumber == block.number;
-    /// if_succeeds {:msg "onlyOwner"} msg.sender == owner();
+    /// if_succeeds {:msg "onlyOwner"} old(msg.sender == owner());
     function deactivateVault(address _vault) external override onlyOwner {
         require(isVaultRegistered(_vault), "Vault is not registered");
     
@@ -180,13 +180,13 @@ contract VaultSavingsV2 is IVaultSavings, OwnableUpgradeable, ReentrancyGuardUpg
     }
 
     /// if_succeeds {:msg "not paused"} paused() == true;
-    /// if_succeeds {:msg "onlyOwner"} msg.sender == owner();
+    /// if_succeeds {:msg "onlyOwner"} old(msg.sender == owner());
     function pause() external onlyOwner {
         _pause();
     }
 
     /// if_succeeds {:msg "paused"} paused() == false;
-    /// if_succeeds {:msg "onlyOwner"} msg.sender == owner();
+    /// if_succeeds {:msg "onlyOwner"} old(msg.sender == owner());
     function unpause() external onlyOwner {
         _unpause();
     }
