@@ -45,6 +45,7 @@ contract Rewards is OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgr
     /**
      * @notice Sets the minimum amount of  which can be swapped. 0 by default
      * @param _minAmount Minimum amount in wei (the least decimals)
+     * if_succeeds {:msg "onlyOwner"} old(msg.sender == owner());
      */
     function setMinClaimAmount(uint256 _minAmount) external onlyOwner {
         minAmountToClaim = _minAmount;
@@ -54,6 +55,7 @@ contract Rewards is OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgr
      * @notice Sets the Merkle roots
      * @param _merkleRoots Array of hashes
      * if_succeeds {:msg "merkle root not updated"} merkleRoots.length == _merkleRoots.length;
+     * if_succeeds {:msg "onlyOwner"} old(msg.sender == owner());
      */
     function setMerkleRoots(bytes32[] memory _merkleRoots) external onlyOwner {
         require(_merkleRoots.length > 0, "Incorrect data");
@@ -128,6 +130,7 @@ contract Rewards is OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgr
     /**
      * @notice Called by the owner to pause, deny claim reward
      * if_succeeds {:msg "not paused"} paused() == true;
+     * if_succeeds {:msg "onlyOwner"} old(msg.sender == owner());
      */
     function pause() onlyOwner whenNotPaused external {
         _pause();
@@ -136,6 +139,7 @@ contract Rewards is OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgr
     /**
      * @notice Called by the owner to unpause, allow claim reward
      * if_succeeds {:msg "paused"} paused() == false;
+     * if_succeeds {:msg "onlyOwner"} old(msg.sender == owner());
      */
     function unpause() onlyOwner whenPaused external {
         _unpause();
