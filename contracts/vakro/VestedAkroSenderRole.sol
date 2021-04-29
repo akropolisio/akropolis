@@ -29,10 +29,12 @@ contract VestedAkroSenderRole is Initializable, ContextUpgradeable {
         return _senders.has(account);
     }
 
+    /// if_succeeds {:msg "only sender"} isSender(msg.sender);
     function addSender(address account) public onlySender {
         _addSender(account);
     }
 
+    /// if_succeeds {:msg "still sender"} !isSender(msg.sender);
     function renounceSender() public {
         _removeSender(_msgSender());
     }

@@ -9,6 +9,7 @@ EPOCH_LENGTH = 100
 REWARDS_AMOUNT = 150
 ADEL_MAX_ALLOWED = 1000
 NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
+MOCK_POOL = '0x06282297F1678d5AF9bcb402c733111Fa0e3153C'
 AVAILABLE_USER1 = 2000
 AVAILABLE_USER2 = 4000
 AVAILABLE_USER3 = 1500
@@ -28,7 +29,7 @@ def prepare_swap(deployer, adel, akro, vakro, stakingpool, vakroSwap):
 
     vakroSwap.setSwapRate(ADEL_AKRO_RATE, 1, {'from': deployer})
     vakroSwap.setStakingPool(stakingpool, {'from': deployer})
-    vakroSwap.setRewardStakingPool(NULL_ADDRESS, stakingpool, {'from': deployer})
+    vakroSwap.setRewardStakingPool(MOCK_POOL, stakingpool, {'from': deployer})
 
 def encode(s):
     return s.encode("utf-8")

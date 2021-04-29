@@ -84,10 +84,14 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
     function allowance(address owner, address spender) public override view returns (uint256) {
         return allowances[owner][spender];
     }
+
+    /// if_succeeds {:msg "wrong spender"} spender != address(0);
     function approve(address spender, uint256 amount) public override returns (bool) {
         _approve(_msgSender(), spender, amount);
         return true;
     }
+
+    /// if_succeeds {:msg "only sender"} isSender(msg.sender);
     function transferFrom(address sender, address recipient, uint256 amount) public override onlySender returns (bool) {
         // We require both sender and _msgSender() to have VestedAkroSender role
         // to prevent sender from redeem and prevent unauthorized transfers via transferFrom.
@@ -98,11 +102,14 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
         return true;
     }
 
+    /// if_succeeds {:msg "only sender"} isSender(msg.sender);
     function transfer(address recipient, uint256 amount) public override onlySender returns (bool) {
         _transfer(_msgSender(), recipient, amount);
         return true;
     }
 
+    /// if_succeeds {:msg "VestedAkro: vestingPeriod should be > 0"} _vestingPeriod > 0;
+    /// if_succeeds {:msg "only owner"} old(msg.sender == owner());
     function setVestingPeriod(uint256 _vestingPeriod) public onlyOwner {
         require(_vestingPeriod > 0, "VestedAkro: vestingPeriod should be > 0");
         vestingPeriod = _vestingPeriod;
@@ -111,6 +118,8 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
     /**
      * @notice Sets vesting start date (as unix timestamp). Owner only
      * @param _vestingStart Unix timestamp.
+     * if_succeeds {:msg "VestedAkro: vestingStart should be > 0"} _vestingStart > 0;
+     * if_succeeds {:msg "only owner"} old(msg.sender == owner());
      */
     function setVestingStart(uint256 _vestingStart) public onlyOwner {
         require(_vestingStart > 0, "VestedAkro: vestingStart should be > 0");
@@ -120,11 +129,13 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
     /**
      * @notice Sets vesting start date (as unix timestamp). Owner only
      * @param _vestingCliff Cliff in seconds (1 month by default)
+     * if_succeeds {:msg "only owner"} old(msg.sender == owner());
      */
     function setVestingCliff(uint256 _vestingCliff) public onlyOwner {
         vestingCliff = _vestingCliff;
     }
 
+    /// if_succeeds {:msg "only minter"} old(isMinter(msg.sender));
     function mint(address beneficiary, uint256 amount) public onlyMinter {
         totalSupply = totalSupply.add(amount);
         holders[beneficiary].unlocked = holders[beneficiary].unlocked.add(amount);
@@ -134,6 +145,7 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
     /**
      * @notice Adds AKRO liquidity to the swap contract
      * @param _amount Amout of AKRO added to the contract.
+     * if_succeeds {:msg "only minter"} old(isMinter(msg.sender));
      */
     function addAkroLiquidity(uint256 _amount) public onlyMinter {
         require(_amount > 0, "Incorrect amount");
@@ -147,6 +159,7 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
      * @notice Unlocks all avilable vAKRO for a holder
      * @param holder Whose funds to unlock
      * @return total unlocked amount awailable for redeem
+     * if_succeeds {:msg "wrong holder"} holder != address(0);
      */
     function unlockAvailable(address holder) public returns(uint256) {
         require(holders[holder].batches.length > 0, "VestedAkro: nothing to unlock");
@@ -167,6 +180,7 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
     /**
      * @notice Redeem all already unlocked vAKRO
      * @return Amount redeemed
+     * if_succeeds {:msg "have unlocked"} holders[_msgSender()].unlocked == 0;
      */
     function redeemAllUnlocked() public returns(uint256){
         address beneficiary = _msgSender();
@@ -204,6 +218,8 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
         return (vb.amount, vb.start, vb.end, vb.claimed, claimable);
     }
 
+    /// if_succeeds {:msg "wrong owner"} owner != address(0);
+    /// if_succeeds {:msg "wrong spender"} spender != address(0);
     function _approve(address owner, address spender, uint256 amount) internal {
         require(owner != address(0), "VestedAkro: approve from the zero address");
         require(spender != address(0), "VestedAkro: approve to the zero address");
@@ -212,6 +228,12 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
         emit Approval(owner, spender, amount);
     }
 
+    /// if_succeeds {:msg "wrong spender"} sender != address(0);
+    /// if_succeeds {:msg "wrong recipient"} recipient != address(0) || sender != recipient;
+    /// if_succeeds {:msg "wrong amount"} amount > 0;
+    /// if_succeeds {:msg "wrong transfer"} old(balanceOf(sender) - amount) == balanceOf(sender);
+    /// if_succeeds {:msg "wrong transfer"} old(balanceOf(recipient) + amount) == balanceOf(recipient);
+    /// if_succeeds {:msg "wrong transfer"} old(balanceOf(sender) + balanceOf(recipient)) == balanceOf(sender) + balanceOf(recipient);
     function _transfer(address sender, address recipient, uint256 amount) internal {
         require(sender != address(0), "VestedAkro: transfer from the zero address");
         require(recipient != address(0), "VestedAkro: transfer to the zero address");
@@ -222,7 +244,7 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
         emit Transfer(sender, recipient, amount);
     }
 
-
+    /// if_succeeds {:msg "not locked"} old(holders[holder].locked + amount) == holders[holder].locked;
     function createOrModifyBatch(address holder, uint256 amount) internal {
         Balance storage b = holders[holder];
 
@@ -246,6 +268,8 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
         claimAllFromBatches(holder, holders[holder].batches.length);
     }
 
+    /// if_succeeds {:msg "wrong holder"} holder != address(0);
+    /// if_succeeds {:msg "wrong calculation"} old(holders[holder].locked) - holders[holder].locked == holders[holder].unlocked - old(holders[holder].unlocked);
     function claimAllFromBatches(address holder, uint256 tillBatch) internal {
         Balance storage b = holders[holder];
         bool firstUnclaimedFound;
