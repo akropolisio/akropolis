@@ -122,6 +122,26 @@ def testVakroVestingSwap(deployer, proxy_admin, adel, akro, vakro, TestAdelVAkro
     yield vakroVestingSwapImplFromProxy
 
 @pytest.fixture(scope="module")
+def exploitCompVAkroSwap(deployer, proxy_admin, adel, akro, vakro, ExploitCompVAkroSwap):
+    vakroSwapImplFromProxy, vakroSwapProxy, vakroSwapImpl = deploy_proxy(deployer, proxy_admin, ExploitCompVAkroSwap,
+                                                                         vakro.address)
+
+    assert vakroSwapProxy.admin.call({"from":proxy_admin.address}) == proxy_admin.address
+    assert vakroSwapProxy.implementation.call({"from":proxy_admin.address}) == vakroSwapImpl.address
+
+    yield vakroSwapImplFromProxy
+
+@pytest.fixture(scope="module")
+def testExploitCompVAkroSwap(deployer, proxy_admin, adel, akro, vakro, TestExploitCompVAkroSwap):
+    vakroSwapImplFromProxy, vakroSwapProxy, vakroSwapImpl = deploy_proxy(deployer, proxy_admin, TestExploitCompVAkroSwap,
+                                                                         vakro.address)
+
+    assert vakroSwapProxy.admin.call({"from":proxy_admin.address}) == proxy_admin.address
+    assert vakroSwapProxy.implementation.call({"from":proxy_admin.address}) == vakroSwapImpl.address
+
+    yield vakroSwapImplFromProxy
+
+@pytest.fixture(scope="module")
 def rewardmodule(deployer, pool, proxy_admin, TestRewardVestingModule):
     rewardmoduleImplFromProxy, rewardmoduleProxy, rewardmoduleImpl = deploy_proxy(deployer, proxy_admin, TestRewardVestingModule, pool)
 
