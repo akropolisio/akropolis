@@ -52,6 +52,9 @@ contract AdelVAkroVestingSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable 
         _;
     }
 
+    /// if_succeeds {:msg "wrong address _akro"} _akro != address(0);
+    /// if_succeeds {:msg "wrong address _adel"} _adel != address(0);
+    /// if_succeeds {:msg "wrong address _vakro"} _vakro != address(0);
     function initialize(address _akro, address _adel, address _vakro) virtual public initializer {
         require(_akro != address(0), "Zero address");
         require(_adel != address(0), "Zero address");
@@ -71,6 +74,7 @@ contract AdelVAkroVestingSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable 
     /**
      * @notice Sets the minimum amount of ADEL which can be swapped. 0 by default
      * @param _minAmount Minimum amount in wei (the least decimals)
+     * if_succeeds {:msg "only owner"} old(msg.sender == owner());
      */
     function setMinSwapAmount(uint256 _minAmount) external onlyOwner {
         minAmountToSwap = _minAmount;
@@ -81,6 +85,8 @@ contract AdelVAkroVestingSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable 
      * @notice By default is set to 0, that means that swap is disabled
      * @param _swapRateNumerator Numerator for Adel converting. Can be set to 0 - that stops the swap.
      * @param _swapRateDenominator Denominator for Adel converting. Can't be set to 0
+     * if_succeeds {:msg "only owner"} old(msg.sender == owner());
+     * if_succeeds {:msg "wrong swapRateDenominator"} swapRateDenominator > 0;
      */
     function setSwapRate(uint256 _swapRateNumerator, uint256 _swapRateDenominator) external onlyOwner {
         require(_swapRateDenominator > 0, "Incorrect value");
@@ -91,6 +97,8 @@ contract AdelVAkroVestingSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable 
     /**
      * @notice Sets the Merkle roots for the rewards (on wallet)
      * @param _merkleRootsWalletRewards Array of hashes for on-wallet rewards
+     * if_succeeds {:msg "only owner"} old(msg.sender == owner());
+     * if_succeeds {:msg "merkle root not updated"} merkleRootsWalletRewards.length == _merkleRootsWalletRewards.length;
      */
     function setMerkleWalletRewardsRoots(bytes32[] memory _merkleRootsWalletRewards) external onlyOwner {
         require(_merkleRootsWalletRewards.length > 0, "Incorrect data");
@@ -105,6 +113,8 @@ contract AdelVAkroVestingSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable 
     /**
      * @notice Sets the Merkle roots for the rewards (vested)
      * @param _merkleRootsTotalRewardsVested Array of hashes for vested rewards
+     * if_succeeds {:msg "only owner"} old(msg.sender == owner());
+     * if_succeeds {:msg "merkle root not updated"} merkleRootsTotalRewardsVested.length == _merkleRootsTotalRewardsVested.length;
      */
     function setMerkleVestedRewardsRoots(bytes32[] memory _merkleRootsTotalRewardsVested) external onlyOwner {
         require(_merkleRootsTotalRewardsVested.length > 0, "Incorrect data");
@@ -120,6 +130,11 @@ contract AdelVAkroVestingSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable 
     /**
      * @notice Withdraws all ADEL collected on a Swap contract
      * @param _recepient Recepient of ADEL.
+     * if_succeeds {:msg "only owner"} old(msg.sender == owner());
+     * if_succeeds {:msg "wrong _recepient"} _recepient != address(0);
+     * if_succeeds {:msg "nothing to withdraw"} old(IERC20Upgradeable(adel).balanceOf(address(this))) != 0;
+     * if_succeeds {:msg "recipient did not receive tokens"} old(IERC20Upgradeable(adel).balanceOf(_recepient) + IERC20Upgradeable(adel).balanceOf(address(this))) == IERC20Upgradeable(adel).balanceOf(_recepient);
+     * if_succeeds {:msg "not all balance transferred"} IERC20Upgradeable(adel).balanceOf(address(this)) == 0;
      */
     function withdrawAdel(address _recepient) external onlyOwner {
         require(_recepient != address(0), "Zero address");
@@ -134,6 +149,12 @@ contract AdelVAkroVestingSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable 
      * @param merkleRootIndex Index of a merkle root to be used for calculations
      * @param adelAllowedToSwap Maximum ADEL allowed for a user to swap
      * @param merkleProofs Array of consiquent merkle hashes
+     * if_succeeds {:msg "enough adel"} _adelAmount > 0 && _adelAmount > minAmountToSwap;
+     * if_succeeds {:msg "wrong merkleRootIndex"} merkleRootIndex >= 0 && merkleRootIndex < merkleRootsWalletRewards.length;
+     * if_succeeds {:msg "wrong merkleRootIndex"} merkleRootsWalletRewards.length > 0;
+     * if_succeeds {:msg "wrong adelAllowedToSwap"} adelAllowedToSwap > 0;
+     * if_succeeds {:msg "adel not transferred"} old(IERC20Upgradeable(adel).balanceOf(_msgSender()) - _adelAmount) == IERC20Upgradeable(adel).balanceOf(_msgSender());
+     * if_succeeds {:msg "adel not transferred"} old(IERC20Upgradeable(adel).balanceOf(address(this)) + _adelAmount) == IERC20Upgradeable(adel).balanceOf(address(this));
      */
     function swapFromAdelWalletRewards(
         uint256 _adelAmount,
@@ -185,6 +206,8 @@ contract AdelVAkroVestingSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable 
 
     /**
      * @notice Toggles vested swap flag from active to inactive or vice versa
+     * if_succeeds {:msg "only owner"} old(msg.sender == owner());
+     * if_succeeds {:msg "not toggled"} old(isVestedSwapEnabled) != isVestedSwapEnabled;
      */
     function toggleVestedSwap() public onlyOwner {
         isVestedSwapEnabled = !isVestedSwapEnabled;
@@ -246,6 +269,11 @@ contract AdelVAkroVestingSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable 
      * @param _adelAllowedToSwap Maximum ADEL vested rewards from any source allowed to swap for user.
      *                           Any extra ADEL which exceeds this value is sent to the user
      * @param _index Number of the source of vested rewards ADEL (wallet, vested unlock)
+     * if_succeeds {:msg "Limit exceeded"} swappedAdelRewards[_msgSender()][uint128(_index)] <= _adelAllowedToSwap;
+     * if_succeeds {:msg "Not enough ADEL"} old(_adelAmount != 0 && _adelAmount >= minAmountToSwap);
+     * if_succeeds {:msg "not stored swap info"} old(swappedAdelRewards[_msgSender()][uint128(_index)]) < swappedAdelRewards[_msgSender()][uint128(_index)];
+     * if_succeeds {:msg "vakro not transferred"} old(IERC20Upgradeable(vakro).balanceOf(address(this))) == IERC20Upgradeable(vakro).balanceOf(address(this));
+     * if_succeeds {:msg "vakro not transferred"} old(IERC20Upgradeable(vakro).balanceOf(address(_msgSender()))) < IERC20Upgradeable(vakro).balanceOf(address(_msgSender()));
      */
     function swapRewards(uint256 _adelAmount, uint256 _adelAllowedToSwap, AdelRewardsSource _index) internal
     {

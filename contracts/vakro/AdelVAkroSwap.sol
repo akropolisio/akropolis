@@ -48,6 +48,9 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
         _;
     }
 
+    /// if_succeeds {:msg "wrong address _akro"} _akro != address(0);
+    /// if_succeeds {:msg "wrong address _adel"} _adel != address(0);
+    /// if_succeeds {:msg "wrong address _vakro"} _vakro != address(0);
     function initialize(address _akro, address _adel, address _vakro) virtual public initializer {
         require(_akro != address(0), "Zero address");
         require(_adel != address(0), "Zero address");
@@ -65,6 +68,8 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
     /**
      * @notice Sets the ADEL staking pool address
      * @param _stakingPool Adel staking pool address)
+     * if_succeeds {:msg "wrong _stakingPool"} _stakingPool != address(0);
+     * if_succeeds {:msg "only owner"} old(msg.sender == owner());
      */
     function setStakingPool(address _stakingPool) external onlyOwner {
         require(_stakingPool != address(0), "Zero address");
@@ -75,6 +80,7 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
      * @notice Sets the staking pool addresses with ADEL rewards
      * @param _rewardAkroPool Akro staking pool address)
      * @param _rewardAdelPool Adel staking pool address)
+     * if_succeeds {:msg "only owner"} old(msg.sender == owner());
      */
     function setRewardStakingPool(address _rewardAkroPool, address _rewardAdelPool) external onlyOwner {
         require(_rewardAkroPool != address(0) || _rewardAdelPool != address(0), "Zero address");
@@ -85,6 +91,7 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
     /**
      * @notice Sets the minimum amount of ADEL which can be swapped. 0 by default
      * @param _minAmount Minimum amount in wei (the least decimals)
+     * if_succeeds {:msg "only owner"} old(msg.sender == owner());
      */
     function setMinSwapAmount(uint256 _minAmount) external onlyOwner {
         minAmountToSwap = _minAmount;
@@ -95,6 +102,8 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
      * @notice By default is set to 0, that means that swap is disabled
      * @param _swapRateNumerator Numerator for Adel converting. Can be set to 0 - that stops the swap.
      * @param _swapRateDenominator Denominator for Adel converting. Can't be set to 0
+     * if_succeeds {:msg "only owner"} old(msg.sender == owner());
+     * if_succeeds {:msg "wrong swapRateDenominator"} swapRateDenominator > 0;
      */
     function setSwapRate(uint256 _swapRateNumerator, uint256 _swapRateDenominator) external onlyOwner {
         require(_swapRateDenominator > 0, "Incorrect value");
@@ -105,6 +114,8 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
     /**
      * @notice Sets the Merkle roots
      * @param _merkleRoots Array of hashes
+     * if_succeeds {:msg "only owner"} old(msg.sender == owner());
+     * if_succeeds {:msg "merkle root not updated"} merkleRoots.length == _merkleRoots.length;
      */
     function setMerkleRoots(bytes32[] memory _merkleRoots) external onlyOwner {
         require(_merkleRoots.length > 0, "Incorrect data");
@@ -118,6 +129,11 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
     /**
      * @notice Withdraws all ADEL collected on a Swap contract
      * @param _recepient Recepient of ADEL.
+     * if_succeeds {:msg "only owner"} old(msg.sender == owner());
+     * if_succeeds {:msg "wrong _recepient"} _recepient != address(0);
+     * if_succeeds {:msg "nothing to withdraw"} old(IERC20Upgradeable(adel).balanceOf(address(this))) != 0;
+     * if_succeeds {:msg "recipient did not receive tokens"} old(IERC20Upgradeable(adel).balanceOf(_recepient) + IERC20Upgradeable(adel).balanceOf(address(this))) == IERC20Upgradeable(adel).balanceOf(_recepient);
+     * if_succeeds {:msg "not all balance transferred"} IERC20Upgradeable(adel).balanceOf(address(this)) == 0;
      */
     function withdrawAdel(address _recepient) external onlyOwner {
         require(_recepient != address(0), "Zero address");
@@ -132,6 +148,12 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
      * @param merkleRootIndex Index of a merkle root to be used for calculations
      * @param adelAllowedToSwap Maximum ADEL allowed for a user to swap
      * @param merkleProofs Array of consiquent merkle hashes
+     * if_succeeds {:msg "enough adel"} _adelAmount > 0 && _adelAmount > minAmountToSwap;
+     * if_succeeds {:msg "wrong merkleRootIndex"} merkleRootIndex >= 0 && merkleRootIndex < merkleRoots.length;
+     * if_succeeds {:msg "wrong merkleRoots"} merkleRoots.length > 0;
+     * if_succeeds {:msg "wrong adelAllowedToSwap"} adelAllowedToSwap > 0;
+     * if_succeeds {:msg "adel not transferred"} old(IERC20Upgradeable(adel).balanceOf(_msgSender()) - _adelAmount) == IERC20Upgradeable(adel).balanceOf(_msgSender());
+     * if_succeeds {:msg "adel not transferred"} old(IERC20Upgradeable(adel).balanceOf(address(this)) + _adelAmount) == IERC20Upgradeable(adel).balanceOf(address(this));
      */
     function swapFromAdel(
         uint256 _adelAmount,
@@ -154,6 +176,10 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
      * @param merkleRootIndex Index of a merkle root to be used for calculations
      * @param adelAllowedToSwap Maximum ADEL allowed for a user to swap
      * @param merkleProofs Array of consiquent merkle hashes
+     * if_succeeds {:msg "wrong merkleRootIndex"} merkleRootIndex >= 0 && merkleRootIndex < merkleRoots.length;
+     * if_succeeds {:msg "wrong merkleRoots"} merkleRoots.length > 0;
+     * if_succeeds {:msg "Swap from stake is disabled"} stakingPool != address(0);
+     * if_succeeds {:msg "adel stake not used"} old(IStakingPool(stakingPool).rewardBalanceOf(_msgSender(), adel)) >= IStakingPool(stakingPool).rewardBalanceOf(_msgSender(), adel);
      */
     function swapFromStakedAdel(
         uint256 merkleRootIndex, 
@@ -187,6 +213,11 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
      * @param merkleRootIndex Index of a merkle root to be used for calculations
      * @param adelAllowedToSwap Maximum ADEL allowed for a user to swap
      * @param merkleProofs Array of consiquent merkle hashes
+     * if_succeeds {:msg "wrong merkleRootIndex"} merkleRootIndex >= 0 && merkleRootIndex < merkleRoots.length;
+     * if_succeeds {:msg "wrong merkleRoots"} merkleRoots.length > 0;
+     * if_succeeds {:msg "Swap from rewards is disabled"} rewardAkroPool != address(0) || rewardAdelPool != address(0);
+     * if_succeeds {:msg "reward in AKRO not used"} rewardAkroPool != address(0) ==> old(rewardAkroPool == address(0) ? 0 : IStakingPool(rewardAkroPool).rewardBalanceOf(_msgSender(), adel)) >= IStakingPool(rewardAkroPool).rewardBalanceOf(_msgSender(), adel);
+     * if_succeeds {:msg "reward in ADEL not used"} rewardAdelPool != address(0) ==> old(rewardAdelPool == address(0) ? 0 : IStakingPool(rewardAdelPool).rewardBalanceOf(_msgSender(), adel)) >= IStakingPool(rewardAdelPool).rewardBalanceOf(_msgSender(), adel);
      */
     function swapFromRewardAdel(
         uint256 merkleRootIndex, 
@@ -223,7 +254,7 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
             _adelAmount = IStakingPool(rewardAdelPool).withdrawRewardForSwap(_msgSender(), adel);
             adelAfter = IERC20Upgradeable(adel).balanceOf(address(this));
 
-            require( adelAfter - adelBefore == _adelAmount, "ADEL was not transferred rom ADEL pool");
+            require( adelAfter - adelBefore == _adelAmount, "ADEL was not transferred from ADEL pool");
 
             adelReceived = adelReceived.add(_adelAmount);
         }
@@ -267,6 +298,10 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
      * @param _adelAllowedToSwap Maximum ADEL from any source allowed to swap for user.
      *                           Any extra ADEL which exceeds this value is sent to the user
      * @param _index Number of the source of ADEL (wallet, stake, rewards)
+     * if_succeeds {:msg "Limit for swap is reached"} old(adelSwapped(_msgSender()) < _adelAllowedToSwap) || adelSwapped(_msgSender()) <= _adelAllowedToSwap;
+     * if_succeeds {:msg "Not enough ADEL"} old(_adelAmount != 0 && _adelAmount >= minAmountToSwap);
+     * if_succeeds {:msg "vakro not transferred"} old(IERC20Upgradeable(vakro).balanceOf(address(this))) == IERC20Upgradeable(vakro).balanceOf(address(this));
+     * if_succeeds {:msg "vakro not transferred"} old(IERC20Upgradeable(vakro).balanceOf(address(_msgSender()))) < IERC20Upgradeable(vakro).balanceOf(address(_msgSender()));
      */
     function swap(uint256 _adelAmount, uint256 _adelAllowedToSwap, AdelSource _index) internal
     {

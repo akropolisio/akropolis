@@ -51,9 +51,11 @@ def test_swap_adel(chain, deployer, akro, adel, vakro, testVakroSwap, prepare_sw
     vakro.setVestingStart(start, {'from': deployer})
     chain.mine(1)
 
+    testVakroSwap.setMerkleRoots(['0x00'], {'from': deployer})
+
     assert testVakroSwap.adelSwapped(regular_user) == 0
     adel.approve(testVakroSwap.address, ADEL_TO_SWAP, {'from': regular_user})
-    testVakroSwap.swapFromAdel(ADEL_TO_SWAP, 0, ADEL_MAX_ALLOWED, [], {'from': regular_user})
+    testVakroSwap.swapFromAdel(ADEL_TO_SWAP, 0, ADEL_MAX_ALLOWED, ['0x00'], {'from': regular_user})
     assert testVakroSwap.adelSwapped(regular_user) == ADEL_TO_SWAP
 
     adel_balance_after = adel.balanceOf(regular_user)
@@ -181,8 +183,10 @@ def test_swap_rewards_adel(chain, deployer, akro, adel, vakro, rewardmodule, sta
     vakro.setVestingStart(start, {'from': deployer})
     chain.mine(1)
 
+    testVakroSwap.setMerkleRoots(['0x00'], {'from': deployer})
+
     assert testVakroSwap.adelSwapped(regular_user3) == 0
-    testVakroSwap.swapFromRewardAdel(0, ADEL_MAX_ALLOWED, [], {'from': regular_user3})
+    testVakroSwap.swapFromRewardAdel(0, ADEL_MAX_ALLOWED, ['0x00'], {'from': regular_user3})
     assert testVakroSwap.adelSwapped(regular_user3) == REWARDS_AMOUNT
     
     adel_balance_after = adel.balanceOf(regular_user3)
@@ -316,9 +320,11 @@ def test_swap_from_wallet_rewards(deployer, akro, adel, vakro, testVakroVestingS
     vakro_user_before = vakro.balanceOf(regular_user)
     adel_swapped_from_rewards_before = testVakroVestingSwap.adelRewardsSwapped(regular_user)
 
+    testVakroVestingSwap.setMerkleWalletRewardsRoots(['0x00'], {'from': deployer})
+
     # Perform swap from rewards (swaps beacause vested swap is enabled by default)
     adel.approve(testVakroVestingSwap.address, ADEL_WALLET_VESTING_REWARDS_TO_SWAP, {'from': regular_user})
-    testVakroVestingSwap.swapFromAdelWalletRewards(ADEL_WALLET_VESTING_REWARDS_TO_SWAP, 0, ADEL_WALLET_VESTING_REWARDS_MAX_ALLOWED, [], {'from': regular_user})
+    testVakroVestingSwap.swapFromAdelWalletRewards(ADEL_WALLET_VESTING_REWARDS_TO_SWAP, 0, ADEL_WALLET_VESTING_REWARDS_MAX_ALLOWED, ['0x00'], {'from': regular_user})
 
 
     # Check balances after

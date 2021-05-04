@@ -29,19 +29,22 @@ contract MinterRole is Initializable, ContextUpgradeable {
         return _minters.has(account);
     }
 
+    /// if_succeeds {:msg "not minter"} isMinter(account);
     function addMinter(address account) public onlyMinter {
         _addMinter(account);
     }
-
     function renounceMinter() public {
         _removeMinter(_msgSender());
     }
 
+    /// if_succeeds {:msg "wrong miner"} account != address(0);
     function _addMinter(address account) internal {
         _minters.add(account);
         emit MinterAdded(account);
     }
 
+    /// if_succeeds {:msg "not minter"} old(isMinter(account));
+    /// if_succeeds {:msg "still minter"} !isMinter(account);
     function _removeMinter(address account) internal {
         _minters.remove(account);
         emit MinterRemoved(account);
