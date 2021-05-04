@@ -5,6 +5,7 @@ Tools included:
 * [Slither](https://github.com/crytic/slither)
 * [Echidna](https://github.com/crytic/echidna)
 * [Manticore](https://github.com/trailofbits/manticore)
+* [Scribble](https://github.com/ConsenSys/scribble)
 
 Before launching any of the utilities, verify that you have installed all dependencies for the project:
 
@@ -115,4 +116,46 @@ npx truffle compile
 
 ```
 manticore flattened/VaultSavings.sol --contract VaultSavings
+```
+
+-----------
+
+## 5. Scribble
+
+### Prerequisites
+
+Install Scribble:
+
+```bash
+npm install -g eth-scribble
+```
+
+1. Before run the test or analyzer you need processing file of contract:
+
+For one specific contract 
+```bash
+npm run scribble:arm contracts/yearnV2/vault-savings/VaultSavingsV2.sol
+```
+
+For all contracts 
+```bash
+npm run scribble:arm:all
+```
+
+2. Run tests or analyzer
+
+```bash
+npm run test
+```
+
+3. After run the tests or analyzer you need restore file of contract:
+
+For one specific contract 
+```bash
+npm run scribble:disarm contracts/yearnV2/vault-savings/VaultSavingsV2.sol
+```
+
+For all contracts 
+```bash
+npm run scribble:disarm:all
 ```
