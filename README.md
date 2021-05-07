@@ -108,6 +108,8 @@ npm run test:add-fork
 Now you can run the test:
 ```bash
 npm run test:swap-mainnet
+
+npm run test:indices-mainnet
 ```
 
 Or you can run the console with the free emulation:
