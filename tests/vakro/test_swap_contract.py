@@ -24,6 +24,7 @@ def prepare_swap(deployer, adel, akro, vakro, stakingpool, testVakroSwap, testVa
     stakingpool.setSwapContract(testVakroSwap.address, {'from': deployer})
 
     testVakroSwap.setSwapRate(ADEL_AKRO_RATE, 1, {'from': deployer})
+    testVakroSwap.setReverseSwapRate(ADEL_AKRO_RATE, 1, {'from': deployer})
     testVakroSwap.setStakingPool(stakingpool, {'from': deployer})
     testVakroSwap.setRewardStakingPool(NULL_ADDRESS, stakingpool, {'from': deployer})
 
@@ -366,3 +367,47 @@ def test_swap_from_vesting_rewards(deployer, akro, adel, vakro, testVakroVesting
     assert adel_user_before == adel_user_after
     assert vakro_user_after == vakro_user_before + swapped_amount * ADEL_AKRO_RATE
     assert adel_swapped_from_rewards_after - adel_swapped_from_rewards_before == swapped_amount
+
+
+def test_reverse_swap(chain, deployer, akro, adel, vakro, testVakroSwap, prepare_swap, regular_user2, regular_user5):
+    testVakroSwap.setSwapRate(ADEL_AKRO_RATE, 1, {'from': deployer})
+
+    vakro.setVestingStart(chain.time() + 100, {'from' : deployer})
+    testVakroSwap.withdrawAdel(deployer.address, {'from' : deployer})
+
+    # Check that swap cannot be performed if not enough adel on the contract
+    with brownie.reverts():
+        testVakroSwap.swapReverseAdel({'from': regular_user2})
+
+    # Save current balances
+
+    adel_swapped_before = testVakroSwap.adelSwapped(regular_user2)
+    assert adel_swapped_before > 0
+    adel.transfer(testVakroSwap.address, adel_swapped_before, {'from' : deployer})
+    
+    adel_on_swap_before = adel.balanceOf(testVakroSwap.address)
+    adel_user_before = adel.balanceOf(regular_user2)
+    vakro_user_before = vakro.balanceOf(regular_user2)
+    
+
+    # Check that swap cannot be performed for user without adel swapped
+    assert testVakroSwap.adelSwapped(regular_user5) == 0
+    with brownie.reverts():
+        testVakroSwap.swapReverseAdel({'from': regular_user5})
+
+    assert vakro.isSender(testVakroSwap.address) == True
+    # Perform reverse swap
+    vakro.approve(testVakroSwap.address, adel_swapped_before, {'from': regular_user2})
+    testVakroSwap.swapReverseAdel({'from': regular_user2})
+
+    # Check balances after
+    adel_on_swap_after = adel.balanceOf(testVakroSwap.address)
+    adel_user_after = adel.balanceOf(regular_user2)
+    vakro_user_after = vakro.balanceOf(regular_user2)
+    adel_swapped_after = testVakroSwap.adelSwapped(regular_user2)
+
+    # Check the results
+    assert adel_on_swap_before - adel_on_swap_after == adel_swapped_before
+    assert adel_user_after - adel_user_before == adel_swapped_before
+    assert vakro_user_before - vakro_user_after == adel_swapped_before * ADEL_AKRO_RATE
+    assert adel_swapped_after == 0

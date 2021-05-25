@@ -179,7 +179,7 @@ contract AdelVAkroVestingSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable 
                                                 merkleTotalProofs), "Merkle proofs not verified");
 
         // No ADEL transfers here
-        uint256 adelAllowedToSwap = adelTotalAllowedToSwap - adelWalletAllowedToSwap;
+        uint256 adelAllowedToSwap = adelTotalAllowedToSwap.sub(adelWalletAllowedToSwap);
         swapRewards(adelAllowedToSwap, adelAllowedToSwap, AdelRewardsSource.VESTED);
     }
 
