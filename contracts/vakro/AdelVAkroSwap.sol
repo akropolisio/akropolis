@@ -38,6 +38,14 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
     bytes32[] public merkleRoots;
     mapping (address => uint256[3]) public swappedAdel;
 
+    uint256 public swapToAdelRateNumerator;   //Amount of 1 vAkro for 1 ADEL - 0 by default
+    uint256 public swapToAdelRateDenominator; // for reverse swap
+
+    mapping (address => uint256) public swappedUsersTimestamps;
+    uint256 public swapRateChangeTimestamp;
+
+    event AdelReturned(address indexed receiver, uint256 adelAmount, uint256 akroAmount);
+
     modifier swapEnabled() {
         require(swapRateNumerator != 0, "Swap is disabled");
         _;
@@ -45,6 +53,11 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
 
     modifier enoughAdel(uint256 _adelAmount) {
         require(_adelAmount > 0 && _adelAmount >= minAmountToSwap, "Insufficient ADEL amount");
+        _;
+    }
+
+    modifier reverseSwapEnabled() {
+        require(swapToAdelRateNumerator != 0, "Reverse swap is disabled");
         _;
     }
 
@@ -100,6 +113,21 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
         require(_swapRateDenominator > 0, "Incorrect value");
         swapRateNumerator = _swapRateNumerator;
         swapRateDenominator = _swapRateDenominator;
+
+        swapRateChangeTimestamp = block.timestamp;
+    }
+
+    /**
+     * @notice Sets the rate of reversed ADEL to vAKRO swap: 1 ADEL = _swapRateNumerator/_swapRateDenominator vAKRO
+     * @notice By default is set to 0, that means that swap is disabled
+     * @param _swapRateNumerator Numerator for Adel converting. Can be set to 0 - that stops the swap.
+     * @param _swapRateDenominator Denominator for ADel converting. Can't be set to 0
+     */
+    function setReverseSwapRate(uint256 _swapRateNumerator, uint256 _swapRateDenominator) external onlyOwner {
+        require(_swapRateDenominator > 0, "Incorrect value");
+
+        swapToAdelRateNumerator = _swapRateNumerator;
+        swapToAdelRateDenominator = _swapRateDenominator;
     }
 
     /**
@@ -124,6 +152,17 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
         uint256 _adelAmount = IERC20Upgradeable(adel).balanceOf(address(this));
         require(_adelAmount > 0, "Nothing to withdraw");
         IERC20Upgradeable(adel).safeTransfer(_recepient, _adelAmount);
+    }
+
+    /**
+     * @notice Withdraws all vAkro collected on a Swap contract
+     * @param _recepient Recepient of vAkro.
+     */
+    function withdrawVAkro(address _recepient) external onlyOwner {
+        require(_recepient != address(0), "Zero address");
+        uint256 _vakroAmount = IERC20Upgradeable(vakro).balanceOf(address(this));
+        require(_vakroAmount > 0, "Nothing to withdraw");
+        IERC20Upgradeable(vakro).safeTransfer(_recepient, _vakroAmount);
     }
 
     /**
@@ -232,6 +271,35 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
     }
 
     /**
+     * @notice Allows the reversed swap of vAkro to ADEL. Is applied to the whole amount of swapped ADEL
+     */
+    function swapReverseAdel()
+        external nonReentrant reverseSwapEnabled
+    {
+        require(swapRateChangeTimestamp == 0 ||
+                 swappedUsersTimestamps[_msgSender()] <= swapRateChangeTimestamp, 
+                 "User is not elligible for reverse swap");
+
+        uint256 _adelToReverse = adelSwapped(_msgSender());
+        require(_adelToReverse > 0, "User hasn't swapped ADEL");
+
+        uint256 adelBefore = IERC20Upgradeable(adel).balanceOf(address(this));
+        require( adelBefore >= _adelToReverse, "Not enough ADEL on the contract");
+
+        uint256 vAkroCalculated = _adelToReverse.mul(swapToAdelRateNumerator).div(swapToAdelRateDenominator);
+        uint256 vAkroUser = IERC20Upgradeable(vakro).balanceOf(_msgSender());
+        require( vAkroUser >= vAkroCalculated, "Not enough vAkro in the wallet");
+
+        swappedAdel[_msgSender()][0] = 0;
+        swappedAdel[_msgSender()][1] = 0;
+        swappedAdel[_msgSender()][2] = 0;
+        IERC20Burnable(vakro).burnFrom(_msgSender(), vAkroCalculated);
+        IERC20Upgradeable(adel).safeTransfer(_msgSender(), _adelToReverse);
+
+        emit AdelReturned(_msgSender(), _adelToReverse, vAkroCalculated);
+    }
+
+    /**
      * @notice Verifies merkle proofs of user to be elligible for swap
      * @param _account Address of a user
      * @param _merkleRootIndex Index of a merkle root to be used for calculations
@@ -294,5 +362,7 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
 
         if (adelChange > 0)
             IERC20Upgradeable(adel).safeTransfer(_msgSender(), adelChange);
+
+        swappedUsersTimestamps[_msgSender()] = block.timestamp;
     }
 }

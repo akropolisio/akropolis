@@ -102,7 +102,7 @@ def test_deposit_array(register_vault, token, vault, vaultSavings, user, deploye
 
     # For test vault - custom logic
     assert vault.available() == (vault_totalSupply+DEPOSIT_VALUE) * vault.min() // vault.max()
-    assert vault.balance() == (vault_totalSupply+DEPOSIT_VALUE)
+    assert token.balanceOf(vault.address) == (vault_totalSupply+DEPOSIT_VALUE)
 
 
 
@@ -143,7 +143,7 @@ def test_deposit_array(register_vault, token, vault, vaultSavings, user, deploye
 
     # For test vault - custom logic
     assert vault.available() == (vault_totalSupply+DEPOSIT_VALUE) * vault.min() // vault.max()
-    assert vault.balance() == (vault_totalSupply+DEPOSIT_VALUE)
+    assert token.balanceOf(vault.address) == (vault_totalSupply+DEPOSIT_VALUE)
 
 
 @given(

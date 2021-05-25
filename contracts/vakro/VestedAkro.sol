@@ -48,6 +48,9 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
     mapping (address => mapping (address => uint256)) private allowances;
     mapping (address => Balance) private holders;
 
+    uint256 public swapToAkroRateNumerator;   //Amount of 1 vAkro for 1 AKRO - 1 by default
+    uint256 public swapToAkroRateDenominator;
+
 
     function initialize(address _akro, uint256 _vestingPeriod) public initializer {
         __Ownable_init();
@@ -63,6 +66,10 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
         vestingPeriod = _vestingPeriod;
         vestingStart = 1619827200; //01 May 2021, 00:00:00 GMT+0
         vestingCliff = 31 * 24 * 60 * 60; //1 month - 31 day in May
+
+        swapToAkroRateNumerator = 1;
+        swapToAkroRateDenominator = 1;
+
     }
 
     // Stub for compiler purposes only
@@ -125,10 +132,47 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
         vestingCliff = _vestingCliff;
     }
 
+    /**
+     * @notice Sets the rate of ADEL to vAKRO swap: 1 ADEL = _swapRateNumerator/_swapRateDenominator vAKRO
+     * @notice By default is set to 0, that means that swap is disabled
+     * @param _swapRateNumerator Numerator for Adel converting. Can be set to 0 - that stops the swap.
+     * @param _swapRateDenominator Denominator for Adel converting. Can't be set to 0
+     */
+    function setSwapRate(uint256 _swapRateNumerator, uint256 _swapRateDenominator) external onlyOwner {
+        require(_swapRateDenominator > 0, "Incorrect value");
+        swapToAkroRateNumerator = _swapRateNumerator;
+        swapToAkroRateDenominator = _swapRateDenominator;
+    }
+
     function mint(address beneficiary, uint256 amount) public onlyMinter {
         totalSupply = totalSupply.add(amount);
         holders[beneficiary].unlocked = holders[beneficiary].unlocked.add(amount);
         emit Transfer(address(0), beneficiary, amount);
+    }
+
+    /**
+     * @notice Burns locked token from the user by the Minter
+     * @param sender User to burn tokens from
+     * @param amount Amount to burn
+     */
+    function burnFrom(address sender, uint256 amount) public onlyMinter {
+        require(amount > 0, "Incorrect amount");
+        require(sender != address(0), "Zero address");
+
+        require(block.timestamp <= vestingStart, "Vesting has started");
+
+        Balance storage b = holders[sender];
+
+        require(b.locked >= amount, "Insufficient vAkro");
+        require(b.batches.length > 0 || b.firstUnclaimedBatch < b.batches.length, "Nothing to burn");
+
+        totalSupply = totalSupply.sub(amount);
+        b.locked = b.locked.sub(amount);
+
+        uint256 batchAmount = b.batches[b.firstUnclaimedBatch].amount;
+        b.batches[b.firstUnclaimedBatch].amount = batchAmount.sub(amount);
+
+        emit Transfer(sender, address(0), amount);
     }
 
     /**
@@ -165,21 +209,37 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
     }
 
     /**
-     * @notice Redeem all already unlocked vAKRO
-     * @return Amount redeemed
+     * @notice Redeem all already unlocked vAKRO. Sends AKRO by the set up rate
+     * @return Amount vAkro redeemed
      */
     function redeemAllUnlocked() public returns(uint256){
         address beneficiary = _msgSender();
         require(!isSender(beneficiary), "VestedAkro: VestedAkroSender is not allowed to redeem");
         uint256 amount = holders[beneficiary].unlocked;
         if(amount == 0) return 0;
-        require(akro.balanceOf(address(this)) >= amount, "Not enough AKRO");
+
+        uint256 akroAmount = amount.mul(swapToAkroRateNumerator).div(swapToAkroRateDenominator);
+        require(akro.balanceOf(address(this)) >= akroAmount, "Not enough AKRO");
 
         holders[beneficiary].unlocked = 0;
         totalSupply = totalSupply.sub(amount);
-        akro.transfer(beneficiary, amount);
+
+        akro.transfer(beneficiary, akroAmount);
+        
         emit Transfer(beneficiary, address(0), amount);
         return amount;
+    }
+
+    /**
+     * @notice Calculates AKRO amount according to vAkro
+     * @param account Whose funds to get balance
+     * @return Akro amount recalculated
+     */
+    function balanceOfAkro(address account) public view returns (uint256) {
+        Balance storage b = holders[account];
+        uint256 amount = b.locked.add(b.unlocked);
+        uint256 akroAmount = amount.mul(swapToAkroRateNumerator).div(swapToAkroRateDenominator);
+        return akroAmount;
     }
 
     function balanceOf(address account) public override view returns (uint256) {
