@@ -53,11 +53,11 @@ abstract contract BaseWrapper {
         registry = RegistryAPI(_registry);
     }
 
-    function bestVault() public virtual view returns (VaultAPI) {
+    function bestVault() public view virtual returns (VaultAPI) {
         return VaultAPI(registry.latestVault(address(token)));
     }
 
-    function allVaults() public virtual view returns (VaultAPI[] memory) {
+    function allVaults() public view virtual returns (VaultAPI[] memory) {
         uint256 cache_length = _cachedVaults.length;
         uint256 num_vaults = registry.numVaults(address(token));
 
@@ -172,10 +172,11 @@ abstract contract BaseWrapper {
 
                 if (amount != WITHDRAW_EVERYTHING) {
                     // Compute amount to withdraw fully to satisfy the request
-                    uint256 estimatedShares = amount
-                        .sub(withdrawn) // NOTE: Changes every iteration
-                        .mul(10**uint256(vaults[id].decimals()))
-                        .div(vaults[id].pricePerShare()); // NOTE: Every Vault is different
+                    uint256 estimatedShares =
+                        amount
+                            .sub(withdrawn) // NOTE: Changes every iteration
+                            .mul(10**uint256(vaults[id].decimals()))
+                            .div(vaults[id].pricePerShare()); // NOTE: Every Vault is different
 
                     // Limit amount to withdraw to the maximum made available to this contract
                     uint256 shares = Math.min(estimatedShares, availableShares);

@@ -9,9 +9,8 @@ contract TestVaultSavings is VaultSavings {
     constructor() public {
         VaultSavings.initialize();
     }
-    function echidna_vault_owner() public view returns(bool){
+
+    function echidna_vault_owner() public view returns (bool) {
         return owner() == _deployer;
     }
-
 }
-

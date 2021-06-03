@@ -199,7 +199,7 @@ abstract contract BaseStrategy {
      *  `apiVersion()` function above.
      * @return This Strategy's name.
      */
-    function name() external virtual view returns (string memory);
+    function name() external view virtual returns (string memory);
 
     /**
      * @notice
@@ -216,7 +216,7 @@ abstract contract BaseStrategy {
      *  The amount of assets this strategy manages that should not be included in Yearn's Total Value
      *  Locked (TVL) calculation across it's ecosystem.
      */
-    function delegatedAssets() external virtual view returns (uint256) {
+    function delegatedAssets() external view virtual returns (uint256) {
         return 0;
     }
 
@@ -490,7 +490,7 @@ abstract contract BaseStrategy {
      *  value to be "safe".
      * @return The estimated total assets in this Strategy.
      */
-    function estimatedTotalAssets() public virtual view returns (uint256);
+    function estimatedTotalAssets() public view virtual returns (uint256);
 
     /*
      * @notice
@@ -580,7 +580,7 @@ abstract contract BaseStrategy {
      * @param callCost The keeper's estimated cast cost to call `tend()`.
      * @return `true` if `tend()` should be called, `false` otherwise.
      */
-    function tendTrigger(uint256 callCost) public virtual view returns (bool) {
+    function tendTrigger(uint256 callCost) public view virtual returns (bool) {
         // We usually don't need tend, but if there are positions that need
         // active maintainence, overriding this function is how you would
         // signal for that.
@@ -631,7 +631,7 @@ abstract contract BaseStrategy {
      * @param callCost The keeper's estimated cast cost to call `harvest()`.
      * @return `true` if `harvest()` should be called, `false` otherwise.
      */
-    function harvestTrigger(uint256 callCost) public virtual view returns (bool) {
+    function harvestTrigger(uint256 callCost) public view virtual returns (bool) {
         StrategyParams memory params = vault.strategies(address(this));
 
         // Should not trigger if Strategy is not activated
@@ -788,7 +788,7 @@ abstract contract BaseStrategy {
      *      return protected;
      *    }
      */
-    function protectedTokens() internal virtual view returns (address[] memory);
+    function protectedTokens() internal view virtual returns (address[] memory);
 
     /**
      * @notice
