@@ -23,16 +23,16 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
     event AkroAdded(uint256 amount);
 
     struct VestedBatch {
-        uint256 amount;     // Full amount of vAKRO vested in this batch
-        uint256 start;      // Vesting start time;
-        uint256 end;        // Vesting end time
-        uint256 claimed;    // vAKRO already claimed from this batch to unlocked balance of holder
+        uint256 amount; // Full amount of vAKRO vested in this batch
+        uint256 start; // Vesting start time;
+        uint256 end; // Vesting end time
+        uint256 claimed; // vAKRO already claimed from this batch to unlocked balance of holder
     }
 
     struct Balance {
-        VestedBatch[] batches;  // Array of vesting batches
-        uint256 locked;         // Amount locked in batches
-        uint256 unlocked;       // Amount of unlocked vAKRO (which either was previously claimed, or received from Minter)
+        VestedBatch[] batches; // Array of vesting batches
+        uint256 locked; // Amount locked in batches
+        uint256 unlocked; // Amount of unlocked vAKRO (which either was previously claimed, or received from Minter)
         uint256 firstUnclaimedBatch; // First batch which is not fully claimed
     }
 
@@ -45,12 +45,11 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
     uint256 public vestingPeriod; //set by owner of this VestedAkro token
     uint256 public vestingStart; //set by owner, default value 01 May 2021, 00:00:00 GMT+0
     uint256 public vestingCliff; //set by owner, cliff for akro unlock, 1 month by default
-    mapping (address => mapping (address => uint256)) private allowances;
-    mapping (address => Balance) private holders;
+    mapping(address => mapping(address => uint256)) private allowances;
+    mapping(address => Balance) private holders;
 
-    uint256 public swapToAkroRateNumerator;   //Amount of 1 vAkro for 1 AKRO - 1 by default
+    uint256 public swapToAkroRateNumerator; //Amount of 1 vAkro for 1 AKRO - 1 by default
     uint256 public swapToAkroRateDenominator;
-
 
     function initialize(address _akro, uint256 _vestingPeriod) public initializer {
         __Ownable_init();
@@ -60,7 +59,7 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
         _name = "Vested AKRO";
         _symbol = "vAKRO";
         _decimals = 18;
-        
+
         akro = IERC20Upgradeable(_akro);
         require(_vestingPeriod > 0, "VestedAkro: vestingPeriod should be > 0");
         vestingPeriod = _vestingPeriod;
@@ -69,12 +68,10 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
 
         swapToAkroRateNumerator = 1;
         swapToAkroRateDenominator = 1;
-
     }
 
     // Stub for compiler purposes only
-    function initialize(address sender) public override(MinterRole, VestedAkroSenderRole) {
-    }
+    function initialize(address sender) public override(MinterRole, VestedAkroSenderRole) {}
 
     function name() public view returns (string memory) {
         return _name;
@@ -88,14 +85,20 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
         return _decimals;
     }
 
-    function allowance(address owner, address spender) public override view returns (uint256) {
+    function allowance(address owner, address spender) public view override returns (uint256) {
         return allowances[owner][spender];
     }
+
     function approve(address spender, uint256 amount) public override returns (bool) {
         _approve(_msgSender(), spender, amount);
         return true;
     }
-    function transferFrom(address sender, address recipient, uint256 amount) public override onlySender returns (bool) {
+
+    function transferFrom(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) public override onlySender returns (bool) {
         // We require both sender and _msgSender() to have VestedAkroSender role
         // to prevent sender from redeem and prevent unauthorized transfers via transferFrom.
         require(isSender(sender), "VestedAkro: sender should have VestedAkroSender role");
@@ -181,9 +184,9 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
      */
     function addAkroLiquidity(uint256 _amount) public onlyMinter {
         require(_amount > 0, "Incorrect amount");
-        
+
         IERC20Upgradeable(akro).safeTransferFrom(_msgSender(), address(this), _amount);
-        
+
         emit AkroAdded(_amount);
     }
 
@@ -192,7 +195,7 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
      * @param holder Whose funds to unlock
      * @return total unlocked amount awailable for redeem
      */
-    function unlockAvailable(address holder) public returns(uint256) {
+    function unlockAvailable(address holder) public returns (uint256) {
         require(holders[holder].batches.length > 0, "VestedAkro: nothing to unlock");
         claimAllFromBatches(holder);
         return holders[holder].unlocked;
@@ -202,7 +205,7 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
      * @notice Unlock all available vAKRO and redeem it
      * @return Amount redeemed
      */
-    function unlockAndRedeemAll() public returns(uint256){
+    function unlockAndRedeemAll() public returns (uint256) {
         address beneficiary = _msgSender();
         claimAllFromBatches(beneficiary);
         return redeemAllUnlocked();
@@ -212,11 +215,11 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
      * @notice Redeem all already unlocked vAKRO. Sends AKRO by the set up rate
      * @return Amount vAkro redeemed
      */
-    function redeemAllUnlocked() public returns(uint256){
+    function redeemAllUnlocked() public returns (uint256) {
         address beneficiary = _msgSender();
         require(!isSender(beneficiary), "VestedAkro: VestedAkroSender is not allowed to redeem");
         uint256 amount = holders[beneficiary].unlocked;
-        if(amount == 0) return 0;
+        if (amount == 0) return 0;
 
         uint256 akroAmount = amount.mul(swapToAkroRateNumerator).div(swapToAkroRateDenominator);
         require(akro.balanceOf(address(this)) >= akroAmount, "Not enough AKRO");
@@ -225,7 +228,7 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
         totalSupply = totalSupply.sub(amount);
 
         akro.transfer(beneficiary, akroAmount);
-        
+
         emit Transfer(beneficiary, address(0), amount);
         return amount;
     }
@@ -242,29 +245,50 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
         return akroAmount;
     }
 
-    function balanceOf(address account) public override view returns (uint256) {
+    function balanceOf(address account) public view override returns (uint256) {
         Balance storage b = holders[account];
         return b.locked.add(b.unlocked);
     }
 
-    function balanceInfoOf(address account) public view returns(uint256 locked, uint256 unlocked, uint256 unlockable) {
+    function balanceInfoOf(address account)
+        public
+        view
+        returns (
+            uint256 locked,
+            uint256 unlocked,
+            uint256 unlockable
+        )
+    {
         Balance storage b = holders[account];
         return (b.locked, b.unlocked, calculateClaimableFromBatches(account));
     }
 
-    function batchesInfoOf(address account) public view returns(uint256 firstUnclaimedBatch, uint256 totalBatches) {
+    function batchesInfoOf(address account) public view returns (uint256 firstUnclaimedBatch, uint256 totalBatches) {
         Balance storage b = holders[account];
         return (b.firstUnclaimedBatch, b.batches.length);
     }
 
-    function batchInfo(address account, uint256 batch) public view 
-    returns(uint256 amount, uint256 start, uint256 end, uint256 claimed, uint256 claimable) {
+    function batchInfo(address account, uint256 batch)
+        public
+        view
+        returns (
+            uint256 amount,
+            uint256 start,
+            uint256 end,
+            uint256 claimed,
+            uint256 claimable
+        )
+    {
         VestedBatch storage vb = holders[account].batches[batch];
-        (claimable,) = calculateClaimableFromBatch(vb);
-        return (vb.amount, vb.start, vb.end, vb.claimed, claimable);
+        (claimable, ) = calculateClaimableFromBatch(vb);
+        return (vb.amount, vestingStart, vestingStart.add(vestingPeriod), vb.claimed, claimable);
     }
 
-    function _approve(address owner, address spender, uint256 amount) internal {
+    function _approve(
+        address owner,
+        address spender,
+        uint256 amount
+    ) internal {
         require(owner != address(0), "VestedAkro: approve from the zero address");
         require(spender != address(0), "VestedAkro: approve to the zero address");
 
@@ -272,7 +296,11 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
         emit Approval(owner, spender, amount);
     }
 
-    function _transfer(address sender, address recipient, uint256 amount) internal {
+    function _transfer(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) internal {
         require(sender != address(0), "VestedAkro: transfer from the zero address");
         require(recipient != address(0), "VestedAkro: transfer to the zero address");
 
@@ -282,19 +310,12 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
         emit Transfer(sender, recipient, amount);
     }
 
-
     function createOrModifyBatch(address holder, uint256 amount) internal {
         Balance storage b = holders[holder];
 
         if (b.batches.length == 0 || b.firstUnclaimedBatch == b.batches.length) {
-            b.batches.push(VestedBatch({
-                amount: amount,
-                start: vestingStart,
-                end: vestingStart.add(vestingPeriod),
-                claimed: 0
-            }));
-        }
-        else {
+            b.batches.push(VestedBatch({amount: amount, start: vestingStart, end: vestingStart.add(vestingPeriod), claimed: 0}));
+        } else {
             uint256 batchAmount = b.batches[b.firstUnclaimedBatch].amount;
             b.batches[b.firstUnclaimedBatch].amount = batchAmount.add(amount);
         }
@@ -310,21 +331,21 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
         Balance storage b = holders[holder];
         bool firstUnclaimedFound;
         uint256 claiming;
-        for(uint256 i = b.firstUnclaimedBatch; i < tillBatch; i++) {
+        for (uint256 i = b.firstUnclaimedBatch; i < tillBatch; i++) {
             (uint256 claimable, bool fullyClaimable) = calculateClaimableFromBatch(b.batches[i]);
-            if(claimable > 0) {
+            if (claimable > 0) {
                 b.batches[i].claimed = b.batches[i].claimed.add(claimable);
                 claiming = claiming.add(claimable);
             }
-            if(!fullyClaimable && !firstUnclaimedFound) {
+            if (!fullyClaimable && !firstUnclaimedFound) {
                 b.firstUnclaimedBatch = i;
                 firstUnclaimedFound = true;
             }
         }
-        if(!firstUnclaimedFound) {
+        if (!firstUnclaimedFound) {
             b.firstUnclaimedBatch = b.batches.length;
         }
-        if(claiming > 0){
+        if (claiming > 0) {
             b.locked = b.locked.sub(claiming);
             b.unlocked = b.unlocked.add(claiming);
             emit Unlocked(holder, claiming);
@@ -336,11 +357,11 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
      * @param holder pointer to a batch
      * @return claimable amount
      */
-    function calculateClaimableFromBatches(address holder) internal view returns(uint256) {
+    function calculateClaimableFromBatches(address holder) internal view returns (uint256) {
         Balance storage b = holders[holder];
         uint256 claiming;
-        for(uint256 i = b.firstUnclaimedBatch; i < b.batches.length; i++) {
-            (uint256 claimable,) = calculateClaimableFromBatch(b.batches[i]);
+        for (uint256 i = b.firstUnclaimedBatch; i < b.batches.length; i++) {
+            (uint256 claimable, ) = calculateClaimableFromBatch(b.batches[i]);
             claiming = claiming.add(claimable);
         }
         return claiming;
@@ -351,14 +372,14 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
      * @param vb pointer to a batch
      * @return claimable amount and bool which is true if batch is fully claimable
      */
-    function calculateClaimableFromBatch(VestedBatch storage vb) internal view returns(uint256, bool) {
-        if (now < vb.start.add(vestingCliff) ) {
+    function calculateClaimableFromBatch(VestedBatch storage vb) internal view returns (uint256, bool) {
+        if (now < vestingStart.add(vestingCliff)) {
             return (0, false); // No unlcoks before cliff period is over
         }
-        if(now >= vb.end) {
+        if (now >= vestingStart.add(vestingPeriod)) {
             return (vb.amount.sub(vb.claimed), true);
         }
-        uint256 claimable = (vb.amount.mul(now.sub(vb.start)).div(vb.end.sub(vb.start))).sub(vb.claimed);
+        uint256 claimable = (vb.amount.mul(now.sub(vestingStart)).div(vestingPeriod)).sub(vb.claimed);
         return (claimable, false);
     }
 }

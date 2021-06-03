@@ -3,7 +3,6 @@
 
 pragma solidity ^0.6.12;
 
-
 /**
  * @title Initializable
  *
@@ -17,51 +16,52 @@ pragma solidity ^0.6.12;
  * because this is not dealt with automatically as with constructors.
  */
 contract Initializable {
+    /**
+     * @dev Indicates that the contract has been initialized.
+     */
+    bool private initialized;
 
-  /**
-   * @dev Indicates that the contract has been initialized.
-   */
-  bool private initialized;
+    /**
+     * @dev Indicates that the contract is in the process of being initialized.
+     */
+    bool private initializing;
 
-  /**
-   * @dev Indicates that the contract is in the process of being initialized.
-   */
-  bool private initializing;
+    /**
+     * @dev Modifier to use in the initializer function of a contract.
+     */
+    modifier initializer() {
+        require(initializing || isConstructor() || !initialized, "Contract instance has already been initialized");
 
-  /**
-   * @dev Modifier to use in the initializer function of a contract.
-   */
-  modifier initializer() {
-    require(initializing || isConstructor() || !initialized, "Contract instance has already been initialized");
+        bool isTopLevelCall = !initializing;
+        if (isTopLevelCall) {
+            initializing = true;
+            initialized = true;
+        }
 
-    bool isTopLevelCall = !initializing;
-    if (isTopLevelCall) {
-      initializing = true;
-      initialized = true;
+        _;
+
+        if (isTopLevelCall) {
+            initializing = false;
+        }
     }
 
-    _;
-
-    if (isTopLevelCall) {
-      initializing = false;
+    /// @dev Returns true if and only if the function is running in the constructor
+    function isConstructor() private view returns (bool) {
+        // extcodesize checks the size of the code stored in an address, and
+        // address returns the current address. Since the code is still not
+        // deployed when running a constructor, any checks on its code size will
+        // yield zero, making it an effective way to detect if a contract is
+        // under construction or not.
+        address self = address(this);
+        uint256 cs;
+        assembly {
+            cs := extcodesize(self)
+        }
+        return cs == 0;
     }
-  }
 
-  /// @dev Returns true if and only if the function is running in the constructor
-  function isConstructor() private view returns (bool) {
-    // extcodesize checks the size of the code stored in an address, and
-    // address returns the current address. Since the code is still not
-    // deployed when running a constructor, any checks on its code size will
-    // yield zero, making it an effective way to detect if a contract is
-    // under construction or not.
-    address self = address(this);
-    uint256 cs;
-    assembly { cs := extcodesize(self) }
-    return cs == 0;
-  }
-
-  // Reserved storage space to allow for layout changes in the future.
-  uint256[50] private ______gap;
+    // Reserved storage space to allow for layout changes in the future.
+    uint256[50] private ______gap;
 }
 
 // File: @openzeppelin\contracts-ethereum-package\contracts\GSN\Context.sol
@@ -79,7 +79,8 @@ contract Initializable {
 contract Context is Initializable {
     // Empty internal constructor, to prevent people from mistakenly deploying
     // an instance of this contract, which should be used via inheritance.
-    constructor () internal { }
+    constructor() internal {}
+
     // solhint-disable-previous-line no-empty-blocks
 
     function _msgSender() internal view returns (address payable) {
@@ -151,7 +152,11 @@ interface IERC20 {
      *
      * Emits a {Transfer} event.
      */
-    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
+    function transferFrom(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) external returns (bool);
 
     /**
      * @dev Emitted when `value` tokens are moved from one account (`from`) to
@@ -223,7 +228,11 @@ library SafeMath {
      *
      * _Available since v2.4.0._
      */
-    function sub(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+    function sub(
+        uint256 a,
+        uint256 b,
+        string memory errorMessage
+    ) internal pure returns (uint256) {
         require(b <= a, errorMessage);
         uint256 c = a - b;
 
@@ -281,7 +290,11 @@ library SafeMath {
      *
      * _Available since v2.4.0._
      */
-    function div(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+    function div(
+        uint256 a,
+        uint256 b,
+        string memory errorMessage
+    ) internal pure returns (uint256) {
         // Solidity only automatically asserts when dividing by 0
         require(b > 0, errorMessage);
         uint256 c = a / b;
@@ -318,14 +331,17 @@ library SafeMath {
      *
      * _Available since v2.4.0._
      */
-    function mod(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+    function mod(
+        uint256 a,
+        uint256 b,
+        string memory errorMessage
+    ) internal pure returns (uint256) {
         require(b != 0, errorMessage);
         return a % b;
     }
 }
 
 // File: @openzeppelin\contracts-ethereum-package\contracts\token\ERC20\ERC20.sol
-
 
 /**
  * @dev Implementation of the {IERC20} interface.
@@ -354,23 +370,23 @@ library SafeMath {
 contract ERC20 is Initializable, Context, IERC20 {
     using SafeMath for uint256;
 
-    mapping (address => uint256) private _balances;
+    mapping(address => uint256) private _balances;
 
-    mapping (address => mapping (address => uint256)) private _allowances;
+    mapping(address => mapping(address => uint256)) private _allowances;
 
     uint256 private _totalSupply;
 
     /**
      * @dev See {IERC20-totalSupply}.
      */
-    function totalSupply() public override view returns (uint256) {
+    function totalSupply() public view override returns (uint256) {
         return _totalSupply;
     }
 
     /**
      * @dev See {IERC20-balanceOf}.
      */
-    function balanceOf(address account) public override view returns (uint256) {
+    function balanceOf(address account) public view override returns (uint256) {
         return _balances[account];
     }
 
@@ -390,7 +406,7 @@ contract ERC20 is Initializable, Context, IERC20 {
     /**
      * @dev See {IERC20-allowance}.
      */
-    function allowance(address owner, address spender) public override view returns (uint256) {
+    function allowance(address owner, address spender) public view override returns (uint256) {
         return _allowances[owner][spender];
     }
 
@@ -418,7 +434,11 @@ contract ERC20 is Initializable, Context, IERC20 {
      * - the caller must have allowance for `sender`'s tokens of at least
      * `amount`.
      */
-    function transferFrom(address sender, address recipient, uint256 amount) public override returns (bool) {
+    function transferFrom(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) public override returns (bool) {
         _transfer(sender, recipient, amount);
         _approve(sender, _msgSender(), _allowances[sender][_msgSender()].sub(amount, "ERC20: transfer amount exceeds allowance"));
         return true;
@@ -474,7 +494,11 @@ contract ERC20 is Initializable, Context, IERC20 {
      * - `recipient` cannot be the zero address.
      * - `sender` must have a balance of at least `amount`.
      */
-    function _transfer(address sender, address recipient, uint256 amount) internal {
+    function _transfer(
+        address sender,
+        address recipient,
+        uint256 amount
+    ) internal {
         require(sender != address(0), "ERC20: transfer from the zero address");
         require(recipient != address(0), "ERC20: transfer to the zero address");
 
@@ -532,7 +556,11 @@ contract ERC20 is Initializable, Context, IERC20 {
      * - `owner` cannot be the zero address.
      * - `spender` cannot be the zero address.
      */
-    function _approve(address owner, address spender, uint256 amount) internal {
+    function _approve(
+        address owner,
+        address spender,
+        uint256 amount
+    ) internal {
         require(owner != address(0), "ERC20: approve from the zero address");
         require(spender != address(0), "ERC20: approve to the zero address");
 
@@ -568,7 +596,7 @@ library Address {
      * It is unsafe to assume that an address for which this function returns
      * false is an externally-owned account (EOA) and not a contract.
      *
-     * Among others, `isContract` will return false for the following 
+     * Among others, `isContract` will return false for the following
      * types of addresses:
      *
      *  - an externally-owned account
@@ -584,7 +612,9 @@ library Address {
         bytes32 codehash;
         bytes32 accountHash = 0xc5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470;
         // solhint-disable-next-line no-inline-assembly
-        assembly { codehash := extcodehash(account) }
+        assembly {
+            codehash := extcodehash(account)
+        }
         return (codehash != accountHash && codehash != 0x0);
     }
 
@@ -627,7 +657,6 @@ library Address {
 
 // File: @openzeppelin\contracts-ethereum-package\contracts\token\ERC20\SafeERC20.sol
 
-
 /**
  * @title SafeERC20
  * @dev Wrappers around ERC20 operations that throw on failure (when the token
@@ -641,31 +670,50 @@ library SafeERC20 {
     using SafeMath for uint256;
     using Address for address;
 
-    function safeTransfer(IERC20 token, address to, uint256 value) internal {
+    function safeTransfer(
+        IERC20 token,
+        address to,
+        uint256 value
+    ) internal {
         callOptionalReturn(token, abi.encodeWithSelector(token.transfer.selector, to, value));
     }
 
-    function safeTransferFrom(IERC20 token, address from, address to, uint256 value) internal {
+    function safeTransferFrom(
+        IERC20 token,
+        address from,
+        address to,
+        uint256 value
+    ) internal {
         callOptionalReturn(token, abi.encodeWithSelector(token.transferFrom.selector, from, to, value));
     }
 
-    function safeApprove(IERC20 token, address spender, uint256 value) internal {
+    function safeApprove(
+        IERC20 token,
+        address spender,
+        uint256 value
+    ) internal {
         // safeApprove should only be called when setting an initial allowance,
         // or when resetting it to zero. To increase and decrease it, use
         // 'safeIncreaseAllowance' and 'safeDecreaseAllowance'
         // solhint-disable-next-line max-line-length
-        require((value == 0) || (token.allowance(address(this), spender) == 0),
-            "SafeERC20: approve from non-zero to non-zero allowance"
-        );
+        require((value == 0) || (token.allowance(address(this), spender) == 0), "SafeERC20: approve from non-zero to non-zero allowance");
         callOptionalReturn(token, abi.encodeWithSelector(token.approve.selector, spender, value));
     }
 
-    function safeIncreaseAllowance(IERC20 token, address spender, uint256 value) internal {
+    function safeIncreaseAllowance(
+        IERC20 token,
+        address spender,
+        uint256 value
+    ) internal {
         uint256 newAllowance = token.allowance(address(this), spender).add(value);
         callOptionalReturn(token, abi.encodeWithSelector(token.approve.selector, spender, newAllowance));
     }
 
-    function safeDecreaseAllowance(IERC20 token, address spender, uint256 value) internal {
+    function safeDecreaseAllowance(
+        IERC20 token,
+        address spender,
+        uint256 value
+    ) internal {
         uint256 newAllowance = token.allowance(address(this), spender).sub(value, "SafeERC20: decreased allowance below zero");
         callOptionalReturn(token, abi.encodeWithSelector(token.approve.selector, spender, newAllowance));
     }
@@ -691,7 +739,8 @@ library SafeERC20 {
         (bool success, bytes memory returndata) = address(token).call(data);
         require(success, "SafeERC20: low-level call failed");
 
-        if (returndata.length > 0) { // Return data is optional
+        if (returndata.length > 0) {
+            // Return data is optional
             // solhint-disable-next-line max-line-length
             require(abi.decode(returndata, (bool)), "SafeERC20: ERC20 operation did not succeed");
         }
@@ -717,7 +766,7 @@ contract Ownable is Initializable, Context {
     /**
      * @dev Initializes the contract setting the deployer as the initial owner.
      */
-    function initialize(address sender) virtual public initializer {
+    function initialize(address sender) public virtual initializer {
         _owner = sender;
         emit OwnershipTransferred(address(0), _owner);
     }
@@ -782,12 +831,11 @@ contract Ownable is Initializable, Context {
  * Base contract for all modules
  */
 contract Base is Initializable, Context, Ownable {
-    address constant  ZERO_ADDRESS = address(0);
+    address constant ZERO_ADDRESS = address(0);
 
     function initialize() public initializer {
         Ownable.initialize(_msgSender());
     }
-
 }
 
 // File: contracts\core\ModuleNames.sol
@@ -797,22 +845,22 @@ contract Base is Initializable, Context, Ownable {
  */
 contract ModuleNames {
     // Pool Modules
-    string internal constant MODULE_ACCESS            = "access";
-    string internal constant MODULE_SAVINGS           = "savings";
-    string internal constant MODULE_INVESTING         = "investing";
-    string internal constant MODULE_STAKING_AKRO      = "staking";
-    string internal constant MODULE_STAKING_ADEL      = "stakingAdel";
-    string internal constant MODULE_DCA               = "dca";
-    string internal constant MODULE_REWARD            = "reward";
-    string internal constant MODULE_REWARD_DISTR      = "rewardDistributions";
-    string internal constant MODULE_VAULT             = "vault";
+    string internal constant MODULE_ACCESS = "access";
+    string internal constant MODULE_SAVINGS = "savings";
+    string internal constant MODULE_INVESTING = "investing";
+    string internal constant MODULE_STAKING_AKRO = "staking";
+    string internal constant MODULE_STAKING_ADEL = "stakingAdel";
+    string internal constant MODULE_DCA = "dca";
+    string internal constant MODULE_REWARD = "reward";
+    string internal constant MODULE_REWARD_DISTR = "rewardDistributions";
+    string internal constant MODULE_VAULT = "vault";
 
     // Pool tokens
-    string internal constant TOKEN_AKRO               = "akro";    
-    string internal constant TOKEN_ADEL               = "adel";    
+    string internal constant TOKEN_AKRO = "akro";
+    string internal constant TOKEN_ADEL = "adel";
 
     // External Modules (used to store addresses of external contracts)
-    string internal constant CONTRACT_RAY             = "ray";
+    string internal constant CONTRACT_RAY = "ray";
 }
 
 // File: contracts\common\Module.sol
@@ -824,7 +872,7 @@ contract Module is Base, ModuleNames {
     event PoolAddressChanged(address newPool);
     address public pool;
 
-    function initialize(address _pool) virtual public override initializer {
+    function initialize(address _pool) public virtual override initializer {
         Base.initialize();
         setPool(_pool);
     }
@@ -832,17 +880,18 @@ contract Module is Base, ModuleNames {
     function setPool(address _pool) public onlyOwner {
         require(_pool != ZERO_ADDRESS, "Module: pool address can't be zero");
         pool = _pool;
-        emit PoolAddressChanged(_pool);        
+        emit PoolAddressChanged(_pool);
     }
 
-    function getModuleAddress(string memory module) public view returns(address){
+    function getModuleAddress(string memory module) public view returns (address) {
         require(pool != ZERO_ADDRESS, "Module: no pool");
         (bool success, bytes memory result) = pool.staticcall(abi.encodeWithSignature("get(string)", module));
-        
+
         //Forward error from Pool contract
-        if (!success) assembly {
-            revert(add(result, 32), result)
-        }
+        if (!success)
+            assembly {
+                revert(add(result, 32), result)
+            }
 
         address moduleAddress = abi.decode(result, (address));
         // string memory error = string(abi.encodePacked("Module: requested module not found - ", module));
@@ -850,7 +899,6 @@ contract Module is Base, ModuleNames {
         require(moduleAddress != ZERO_ADDRESS, "Module: requested module not found");
         return moduleAddress;
     }
-
 }
 
 import "../../vakro/Roles.sol";
@@ -865,7 +913,7 @@ contract RewardManagerRole is Initializable, Context {
 
     Roles.Role private _managers;
 
-    function initialize(address sender) virtual public initializer {
+    function initialize(address sender) public virtual initializer {
         if (!isRewardManager(sender)) {
             _addRewardManager(sender);
         }
@@ -897,7 +945,6 @@ contract RewardManagerRole is Initializable, Context {
         _managers.remove(account);
         emit RewardManagerRemoved(account);
     }
-
 }
 
 // File: contracts\modules\reward\RewardVestingModule.sol
@@ -911,8 +958,8 @@ contract RewardVestingModule is Module, RewardManagerRole {
     using SafeMath for uint256;
 
     struct Epoch {
-        uint256 end;        // Timestamp of Epoch end
-        uint256 amount;     // Amount of reward token for this protocol on this epoch
+        uint256 end; // Timestamp of Epoch end
+        uint256 amount; // Amount of reward token for this protocol on this epoch
     }
 
     struct RewardInfo {
@@ -922,7 +969,7 @@ contract RewardVestingModule is Module, RewardManagerRole {
 
     struct ProtocolRewards {
         address[] tokens;
-        mapping(address=>RewardInfo) rewardInfo;
+        mapping(address => RewardInfo) rewardInfo;
     }
 
     mapping(address => ProtocolRewards) internal rewards;
@@ -931,26 +978,27 @@ contract RewardVestingModule is Module, RewardManagerRole {
     function initialize(address _pool) public override(Module, RewardManagerRole) initializer {
         Module.initialize(_pool);
         RewardManagerRole.initialize(_msgSender());
-        defaultEpochLength = 7*24*60*60;
+        defaultEpochLength = 7 * 24 * 60 * 60;
     }
 
-    function getRewardInfo(address protocol, address token) public view returns(uint256 lastClaim, uint256 epochCount) {
+    function getRewardInfo(address protocol, address token) public view returns (uint256 lastClaim, uint256 epochCount) {
         ProtocolRewards storage r = rewards[protocol];
         RewardInfo storage ri = r.rewardInfo[token];
         return (ri.lastClaim, ri.epochs.length);
     }
 
-    function registerRewardToken(address protocol, address token, uint256 firstEpochStart) public onlyRewardManager {
-        if(firstEpochStart == 0) firstEpochStart = block.timestamp;
+    function registerRewardToken(
+        address protocol,
+        address token,
+        uint256 firstEpochStart
+    ) public onlyRewardManager {
+        if (firstEpochStart == 0) firstEpochStart = block.timestamp;
         //Push zero epoch
         ProtocolRewards storage r = rewards[protocol];
         RewardInfo storage ri = r.rewardInfo[token];
         require(ri.epochs.length == 0, "RewardVesting: token already registered for this protocol");
         r.tokens.push(token);
-        ri.epochs.push(Epoch({
-            end: firstEpochStart,
-            amount: 0
-        }));
+        ri.epochs.push(Epoch({end: firstEpochStart, amount: 0}));
         emit RewardTokenRegistered(protocol, token);
     }
 
@@ -958,34 +1006,46 @@ contract RewardVestingModule is Module, RewardManagerRole {
         defaultEpochLength = _defaultEpochLength;
     }
 
-    function getEpochInfo(address protocol, address token, uint256 epoch) public view returns(uint256 epochStart, uint256 epochEnd, uint256 rewardAmount) {
+    function getEpochInfo(
+        address protocol,
+        address token,
+        uint256 epoch
+    )
+        public
+        view
+        returns (
+            uint256 epochStart,
+            uint256 epochEnd,
+            uint256 rewardAmount
+        )
+    {
         ProtocolRewards storage r = rewards[protocol];
         RewardInfo storage ri = r.rewardInfo[token];
         require(ri.epochs.length > 0, "RewardVesting: protocol or token not registered");
-        require (epoch < ri.epochs.length, "RewardVesting: epoch number too high");
-        if(epoch == 0) {
+        require(epoch < ri.epochs.length, "RewardVesting: epoch number too high");
+        if (epoch == 0) {
             epochStart = 0;
-        }else {
-            epochStart = ri.epochs[epoch-1].end;
+        } else {
+            epochStart = ri.epochs[epoch - 1].end;
         }
         epochEnd = ri.epochs[epoch].end;
         rewardAmount = ri.epochs[epoch].amount;
         return (epochStart, epochEnd, rewardAmount);
     }
 
-    function getLastCreatedEpoch(address protocol, address token) public view returns(uint256) {
+    function getLastCreatedEpoch(address protocol, address token) public view returns (uint256) {
         ProtocolRewards storage r = rewards[protocol];
         RewardInfo storage ri = r.rewardInfo[token];
         require(ri.epochs.length > 0, "RewardVesting: protocol or token not registered");
-        return ri.epochs.length-1;       
+        return ri.epochs.length - 1;
     }
 
     function claimRewards() public {
         address protocol = _msgSender();
         ProtocolRewards storage r = rewards[protocol];
         //require(r.tokens.length > 0, "RewardVesting: call only from registered protocols allowed");
-        if(r.tokens.length == 0) return;    //This allows claims from protocols which are not yet registered without reverting
-        for(uint256 i=0; i < r.tokens.length; i++){
+        if (r.tokens.length == 0) return; //This allows claims from protocols which are not yet registered without reverting
+        for (uint256 i = 0; i < r.tokens.length; i++) {
             _claimRewards(protocol, r.tokens[i]);
         }
     }
@@ -1000,44 +1060,46 @@ contract RewardVestingModule is Module, RewardManagerRole {
         uint256 epochsLength = ri.epochs.length;
         require(epochsLength > 0, "RewardVesting: protocol or token not registered");
 
-        Epoch storage lastEpoch = ri.epochs[epochsLength-1];
+        Epoch storage lastEpoch = ri.epochs[epochsLength - 1];
         uint256 previousClaim = ri.lastClaim;
-        if(previousClaim == lastEpoch.end) return; // Nothing to claim yet
+        if (previousClaim == lastEpoch.end) return; // Nothing to claim yet
 
-        if(lastEpoch.end < block.timestamp) {
+        if (lastEpoch.end < block.timestamp) {
             ri.lastClaim = lastEpoch.end;
-        }else{
+        } else {
             ri.lastClaim = block.timestamp;
         }
-        
+
         uint256 claimAmount;
         Epoch storage ep = ri.epochs[0];
         uint256 i;
         // Searching for last claimable epoch
-        for(i = epochsLength-1; i > 0; i--) {
+        for (i = epochsLength - 1; i > 0; i--) {
             ep = ri.epochs[i];
-            if(ep.end < block.timestamp) {  // We've found last fully-finished epoch
-                if(i < epochsLength-1) {    // We have already started current epoch
-                    i++;                    //    Go back to currently-running epoch
+            if (ep.end < block.timestamp) {
+                // We've found last fully-finished epoch
+                if (i < epochsLength - 1) {
+                    // We have already started current epoch
+                    i++; //    Go back to currently-running epoch
                     ep = ri.epochs[i];
                 }
                 break;
             }
         }
-        if(ep.end > block.timestamp) {
+        if (ep.end > block.timestamp) {
             //Half-claim
-            uint256 epStart = ri.epochs[i-1].end;
-            uint256 claimStart = (previousClaim > epStart)?previousClaim:epStart;
+            uint256 epStart = ri.epochs[i - 1].end;
+            uint256 claimStart = (previousClaim > epStart) ? previousClaim : epStart;
             uint256 epochClaim = ep.amount.mul(block.timestamp.sub(claimStart)).div(ep.end.sub(epStart));
             claimAmount = claimAmount.add(epochClaim);
             i--;
         }
         //Claim rest
-        for(i; i > 0; i--) {
+        for (i; i > 0; i--) {
             ep = ri.epochs[i];
-            uint256 epStart = ri.epochs[i-1].end;
-            if(ep.end > previousClaim) {
-                if(previousClaim > epStart) {
+            uint256 epStart = ri.epochs[i - 1].end;
+            if (ep.end > previousClaim) {
+                if (previousClaim > epStart) {
                     uint256 epochClaim = ep.amount.mul(ep.end.sub(previousClaim)).div(ep.end.sub(epStart));
                     claimAmount = claimAmount.add(epochClaim);
                 } else {
@@ -1051,31 +1113,42 @@ contract RewardVestingModule is Module, RewardManagerRole {
         emit RewardClaimed(protocol, token, previousClaim, ri.lastClaim, claimAmount);
     }
 
-    function createEpoch(address protocol, address token, uint256 epochEnd, uint256 amount) public onlyRewardManager {
+    function createEpoch(
+        address protocol,
+        address token,
+        uint256 epochEnd,
+        uint256 amount
+    ) public onlyRewardManager {
         ProtocolRewards storage r = rewards[protocol];
         RewardInfo storage ri = r.rewardInfo[token];
         uint256 epochsLength = ri.epochs.length;
         require(epochsLength > 0, "RewardVesting: protocol or token not registered");
-        uint256 prevEpochEnd = ri.epochs[epochsLength-1].end;
+        uint256 prevEpochEnd = ri.epochs[epochsLength - 1].end;
         require(epochEnd > prevEpochEnd, "RewardVesting: new epoch should end after previous");
-        ri.epochs.push(Epoch({
-            end: epochEnd,
-            amount:0
-        }));            
+        ri.epochs.push(Epoch({end: epochEnd, amount: 0}));
         _addReward(protocol, token, epochsLength, amount);
     }
 
-    function addReward(address protocol, address token, uint256 epoch, uint256 amount) public onlyRewardManager {
+    function addReward(
+        address protocol,
+        address token,
+        uint256 epoch,
+        uint256 amount
+    ) public onlyRewardManager {
         _addReward(protocol, token, epoch, amount);
     }
 
-    function addRewards(address[] calldata protocols, address[] calldata tokens, uint256[] calldata epochs, uint256[] calldata amounts) external onlyRewardManager {
+    function addRewards(
+        address[] calldata protocols,
+        address[] calldata tokens,
+        uint256[] calldata epochs,
+        uint256[] calldata amounts
+    ) external onlyRewardManager {
         require(
-            (protocols.length == tokens.length) && 
-            (protocols.length == epochs.length) && 
-            (protocols.length == amounts.length),
-            "RewardVesting: array lengths do not match");
-        for(uint256 i=0; i<protocols.length; i++) {
+            (protocols.length == tokens.length) && (protocols.length == epochs.length) && (protocols.length == amounts.length),
+            "RewardVesting: array lengths do not match"
+        );
+        for (uint256 i = 0; i < protocols.length; i++) {
             _addReward(protocols[i], tokens[i], epochs[i], amounts[i]);
         }
     }
@@ -1087,20 +1160,22 @@ contract RewardVestingModule is Module, RewardManagerRole {
      * @param epoch Epoch number - can be 0 to create new Epoch
      * @param amount Amount of Reward token to deposit
      */
-    function _addReward(address protocol, address token, uint256 epoch, uint256 amount) internal {
+    function _addReward(
+        address protocol,
+        address token,
+        uint256 epoch,
+        uint256 amount
+    ) internal {
         ProtocolRewards storage r = rewards[protocol];
         RewardInfo storage ri = r.rewardInfo[token];
         uint256 epochsLength = ri.epochs.length;
         require(epochsLength > 0, "RewardVesting: protocol or token not registered");
-        if(epoch == 0) epoch = epochsLength; // creating a new epoch
+        if (epoch == 0) epoch = epochsLength; // creating a new epoch
         if (epoch == epochsLength) {
-            uint256 epochEnd = ri.epochs[epochsLength-1].end.add(defaultEpochLength);
-            if(epochEnd < block.timestamp) epochEnd = block.timestamp; //This generally should not happen, but just in case - we generate only one epoch since previous end
-            ri.epochs.push(Epoch({
-                end: epochEnd,
-                amount: amount
-            }));            
-        } else  {
+            uint256 epochEnd = ri.epochs[epochsLength - 1].end.add(defaultEpochLength);
+            if (epochEnd < block.timestamp) epochEnd = block.timestamp; //This generally should not happen, but just in case - we generate only one epoch since previous end
+            ri.epochs.push(Epoch({end: epochEnd, amount: amount}));
+        } else {
             require(epochsLength > epoch, "RewardVesting: epoch is too high");
             Epoch storage ep = ri.epochs[epoch];
             require(ep.end > block.timestamp, "RewardVesting: epoch already finished");
@@ -1109,12 +1184,9 @@ contract RewardVestingModule is Module, RewardManagerRole {
         emit EpochRewardAdded(protocol, token, epoch, amount);
         IERC20(token).safeTransferFrom(_msgSender(), address(this), amount);
     }
-
-
 }
 
 import "../../../interfaces/delphi/IERC900.sol";
-
 
 // File: @openzeppelin\contracts-ethereum-package\contracts\access\roles\CapperRole.sol
 
@@ -1126,7 +1198,7 @@ contract CapperRole is Initializable, Context {
 
     Roles.Role private _cappers;
 
-    function initialize(address sender) virtual public initializer {
+    function initialize(address sender) public virtual initializer {
         if (!isCapper(sender)) {
             _addCapper(sender);
         }
@@ -1168,534 +1240,498 @@ contract CapperRole is Initializable, Context {
  * @title ERC900 Simple Staking Interface basic implementation
  * @dev See https://github.com/ethereum/EIPs/blob/master/EIPS/eip-900.md
  */
-contract StakingPoolBase is Module, IERC900, CapperRole  {
-  // @TODO: deploy this separately so we don't have to deploy it multiple times for each contract
-  using SafeMath for uint256;
+contract StakingPoolBase is Module, IERC900, CapperRole {
+    // @TODO: deploy this separately so we don't have to deploy it multiple times for each contract
+    using SafeMath for uint256;
 
-  // Token used for staking
-  ERC20 stakingToken;
+    // Token used for staking
+    ERC20 stakingToken;
 
-  // The default duration of stake lock-in (in seconds)
-  uint256 public defaultLockInDuration;
+    // The default duration of stake lock-in (in seconds)
+    uint256 public defaultLockInDuration;
 
-  // To save on gas, rather than create a separate mapping for totalStakedFor & personalStakes,
-  //  both data structures are stored in a single mapping for a given addresses.
-  //
-  // It's possible to have a non-existing personalStakes, but have tokens in totalStakedFor
-  //  if other users are staking on behalf of a given address.
-  mapping (address => StakeContract) public stakeHolders;
+    // To save on gas, rather than create a separate mapping for totalStakedFor & personalStakes,
+    //  both data structures are stored in a single mapping for a given addresses.
+    //
+    // It's possible to have a non-existing personalStakes, but have tokens in totalStakedFor
+    //  if other users are staking on behalf of a given address.
+    mapping(address => StakeContract) public stakeHolders;
 
-  // Struct for personal stakes (i.e., stakes made by this address)
-  // unlockedTimestamp - when the stake unlocks (in seconds since Unix epoch)
-  // actualAmount - the amount of tokens in the stake
-  // stakedFor - the address the stake was staked for
-  struct Stake {
-    uint256 unlockedTimestamp;
-    uint256 actualAmount;
-    address stakedFor;
-  }
-
-  // Struct for all stake metadata at a particular address
-  // totalStakedFor - the number of tokens staked for this address
-  // personalStakeIndex - the index in the personalStakes array.
-  // personalStakes - append only array of stakes made by this address
-  // exists - whether or not there are stakes that involve this address
-  struct StakeContract {
-    uint256 totalStakedFor;
-
-    uint256 personalStakeIndex;
-
-    Stake[] personalStakes;
-
-    bool exists;
-  }
-
-  bool public userCapEnabled;
-
-  mapping(address => uint256) public userCap; //Limit of pool tokens which can be minted for a user during deposit
-
-  
-  uint256 public defaultUserCap;
-  bool public stakingCapEnabled;
-  uint256 public stakingCap;
-
-
-  bool public vipUserEnabled;
-  mapping(address => bool) public isVipUser;
-
-  uint256 internal totalStakedAmount;
-
-  uint256 public coeffScore;
-  
-
-
-  event VipUserEnabledChange(bool enabled);
-  event VipUserChanged(address indexed user, bool isVip);
-
-  event StakingCapChanged(uint256 newCap);
-  event StakingCapEnabledChange(bool enabled);
-
-  //global cap
-  event DefaultUserCapChanged(uint256 newCap);
-
-  event UserCapEnabledChange(bool enabled);
-
-  event UserCapChanged(address indexed user, uint256 newCap);
-  event Staked(address indexed user, uint256 amount, uint256 totalStacked, bytes data);
-  event Unstaked(address indexed user, uint256 amount, uint256 totalStacked, bytes data);
-  event setLockInDuration(uint256 defaultLockInDuration);
-
-  event CoeffScoreUpdated(uint256 coeff);
-  /**
-   * @dev Modifier that checks that this contract can transfer tokens from the
-   *  balance in the stakingToken contract for the given address.
-   * @dev This modifier also transfers the tokens.
-   * @param _address address to transfer tokens from
-   * @param _amount uint256 the number of tokens
-   */
-  modifier canStake(address _address, uint256 _amount) {
-    require(
-      stakingToken.transferFrom(_address, address(this), _amount),
-      "Stake required");
-
-    _;
-  }
-
-
-  modifier isUserCapEnabledForStakeFor(uint256 stake) {
-
-    if (stakingCapEnabled && !(vipUserEnabled && isVipUser[_msgSender()])) {
-        require((stakingCap > totalStaked() && (stakingCap-totalStaked() >= stake)), "StakingModule: stake exeeds staking cap");
+    // Struct for personal stakes (i.e., stakes made by this address)
+    // unlockedTimestamp - when the stake unlocks (in seconds since Unix epoch)
+    // actualAmount - the amount of tokens in the stake
+    // stakedFor - the address the stake was staked for
+    struct Stake {
+        uint256 unlockedTimestamp;
+        uint256 actualAmount;
+        address stakedFor;
     }
 
-    if(userCapEnabled) {
-          uint256 cap = userCap[_msgSender()];
-          //check default user cap settings
-          if (defaultUserCap > 0) {
-              uint256 totalStaked = totalStakedFor(_msgSender());
-              //get new cap
-              if (defaultUserCap >= totalStaked) {
-                cap = defaultUserCap.sub(totalStaked);
-              } else {
-                 cap = 0;
-              }
-          }
-          
-          require(cap >= stake, "StakingModule: stake exeeds cap");
-          cap = cap.sub(stake);
-          userCap[_msgSender()] = cap;
-          emit UserCapChanged(_msgSender(), cap);  
+    // Struct for all stake metadata at a particular address
+    // totalStakedFor - the number of tokens staked for this address
+    // personalStakeIndex - the index in the personalStakes array.
+    // personalStakes - append only array of stakes made by this address
+    // exists - whether or not there are stakes that involve this address
+    struct StakeContract {
+        uint256 totalStakedFor;
+        uint256 personalStakeIndex;
+        Stake[] personalStakes;
+        bool exists;
     }
-      
-    _;
-  }
 
+    bool public userCapEnabled;
 
-  modifier isUserCapEnabledForUnStakeFor(uint256 unStake) {
-     _;
-     checkAndUpdateCapForUnstakeFor(unStake);
-  }
-  function checkAndUpdateCapForUnstakeFor(uint256 unStake) internal {
-     if(userCapEnabled){
-        uint256 cap = userCap[_msgSender()];
-        cap = cap.add(unStake);
+    mapping(address => uint256) public userCap; //Limit of pool tokens which can be minted for a user during deposit
 
-        if (cap > defaultUserCap) {
-            cap = defaultUserCap;
+    uint256 public defaultUserCap;
+    bool public stakingCapEnabled;
+    uint256 public stakingCap;
+
+    bool public vipUserEnabled;
+    mapping(address => bool) public isVipUser;
+
+    uint256 internal totalStakedAmount;
+
+    uint256 public coeffScore;
+
+    event VipUserEnabledChange(bool enabled);
+    event VipUserChanged(address indexed user, bool isVip);
+
+    event StakingCapChanged(uint256 newCap);
+    event StakingCapEnabledChange(bool enabled);
+
+    //global cap
+    event DefaultUserCapChanged(uint256 newCap);
+
+    event UserCapEnabledChange(bool enabled);
+
+    event UserCapChanged(address indexed user, uint256 newCap);
+    event Staked(address indexed user, uint256 amount, uint256 totalStacked, bytes data);
+    event Unstaked(address indexed user, uint256 amount, uint256 totalStacked, bytes data);
+    event setLockInDuration(uint256 defaultLockInDuration);
+
+    event CoeffScoreUpdated(uint256 coeff);
+    /**
+     * @dev Modifier that checks that this contract can transfer tokens from the
+     *  balance in the stakingToken contract for the given address.
+     * @dev This modifier also transfers the tokens.
+     * @param _address address to transfer tokens from
+     * @param _amount uint256 the number of tokens
+     */
+    modifier canStake(address _address, uint256 _amount) {
+        require(stakingToken.transferFrom(_address, address(this), _amount), "Stake required");
+
+        _;
+    }
+
+    modifier isUserCapEnabledForStakeFor(uint256 stake) {
+        if (stakingCapEnabled && !(vipUserEnabled && isVipUser[_msgSender()])) {
+            require((stakingCap > totalStaked() && (stakingCap - totalStaked() >= stake)), "StakingModule: stake exeeds staking cap");
         }
 
-        userCap[_msgSender()] = cap;
-        emit UserCapChanged(_msgSender(), cap);
-     }
-  }
+        if (userCapEnabled) {
+            uint256 cap = userCap[_msgSender()];
+            //check default user cap settings
+            if (defaultUserCap > 0) {
+                uint256 totalStaked = totalStakedFor(_msgSender());
+                //get new cap
+                if (defaultUserCap >= totalStaked) {
+                    cap = defaultUserCap.sub(totalStaked);
+                } else {
+                    cap = 0;
+                }
+            }
 
+            require(cap >= stake, "StakingModule: stake exeeds cap");
+            cap = cap.sub(stake);
+            userCap[_msgSender()] = cap;
+            emit UserCapChanged(_msgSender(), cap);
+        }
 
-  modifier checkUserCapDisabled() {
-    require(isUserCapEnabled() == false, "UserCapEnabled");
-    _;
-  }
+        _;
+    }
 
-  modifier checkUserCapEnabled() {
-    require(isUserCapEnabled(), "UserCapDisabled");
-    _;
-  }
- 
+    modifier isUserCapEnabledForUnStakeFor(uint256 unStake) {
+        _;
+        checkAndUpdateCapForUnstakeFor(unStake);
+    }
 
-  function initialize(address _pool, ERC20 _stakingToken, uint256 _defaultLockInDuration) public initializer {
+    function checkAndUpdateCapForUnstakeFor(uint256 unStake) internal {
+        if (userCapEnabled) {
+            uint256 cap = userCap[_msgSender()];
+            cap = cap.add(unStake);
+
+            if (cap > defaultUserCap) {
+                cap = defaultUserCap;
+            }
+
+            userCap[_msgSender()] = cap;
+            emit UserCapChanged(_msgSender(), cap);
+        }
+    }
+
+    modifier checkUserCapDisabled() {
+        require(isUserCapEnabled() == false, "UserCapEnabled");
+        _;
+    }
+
+    modifier checkUserCapEnabled() {
+        require(isUserCapEnabled(), "UserCapDisabled");
+        _;
+    }
+
+    function initialize(
+        address _pool,
+        ERC20 _stakingToken,
+        uint256 _defaultLockInDuration
+    ) public initializer {
         stakingToken = _stakingToken;
         defaultLockInDuration = _defaultLockInDuration;
         Module.initialize(_pool);
 
         CapperRole.initialize(_msgSender());
-  }
-
-    function initialize(address sender) public override(Module, CapperRole) {
     }
 
-  function setDefaultLockInDuration(uint256 _defaultLockInDuration) public onlyOwner {
-      defaultLockInDuration = _defaultLockInDuration;
-      emit setLockInDuration(_defaultLockInDuration);
-  }
+    function initialize(address sender) public override(Module, CapperRole) {}
 
-  function setUserCapEnabled(bool _userCapEnabled) public onlyCapper {
-      userCapEnabled = _userCapEnabled;
-      emit UserCapEnabledChange(userCapEnabled);
-  }
+    function setDefaultLockInDuration(uint256 _defaultLockInDuration) public onlyOwner {
+        defaultLockInDuration = _defaultLockInDuration;
+        emit setLockInDuration(_defaultLockInDuration);
+    }
 
-  function setStakingCapEnabled(bool _stakingCapEnabled) public onlyCapper {
-      stakingCapEnabled= _stakingCapEnabled;
-      emit StakingCapEnabledChange(stakingCapEnabled);
-  }
+    function setUserCapEnabled(bool _userCapEnabled) public onlyCapper {
+        userCapEnabled = _userCapEnabled;
+        emit UserCapEnabledChange(userCapEnabled);
+    }
 
-  function setDefaultUserCap(uint256 _newCap) public onlyCapper {
-      defaultUserCap = _newCap;
-      emit DefaultUserCapChanged(_newCap);
-  }
+    function setStakingCapEnabled(bool _stakingCapEnabled) public onlyCapper {
+        stakingCapEnabled = _stakingCapEnabled;
+        emit StakingCapEnabledChange(stakingCapEnabled);
+    }
 
-  function setStakingCap(uint256 _newCap) public onlyCapper {
-      stakingCap = _newCap;
-      emit StakingCapChanged(_newCap);
-  }
+    function setDefaultUserCap(uint256 _newCap) public onlyCapper {
+        defaultUserCap = _newCap;
+        emit DefaultUserCapChanged(_newCap);
+    }
 
-  function setUserCap(address user, uint256 cap) public onlyCapper {
-      userCap[user] = cap;
-      emit UserCapChanged(user, cap);
-  }
+    function setStakingCap(uint256 _newCap) public onlyCapper {
+        stakingCap = _newCap;
+        emit StakingCapChanged(_newCap);
+    }
 
-  function setUserCap(address[] memory users, uint256[] memory caps) public onlyCapper {
+    function setUserCap(address user, uint256 cap) public onlyCapper {
+        userCap[user] = cap;
+        emit UserCapChanged(user, cap);
+    }
+
+    function setUserCap(address[] memory users, uint256[] memory caps) public onlyCapper {
         require(users.length == caps.length, "SavingsModule: arrays length not match");
-        for(uint256 i=0;  i < users.length; i++) {
+        for (uint256 i = 0; i < users.length; i++) {
             userCap[users[i]] = caps[i];
             emit UserCapChanged(users[i], caps[i]);
         }
-
-  }
-
-  function setVipUserEnabled(bool _vipUserEnabled) public onlyCapper {
-      vipUserEnabled = _vipUserEnabled;
-      emit VipUserEnabledChange(_vipUserEnabled);
-  }
-
-  function setVipUser(address user, bool isVip) public onlyCapper {
-      isVipUser[user] = isVip;
-      emit VipUserChanged(user, isVip);
-  }
-
-  function setCoeffScore(uint256 coeff) public onlyCapper {
-    coeffScore = coeff;
-
-    emit CoeffScoreUpdated(coeff);
-  }
-
-  function isUserCapEnabled() public view returns(bool) {
-    return userCapEnabled;
-  }
-
-  function iStakingCapEnabled() public view returns(bool) {
-    return stakingCapEnabled;
-  }
-
-  /**
-   * @dev Returns the timestamps for when active personal stakes for an address will unlock
-   * @dev These accessors functions are needed until https://github.com/ethereum/web3.js/issues/1241 is solved
-   * @param _address address that created the stakes
-   * @return uint256[] array of timestamps
-   */
-  function getPersonalStakeUnlockedTimestamps(address _address) external view returns (uint256[] memory) {
-    uint256[] memory timestamps;
-    (timestamps,,) = getPersonalStakes(_address);
-
-    return timestamps;
-  }
-
-  /**
-   * @dev Returns the stake actualAmount for active personal stakes for an address
-   * @dev These accessors functions are needed until https://github.com/ethereum/web3.js/issues/1241 is solved
-   * @param _address address that created the stakes
-   * @return uint256[] array of actualAmounts
-   */
-  function getPersonalStakeActualAmounts(address _address) external view returns (uint256[] memory) {
-    uint256[] memory actualAmounts;
-    (,actualAmounts,) = getPersonalStakes(_address);
-
-    return actualAmounts;
-  }
-
-  function getPersonalStakeTotalAmount(address _address) public view returns(uint256) {
-    uint256[] memory actualAmounts;
-    (,actualAmounts,) = getPersonalStakes(_address);
-    uint256 totalStake;
-    for(uint256 i=0; i <actualAmounts.length; i++) {
-      totalStake = totalStake.add(actualAmounts[i]);
-    }
-    return totalStake;
-  }
-
-  /**
-   * @dev Returns the addresses that each personal stake was created for by an address
-   * @dev These accessors functions are needed until https://github.com/ethereum/web3.js/issues/1241 is solved
-   * @param _address address that created the stakes
-   * @return address[] array of amounts
-   */
-  function getPersonalStakeForAddresses(address _address) external view returns (address[] memory) {
-    address[] memory stakedFor;
-    (,,stakedFor) = getPersonalStakes(_address);
-
-    return stakedFor;
-  }
-
-  /**
-   * @notice Stakes a certain amount of tokens, this MUST transfer the given amount from the user
-   * @notice MUST trigger Staked event
-   * @param _amount uint256 the amount of tokens to stake
-   * @param _data bytes optional data to include in the Stake event
-   */
-  function stake(uint256 _amount, bytes memory _data) public override isUserCapEnabledForStakeFor(_amount) {
-    createStake(
-      _msgSender(),
-      _amount,
-      defaultLockInDuration,
-      _data);
-  }
-
-  /**
-   * @notice Stakes a certain amount of tokens, this MUST transfer the given amount from the caller
-   * @notice MUST trigger Staked event
-   * @param _user address the address the tokens are staked for
-   * @param _amount uint256 the amount of tokens to stake
-   * @param _data bytes optional data to include in the Stake event
-   */
-  function stakeFor(address _user, uint256 _amount, bytes memory _data) public override checkUserCapDisabled {
-    createStake(
-      _user,
-      _amount,
-      defaultLockInDuration,
-      _data);
-  }
-
-  /**
-   * @notice Unstakes a certain amount of tokens, this SHOULD return the given amount of tokens to the user, if unstaking is currently not possible the function MUST revert
-   * @notice MUST trigger Unstaked event
-   * @dev Unstaking tokens is an atomic operation—either all of the tokens in a stake, or none of the tokens.
-   * @dev Users can only unstake a single stake at a time, it is must be their oldest active stake. Upon releasing that stake, the tokens will be
-   *  transferred back to their account, and their personalStakeIndex will increment to the next active stake.
-   * @param _amount uint256 the amount of tokens to unstake
-   * @param _data bytes optional data to include in the Unstake event
-   */
-  function unstake(uint256 _amount, bytes memory _data) virtual override public {
-    withdrawStake(
-      _amount,
-      _data);
-  }
-
-  // function unstakeAllUnlocked(bytes memory _data) public returns (uint256) {
-  //     uint256 unstakeAllAmount = 0;
-  //     uint256 personalStakeIndex = stakeHolders[_msgSender()].personalStakeIndex;
-
-  //     for (uint256 i = personalStakeIndex; i < stakeHolders[_msgSender()].personalStakes.length; i++) {
-  //         if (stakeHolders[_msgSender()].personalStakes[i].unlockedTimestamp <= block.timestamp) {
-  //             unstakeAllAmount = unstakeAllAmount.add(stakeHolders[_msgSender()].personalStakes[i].actualAmount);
-  //             withdrawStake(stakeHolders[_msgSender()].personalStakes[i].actualAmount, _data);
-  //         }
-  //     }
-
-  //     return unstakeAllAmount;
-  // }
-
-  function unstakeAllUnlocked(bytes memory _data) virtual public returns (uint256) {
-      return withdrawStakes(_msgSender(), _msgSender(), _data);
-  }
-
-  /**
-   * @notice Returns the current total of tokens staked for an address
-   * @param _address address The address to query
-   * @return uint256 The number of tokens staked for the given address
-   */
-  function totalStakedFor(address _address) public override view returns (uint256) {
-    return stakeHolders[_address].totalStakedFor;
-  }
-
-  /**
-   * @notice Returns the current total of tokens staked for an address
-   * @param _address address The address to query
-   * @return uint256 The number of tokens staked for the given address
-   */
-  function totalScoresFor(address _address) public view returns (uint256) {
-    return stakeHolders[_address].totalStakedFor.mul(coeffScore).div(10**18);
-  }
-
-  /**
-   * @notice Returns the current total of tokens staked
-   * @return uint256 The number of tokens staked in the contract
-   */
-  function totalStaked() public override view returns (uint256) {
-    //return stakingToken.balanceOf(address(this));
-    return totalStakedAmount;
-  }
-
-  /**
-   * @notice Address of the token being used by the staking interface
-   * @return address The address of the ERC20 token used for staking
-   */
-  function token() public override view returns (address) {
-    return address(stakingToken);
-  }
-
-  /**
-   * @notice MUST return true if the optional history functions are implemented, otherwise false
-   * @dev Since we don't implement the optional interface, this always returns false
-   * @return bool Whether or not the optional history functions are implemented
-   */
-  function supportsHistory() public override pure returns (bool) {
-    return false;
-  }
-
-  /**
-   * @dev Helper function to get specific properties of all of the personal stakes created by an address
-   * @param _address address The address to query
-   * @return (uint256[], uint256[], address[])
-   *  timestamps array, actualAmounts array, stakedFor array
-   */
-  function getPersonalStakes(
-    address _address
-  )
-    public view
-    returns(uint256[] memory, uint256[] memory, address[] memory)
-  {
-    StakeContract storage stakeContract = stakeHolders[_address];
-
-    uint256 arraySize = stakeContract.personalStakes.length - stakeContract.personalStakeIndex;
-    uint256[] memory unlockedTimestamps = new uint256[](arraySize);
-    uint256[] memory actualAmounts = new uint256[](arraySize);
-    address[] memory stakedFor = new address[](arraySize);
-
-    for (uint256 i = stakeContract.personalStakeIndex; i < stakeContract.personalStakes.length; i++) {
-      uint256 index = i - stakeContract.personalStakeIndex;
-      unlockedTimestamps[index] = stakeContract.personalStakes[i].unlockedTimestamp;
-      actualAmounts[index] = stakeContract.personalStakes[i].actualAmount;
-      stakedFor[index] = stakeContract.personalStakes[i].stakedFor;
     }
 
-    return (
-      unlockedTimestamps,
-      actualAmounts,
-      stakedFor
-    );
-  }
-
-  /**
-   * @dev Helper function to create stakes for a given address
-   * @param _address address The address the stake is being created for
-   * @param _amount uint256 The number of tokens being staked
-   * @param _lockInDuration uint256 The duration to lock the tokens for
-   * @param _data bytes optional data to include in the Stake event
-   */
-  function createStake(
-    address _address,
-    uint256 _amount,
-    uint256 _lockInDuration,
-    bytes memory _data)
-    virtual internal
-    canStake(_msgSender(), _amount)
-  {
-    if (!stakeHolders[_msgSender()].exists) {
-      stakeHolders[_msgSender()].exists = true;
+    function setVipUserEnabled(bool _vipUserEnabled) public onlyCapper {
+        vipUserEnabled = _vipUserEnabled;
+        emit VipUserEnabledChange(_vipUserEnabled);
     }
 
-    stakeHolders[_address].totalStakedFor = stakeHolders[_address].totalStakedFor.add(_amount);
-    stakeHolders[_msgSender()].personalStakes.push(
-      Stake(
-        block.timestamp.add(_lockInDuration),
-        _amount,
-        _address)
-      );
+    function setVipUser(address user, bool isVip) public onlyCapper {
+        isVipUser[user] = isVip;
+        emit VipUserChanged(user, isVip);
+    }
 
-    totalStakedAmount = totalStakedAmount.add(_amount);
-    emit Staked(
-      _address,
-      _amount,
-      totalStakedFor(_address),
-      _data);
-  }
+    function setCoeffScore(uint256 coeff) public onlyCapper {
+        coeffScore = coeff;
 
-  /**
-   * @dev Helper function to withdraw stakes for the _msgSender()
-   * @param _amount uint256 The amount to withdraw. MUST match the stake amount for the
-   *  stake at personalStakeIndex.
-   * @param _data bytes optional data to include in the Unstake event
-   */
-  function withdrawStake(
-    uint256 _amount,
-    bytes memory _data)
-    internal isUserCapEnabledForUnStakeFor(_amount)
-  {
-    Stake storage personalStake = stakeHolders[_msgSender()].personalStakes[stakeHolders[_msgSender()].personalStakeIndex];
+        emit CoeffScoreUpdated(coeff);
+    }
 
-    // Check that the current stake has unlocked & matches the unstake amount
-    require(
-      personalStake.unlockedTimestamp <= block.timestamp,
-      "The current stake hasn't unlocked yet");
+    function isUserCapEnabled() public view returns (bool) {
+        return userCapEnabled;
+    }
 
-    require(
-      personalStake.actualAmount == _amount,
-      "The unstake amount does not match the current stake");
+    function iStakingCapEnabled() public view returns (bool) {
+        return stakingCapEnabled;
+    }
 
-    // Transfer the staked tokens from this contract back to the sender
-    // Notice that we are using transfer instead of transferFrom here, so
-    //  no approval is needed beforehand.
-    require(
-      stakingToken.transfer(_msgSender(), _amount),
-      "Unable to withdraw stake");
+    /**
+     * @dev Returns the timestamps for when active personal stakes for an address will unlock
+     * @dev These accessors functions are needed until https://github.com/ethereum/web3.js/issues/1241 is solved
+     * @param _address address that created the stakes
+     * @return uint256[] array of timestamps
+     */
+    function getPersonalStakeUnlockedTimestamps(address _address) external view returns (uint256[] memory) {
+        uint256[] memory timestamps;
+        (timestamps, , ) = getPersonalStakes(_address);
 
-    stakeHolders[personalStake.stakedFor].totalStakedFor = stakeHolders[personalStake.stakedFor]
-      .totalStakedFor.sub(personalStake.actualAmount);
+        return timestamps;
+    }
 
-    personalStake.actualAmount = 0;
-    stakeHolders[_msgSender()].personalStakeIndex++;
+    /**
+     * @dev Returns the stake actualAmount for active personal stakes for an address
+     * @dev These accessors functions are needed until https://github.com/ethereum/web3.js/issues/1241 is solved
+     * @param _address address that created the stakes
+     * @return uint256[] array of actualAmounts
+     */
+    function getPersonalStakeActualAmounts(address _address) external view returns (uint256[] memory) {
+        uint256[] memory actualAmounts;
+        (, actualAmounts, ) = getPersonalStakes(_address);
 
-    totalStakedAmount = totalStakedAmount.sub(_amount);
+        return actualAmounts;
+    }
 
-    emit Unstaked(
-      personalStake.stakedFor,
-      _amount,
-      totalStakedFor(personalStake.stakedFor),
-      _data);
-  }
+    function getPersonalStakeTotalAmount(address _address) public view returns (uint256) {
+        uint256[] memory actualAmounts;
+        (, actualAmounts, ) = getPersonalStakes(_address);
+        uint256 totalStake;
+        for (uint256 i = 0; i < actualAmounts.length; i++) {
+            totalStake = totalStake.add(actualAmounts[i]);
+        }
+        return totalStake;
+    }
 
-  function withdrawStakes(address _transferTo, address _unstakeFor, bytes memory _data) internal returns (uint256){
-      StakeContract storage sc = stakeHolders[_unstakeFor];
-      uint256 unstakeAmount = 0;
-      uint256 unstakedForOthers = 0;
-      uint256 personalStakeIndex = sc.personalStakeIndex;
+    /**
+     * @dev Returns the addresses that each personal stake was created for by an address
+     * @dev These accessors functions are needed until https://github.com/ethereum/web3.js/issues/1241 is solved
+     * @param _address address that created the stakes
+     * @return address[] array of amounts
+     */
+    function getPersonalStakeForAddresses(address _address) external view returns (address[] memory) {
+        address[] memory stakedFor;
+        (, , stakedFor) = getPersonalStakes(_address);
 
-      uint256 i;
-      for (i = personalStakeIndex; i < sc.personalStakes.length; i++) {
-          Stake storage personalStake = sc.personalStakes[i];
-          if(personalStake.unlockedTimestamp > block.timestamp) break; //We've found last unlocked stake
-            
-          if(personalStake.stakedFor != _unstakeFor){
-              //Handle unstake of staked for other address
-              stakeHolders[personalStake.stakedFor].totalStakedFor = stakeHolders[personalStake.stakedFor].totalStakedFor.sub(personalStake.actualAmount);
-              unstakedForOthers = unstakedForOthers.add(personalStake.actualAmount);
-              emit Unstaked(personalStake.stakedFor, personalStake.actualAmount, totalStakedFor(personalStake.stakedFor), _data);
-          }
+        return stakedFor;
+    }
 
-          unstakeAmount = unstakeAmount.add(personalStake.actualAmount);
-          personalStake.actualAmount = 0;
-      }
-      sc.personalStakeIndex = i;
+    /**
+     * @notice Stakes a certain amount of tokens, this MUST transfer the given amount from the user
+     * @notice MUST trigger Staked event
+     * @param _amount uint256 the amount of tokens to stake
+     * @param _data bytes optional data to include in the Stake event
+     */
+    function stake(uint256 _amount, bytes memory _data) public override isUserCapEnabledForStakeFor(_amount) {
+        createStake(_msgSender(), _amount, defaultLockInDuration, _data);
+    }
 
-      uint256 unstakedForSender = unstakeAmount.sub(unstakedForOthers);
-      sc.totalStakedFor = sc.totalStakedFor.sub(unstakedForSender);
-      totalStakedAmount = totalStakedAmount.sub(unstakeAmount);
-      require(stakingToken.transfer(_transferTo, unstakeAmount), "Unable to withdraw");
-      emit Unstaked(_unstakeFor, unstakedForSender, sc.totalStakedFor, _data);
+    /**
+     * @notice Stakes a certain amount of tokens, this MUST transfer the given amount from the caller
+     * @notice MUST trigger Staked event
+     * @param _user address the address the tokens are staked for
+     * @param _amount uint256 the amount of tokens to stake
+     * @param _data bytes optional data to include in the Stake event
+     */
+    function stakeFor(
+        address _user,
+        uint256 _amount,
+        bytes memory _data
+    ) public override checkUserCapDisabled {
+        createStake(_user, _amount, defaultLockInDuration, _data);
+    }
 
-      checkAndUpdateCapForUnstakeFor(unstakeAmount);
-      return unstakeAmount;
-  }
+    /**
+     * @notice Unstakes a certain amount of tokens, this SHOULD return the given amount of tokens to the user, if unstaking is currently not possible the function MUST revert
+     * @notice MUST trigger Unstaked event
+     * @dev Unstaking tokens is an atomic operation—either all of the tokens in a stake, or none of the tokens.
+     * @dev Users can only unstake a single stake at a time, it is must be their oldest active stake. Upon releasing that stake, the tokens will be
+     *  transferred back to their account, and their personalStakeIndex will increment to the next active stake.
+     * @param _amount uint256 the amount of tokens to unstake
+     * @param _data bytes optional data to include in the Unstake event
+     */
+    function unstake(uint256 _amount, bytes memory _data) public virtual override {
+        withdrawStake(_amount, _data);
+    }
 
-  uint256[49] private ______gap;
+    // function unstakeAllUnlocked(bytes memory _data) public returns (uint256) {
+    //     uint256 unstakeAllAmount = 0;
+    //     uint256 personalStakeIndex = stakeHolders[_msgSender()].personalStakeIndex;
+
+    //     for (uint256 i = personalStakeIndex; i < stakeHolders[_msgSender()].personalStakes.length; i++) {
+    //         if (stakeHolders[_msgSender()].personalStakes[i].unlockedTimestamp <= block.timestamp) {
+    //             unstakeAllAmount = unstakeAllAmount.add(stakeHolders[_msgSender()].personalStakes[i].actualAmount);
+    //             withdrawStake(stakeHolders[_msgSender()].personalStakes[i].actualAmount, _data);
+    //         }
+    //     }
+
+    //     return unstakeAllAmount;
+    // }
+
+    function unstakeAllUnlocked(bytes memory _data) public virtual returns (uint256) {
+        return withdrawStakes(_msgSender(), _msgSender(), _data);
+    }
+
+    /**
+     * @notice Returns the current total of tokens staked for an address
+     * @param _address address The address to query
+     * @return uint256 The number of tokens staked for the given address
+     */
+    function totalStakedFor(address _address) public view override returns (uint256) {
+        return stakeHolders[_address].totalStakedFor;
+    }
+
+    /**
+     * @notice Returns the current total of tokens staked for an address
+     * @param _address address The address to query
+     * @return uint256 The number of tokens staked for the given address
+     */
+    function totalScoresFor(address _address) public view returns (uint256) {
+        return stakeHolders[_address].totalStakedFor.mul(coeffScore).div(10**18);
+    }
+
+    /**
+     * @notice Returns the current total of tokens staked
+     * @return uint256 The number of tokens staked in the contract
+     */
+    function totalStaked() public view override returns (uint256) {
+        //return stakingToken.balanceOf(address(this));
+        return totalStakedAmount;
+    }
+
+    /**
+     * @notice Address of the token being used by the staking interface
+     * @return address The address of the ERC20 token used for staking
+     */
+    function token() public view override returns (address) {
+        return address(stakingToken);
+    }
+
+    /**
+     * @notice MUST return true if the optional history functions are implemented, otherwise false
+     * @dev Since we don't implement the optional interface, this always returns false
+     * @return bool Whether or not the optional history functions are implemented
+     */
+    function supportsHistory() public pure override returns (bool) {
+        return false;
+    }
+
+    /**
+     * @dev Helper function to get specific properties of all of the personal stakes created by an address
+     * @param _address address The address to query
+     * @return (uint256[], uint256[], address[])
+     *  timestamps array, actualAmounts array, stakedFor array
+     */
+    function getPersonalStakes(address _address)
+        public
+        view
+        returns (
+            uint256[] memory,
+            uint256[] memory,
+            address[] memory
+        )
+    {
+        StakeContract storage stakeContract = stakeHolders[_address];
+
+        uint256 arraySize = stakeContract.personalStakes.length - stakeContract.personalStakeIndex;
+        uint256[] memory unlockedTimestamps = new uint256[](arraySize);
+        uint256[] memory actualAmounts = new uint256[](arraySize);
+        address[] memory stakedFor = new address[](arraySize);
+
+        for (uint256 i = stakeContract.personalStakeIndex; i < stakeContract.personalStakes.length; i++) {
+            uint256 index = i - stakeContract.personalStakeIndex;
+            unlockedTimestamps[index] = stakeContract.personalStakes[i].unlockedTimestamp;
+            actualAmounts[index] = stakeContract.personalStakes[i].actualAmount;
+            stakedFor[index] = stakeContract.personalStakes[i].stakedFor;
+        }
+
+        return (unlockedTimestamps, actualAmounts, stakedFor);
+    }
+
+    /**
+     * @dev Helper function to create stakes for a given address
+     * @param _address address The address the stake is being created for
+     * @param _amount uint256 The number of tokens being staked
+     * @param _lockInDuration uint256 The duration to lock the tokens for
+     * @param _data bytes optional data to include in the Stake event
+     */
+    function createStake(
+        address _address,
+        uint256 _amount,
+        uint256 _lockInDuration,
+        bytes memory _data
+    ) internal virtual canStake(_msgSender(), _amount) {
+        if (!stakeHolders[_msgSender()].exists) {
+            stakeHolders[_msgSender()].exists = true;
+        }
+
+        stakeHolders[_address].totalStakedFor = stakeHolders[_address].totalStakedFor.add(_amount);
+        stakeHolders[_msgSender()].personalStakes.push(Stake(block.timestamp.add(_lockInDuration), _amount, _address));
+
+        totalStakedAmount = totalStakedAmount.add(_amount);
+        emit Staked(_address, _amount, totalStakedFor(_address), _data);
+    }
+
+    /**
+     * @dev Helper function to withdraw stakes for the _msgSender()
+     * @param _amount uint256 The amount to withdraw. MUST match the stake amount for the
+     *  stake at personalStakeIndex.
+     * @param _data bytes optional data to include in the Unstake event
+     */
+    function withdrawStake(uint256 _amount, bytes memory _data) internal isUserCapEnabledForUnStakeFor(_amount) {
+        Stake storage personalStake = stakeHolders[_msgSender()].personalStakes[stakeHolders[_msgSender()].personalStakeIndex];
+
+        // Check that the current stake has unlocked & matches the unstake amount
+        require(personalStake.unlockedTimestamp <= block.timestamp, "The current stake hasn't unlocked yet");
+
+        require(personalStake.actualAmount == _amount, "The unstake amount does not match the current stake");
+
+        // Transfer the staked tokens from this contract back to the sender
+        // Notice that we are using transfer instead of transferFrom here, so
+        //  no approval is needed beforehand.
+        require(stakingToken.transfer(_msgSender(), _amount), "Unable to withdraw stake");
+
+        stakeHolders[personalStake.stakedFor].totalStakedFor = stakeHolders[personalStake.stakedFor].totalStakedFor.sub(
+            personalStake.actualAmount
+        );
+
+        personalStake.actualAmount = 0;
+        stakeHolders[_msgSender()].personalStakeIndex++;
+
+        totalStakedAmount = totalStakedAmount.sub(_amount);
+
+        emit Unstaked(personalStake.stakedFor, _amount, totalStakedFor(personalStake.stakedFor), _data);
+    }
+
+    function withdrawStakes(
+        address _transferTo,
+        address _unstakeFor,
+        bytes memory _data
+    ) internal returns (uint256) {
+        StakeContract storage sc = stakeHolders[_unstakeFor];
+        uint256 unstakeAmount = 0;
+        uint256 unstakedForOthers = 0;
+        uint256 personalStakeIndex = sc.personalStakeIndex;
+
+        uint256 i;
+        for (i = personalStakeIndex; i < sc.personalStakes.length; i++) {
+            Stake storage personalStake = sc.personalStakes[i];
+            if (personalStake.unlockedTimestamp > block.timestamp) break; //We've found last unlocked stake
+
+            if (personalStake.stakedFor != _unstakeFor) {
+                //Handle unstake of staked for other address
+                stakeHolders[personalStake.stakedFor].totalStakedFor = stakeHolders[personalStake.stakedFor].totalStakedFor.sub(
+                    personalStake.actualAmount
+                );
+                unstakedForOthers = unstakedForOthers.add(personalStake.actualAmount);
+                emit Unstaked(personalStake.stakedFor, personalStake.actualAmount, totalStakedFor(personalStake.stakedFor), _data);
+            }
+
+            unstakeAmount = unstakeAmount.add(personalStake.actualAmount);
+            personalStake.actualAmount = 0;
+        }
+        sc.personalStakeIndex = i;
+
+        uint256 unstakedForSender = unstakeAmount.sub(unstakedForOthers);
+        sc.totalStakedFor = sc.totalStakedFor.sub(unstakedForSender);
+        totalStakedAmount = totalStakedAmount.sub(unstakeAmount);
+        require(stakingToken.transfer(_transferTo, unstakeAmount), "Unable to withdraw");
+        emit Unstaked(_unstakeFor, unstakedForSender, sc.totalStakedFor, _data);
+
+        checkAndUpdateCapForUnstakeFor(unstakeAmount);
+        return unstakeAmount;
+    }
+
+    uint256[49] private ______gap;
 }
 
 // File: contracts\modules\staking\StakingPool.sol
@@ -1714,7 +1750,7 @@ contract StakingPool is StakingPoolBase {
     }
 
     struct UserRewardInfo {
-        mapping(address=>uint256) nextDistribution; //Next unclaimed distribution
+        mapping(address => uint256) nextDistribution; //Next unclaimed distribution
     }
 
     struct RewardData {
@@ -1724,11 +1760,10 @@ contract StakingPool is StakingPoolBase {
 
     RewardVestingModule public rewardVesting;
     address[] internal registeredRewardTokens;
-    mapping(address=>RewardData) internal rewards;
-    mapping(address=>UserRewardInfo) internal userRewards;
+    mapping(address => RewardData) internal rewards;
+    mapping(address => UserRewardInfo) internal userRewards;
 
     address public swapContract;
-
 
     modifier onlyRewardDistributionModule() {
         require(_msgSender() == getModuleAddress(MODULE_REWARD_DISTR), "StakingPool: calls allowed from RewardDistributionModule only");
@@ -1745,26 +1780,26 @@ contract StakingPool is StakingPoolBase {
         emit RewardTokenRegistered(token);
     }
 
-    function claimRewardsFromVesting() public onlyCapper{
+    function claimRewardsFromVesting() public onlyCapper {
         _claimRewardsFromVesting();
     }
 
-    function isRegisteredRewardToken(address token) public view returns(bool) {
-        for(uint256 i=0; i<registeredRewardTokens.length; i++){
-            if(token == registeredRewardTokens[i]) return true;
+    function isRegisteredRewardToken(address token) public view returns (bool) {
+        for (uint256 i = 0; i < registeredRewardTokens.length; i++) {
+            if (token == registeredRewardTokens[i]) return true;
         }
         return false;
     }
 
-    function supportedRewardTokens() public view returns(address[] memory) {
+    function supportedRewardTokens() public view returns (address[] memory) {
         return registeredRewardTokens;
     }
 
-    function withdrawRewards() public returns(uint256[] memory){
+    function withdrawRewards() public returns (uint256[] memory) {
         return _withdrawRewards(_msgSender());
     }
 
-    function withdrawRewardsFor(address user, address rewardToken) public onlyRewardDistributionModule returns(uint256) {
+    function withdrawRewardsFor(address user, address rewardToken) public onlyRewardDistributionModule returns (uint256) {
         return _withdrawRewards(user, rewardToken);
     }
 
@@ -1774,14 +1809,14 @@ contract StakingPool is StakingPoolBase {
     //     }
     // }
 
-    function rewardBalanceOf(address user, address token) public view returns(uint256) {
+    function rewardBalanceOf(address user, address token) public view returns (uint256) {
         RewardData storage rd = rewards[token];
-        if(rd.unclaimed == 0) return 0; //Either token not registered or everything is already claimed
+        if (rd.unclaimed == 0) return 0; //Either token not registered or everything is already claimed
         uint256 shares = getPersonalStakeTotalAmount(user);
-        if(shares == 0) return 0;
+        if (shares == 0) return 0;
         UserRewardInfo storage uri = userRewards[user];
         uint256 reward;
-        for(uint256 i=uri.nextDistribution[token]; i < rd.distributions.length; i++) {
+        for (uint256 i = uri.nextDistribution[token]; i < rd.distributions.length; i++) {
             RewardDistribution storage rdistr = rd.distributions[i];
             uint256 r = shares.mul(rdistr.amount).div(rdistr.totalShares);
             reward = reward.add(r);
@@ -1789,23 +1824,24 @@ contract StakingPool is StakingPoolBase {
         return reward;
     }
 
-    function _withdrawRewards(address user) internal returns(uint256[] memory rwrds) {
+    function _withdrawRewards(address user) internal returns (uint256[] memory rwrds) {
         rwrds = new uint256[](registeredRewardTokens.length);
-        for(uint256 i=0; i<registeredRewardTokens.length; i++){
+        for (uint256 i = 0; i < registeredRewardTokens.length; i++) {
             rwrds[i] = _withdrawRewards(user, registeredRewardTokens[i]);
         }
         return rwrds;
     }
 
-    function _withdrawRewards(address user, address token) internal returns(uint256){
+    function _withdrawRewards(address user, address token) internal returns (uint256) {
         UserRewardInfo storage uri = userRewards[user];
         RewardData storage rd = rewards[token];
-        if(rd.distributions.length == 0) { //No distributions = nothing to do
+        if (rd.distributions.length == 0) {
+            //No distributions = nothing to do
             return 0;
         }
         uint256 rwrds = rewardBalanceOf(user, token);
         uri.nextDistribution[token] = rd.distributions.length;
-        if(rwrds > 0){
+        if (rwrds > 0) {
             rewards[token].unclaimed = rewards[token].unclaimed.sub(rwrds);
             IERC20(token).transfer(user, rwrds);
             emit RewardWithdraw(user, token, rwrds);
@@ -1813,7 +1849,12 @@ contract StakingPool is StakingPoolBase {
         return rwrds;
     }
 
-    function createStake(address _address, uint256 _amount, uint256 _lockInDuration, bytes memory _data) internal override {
+    function createStake(
+        address _address,
+        uint256 _amount,
+        uint256 _lockInDuration,
+        bytes memory _data
+    ) internal override {
         _withdrawRewards(_address);
         super.createStake(_address, _amount, _lockInDuration, _data);
     }
@@ -1830,20 +1871,17 @@ contract StakingPool is StakingPoolBase {
 
     function _claimRewardsFromVesting() internal {
         rewardVesting.claimRewards();
-        for(uint256 i=0; i < registeredRewardTokens.length; i++){
+        for (uint256 i = 0; i < registeredRewardTokens.length; i++) {
             address rt = registeredRewardTokens[i];
             uint256 expectedBalance = rewards[rt].unclaimed;
-            if(rt == address(stakingToken)){
+            if (rt == address(stakingToken)) {
                 expectedBalance = expectedBalance.add(totalStaked());
             }
             uint256 actualBalance = IERC20(rt).balanceOf(address(this));
             uint256 distributionAmount = actualBalance.sub(expectedBalance);
-            if(actualBalance > expectedBalance) {
+            if (actualBalance > expectedBalance) {
                 uint256 totalShares = totalStaked();
-                rewards[rt].distributions.push(RewardDistribution({
-                    totalShares: totalShares,
-                    amount: distributionAmount
-                }));
+                rewards[rt].distributions.push(RewardDistribution({totalShares: totalShares, amount: distributionAmount}));
                 rewards[rt].unclaimed = rewards[rt].unclaimed.add(distributionAmount);
                 emit RewardDistributionCreated(rt, distributionAmount, totalShares);
             }
@@ -1859,7 +1897,7 @@ contract StakingPool is StakingPoolBase {
 
     /**
      * @notice Admin function to set the address of the ADEL/vAkro Swap contract
-     * @notice Default value is 0-address, which means, that swap is disabled 
+     * @notice Default value is 0-address, which means, that swap is disabled
      * @param _swapContract Adel to vAkro Swap contract.
      */
     function setSwapContract(address _swapContract) external onlyOwner {
@@ -1874,13 +1912,13 @@ contract StakingPool is StakingPoolBase {
      * @param _token Adel address.
      * @param _data Data for the event.
      */
-    function withdrawStakeForSwap(address _user, address _token, bytes calldata _data)
-            external
-            swapEligible(_user)
-            returns(uint256)
-    {
+    function withdrawStakeForSwap(
+        address _user,
+        address _token,
+        bytes calldata _data
+    ) external swapEligible(_user) returns (uint256) {
         uint256 returnValue = 0;
-        for(uint256 i = 0; i < registeredRewardTokens.length; i++) {
+        for (uint256 i = 0; i < registeredRewardTokens.length; i++) {
             uint256 rwrds = withdrawRewardForSwap(_user, registeredRewardTokens[i]);
             if (_token == registeredRewardTokens[i]) {
                 returnValue += rwrds;
@@ -1896,9 +1934,7 @@ contract StakingPool is StakingPoolBase {
      * @param _user User to withdraw the stake for.
      * @param _token Token to get the rewards (can be only ADEL).
      */
-    function withdrawRewardForSwap(address _user, address _token) public swapEligible(_user) 
-        returns(uint256)
-    {
+    function withdrawRewardForSwap(address _user, address _token) public swapEligible(_user) returns (uint256) {
         UserRewardInfo storage uri = userRewards[_user];
         RewardData storage rd = rewards[_token];
 
@@ -1924,4 +1960,5 @@ contract StakingPool is StakingPoolBase {
 // File: contracts\deploy\StakingPoolADEL.sol
 
 contract StakingPoolADEL is StakingPool {
+
 }
