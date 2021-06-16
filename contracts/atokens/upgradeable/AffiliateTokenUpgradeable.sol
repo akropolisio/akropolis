@@ -65,18 +65,26 @@ contract AffiliateTokenUpgradeable is ERC20Upgradeable, BaseWrapperUpgradeable {
         uint256 totalShares = totalSupply();
 
         if (totalShares > 0) {
-            return totalVaultBalance(address(this)).mul(numShares).div(totalShares);
+            return
+                totalVaultBalance(address(this)).mul(numShares).div(
+                    totalShares
+                );
         } else {
             return numShares;
         }
     }
 
     function pricePerShare() external view returns (uint256) {
-        return totalVaultBalance(address(this)).mul(10**uint256(decimals())).div(totalSupply());
+        return
+            totalVaultBalance(address(this)).mul(10**uint256(decimals())).div(
+                totalSupply()
+            );
     }
 
     function _sharesForValue(uint256 amount) internal view returns (uint256) {
-        uint256 totalWrapperAssets = totalVaultBalance(address(this)) - amount; //total wrapper assets before deposit
+        // total wrapper assets before deposit (assumes deposit already occured)
+        uint256 totalWrapperAssets =
+            totalVaultBalance(address(this)).sub(amount);
 
         if (totalWrapperAssets > 0) {
             return totalSupply().mul(amount).div(totalWrapperAssets);
@@ -91,7 +99,7 @@ contract AffiliateTokenUpgradeable is ERC20Upgradeable, BaseWrapperUpgradeable {
 
     function deposit(uint256 amount) public returns (uint256 deposited) {
         deposited = _deposit(msg.sender, address(this), amount, true); // `true` = pull from `msg.sender`
-        uint256 shares = _sharesForValue(deposited);
+        uint256 shares = _sharesForValue(amount); // NOTE: Must be calculated after deposit is handled
         _mint(msg.sender, shares);
     }
 
@@ -112,7 +120,11 @@ contract AffiliateTokenUpgradeable is ERC20Upgradeable, BaseWrapperUpgradeable {
         return _migrate(address(this), amount);
     }
 
-    function migrate(uint256 amount, uint256 maxMigrationLoss) external onlyAffiliate returns (uint256) {
+    function migrate(uint256 amount, uint256 maxMigrationLoss)
+        external
+        onlyAffiliate
+        returns (uint256)
+    {
         return _migrate(address(this), amount, maxMigrationLoss);
     }
 
@@ -138,8 +150,21 @@ contract AffiliateTokenUpgradeable is ERC20Upgradeable, BaseWrapperUpgradeable {
         require(owner != address(0), "permit: signature");
         require(block.timestamp <= deadline, "permit: expired");
 
-        bytes32 structHash = keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, amount, nonces[owner]++, deadline));
-        bytes32 digest = keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR(), structHash));
+        bytes32 structHash =
+            keccak256(
+                abi.encode(
+                    PERMIT_TYPEHASH,
+                    owner,
+                    spender,
+                    amount,
+                    nonces[owner]++,
+                    deadline
+                )
+            );
+        bytes32 digest =
+            keccak256(
+                abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR(), structHash)
+            );
 
         address signatory = ecrecover(digest, v, r, s);
         require(signatory == owner, "permit: unauthorized");

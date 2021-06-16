@@ -23,7 +23,6 @@ interface RegistryAPI {
 abstract contract BaseWrapperUpgradeable is Initializable {
     using MathUpgradeable for uint256;
     using SafeMathUpgradeable for uint256;
-    using SafeERC20Upgradeable for IERC20Upgradeable;
     using AddressUpgradeable for address;
 
     IERC20Upgradeable public token;
@@ -50,17 +49,35 @@ abstract contract BaseWrapperUpgradeable is Initializable {
         registry = RegistryAPI(_registry);
     }
 
+    /**
+     * @notice
+     *  Used to update the yearn registry.
+     * @param _registry The new _registry address.
+     */
     function setRegistry(address _registry) external {
         require(msg.sender == registry.governance());
         // In case you want to override the registry instead of re-deploying
         registry = RegistryAPI(_registry);
+        // Make sure there's no change in governance
+        // NOTE: Also avoid bricking the wrapper from setting a bad registry
+        require(msg.sender == registry.governance());
     }
 
-    function bestVault() public virtual view returns (VaultAPI) {
+    /**
+     * @notice
+     *  Used to get the most revent vault for the token using the registry.
+     * @return An instance of a VaultAPI
+     */
+    function bestVault() public view virtual returns (VaultAPI) {
         return VaultAPI(registry.latestVault(address(token)));
     }
 
-    function allVaults() public virtual view returns (VaultAPI[] memory) {
+    /**
+     * @notice
+     *  Used to get all vaults from the registery for the token
+     * @return An array containing instances of VaultAPI
+     */
+    function allVaults() public view virtual returns (VaultAPI[] memory) {
         uint256 cache_length = _cachedVaults.length;
         uint256 num_vaults = registry.numVaults(address(token));
 
@@ -83,11 +100,21 @@ abstract contract BaseWrapperUpgradeable is Initializable {
     }
 
     function _updateVaultCache(VaultAPI[] memory vaults) internal {
+        // NOTE: even though `registry` is update-able by Yearn, the intended behavior
+        //       is that any future upgrades to the registry will replay the version
+        //       history so that this cached value does not get out of date.
         if (vaults.length > _cachedVaults.length) {
             _cachedVaults = vaults;
         }
     }
 
+    /**
+     * @notice
+     *  Used to get the balance of an account accross all the vaults for a token.
+     *  @dev will be used to get the wrapper balance using totalVaultBalance(address(this)).
+     *  @param account The address of the account.
+     *  @return balance of token for the account accross all the vaults.
+     */
     function totalVaultBalance(address account) public view returns (uint256 balance) {
         VaultAPI[] memory vaults = allVaults();
 
@@ -96,6 +123,11 @@ abstract contract BaseWrapperUpgradeable is Initializable {
         }
     }
 
+    /**
+     * @notice
+     *  Used to get the TVL on the underlying vaults.
+     *  @return assets the sum of all the assets managed by the underlying vaults.
+     */
     function totalAssets() public view returns (uint256 assets) {
         VaultAPI[] memory vaults = allVaults();
 
@@ -113,16 +145,16 @@ abstract contract BaseWrapperUpgradeable is Initializable {
         VaultAPI _bestVault = bestVault();
 
         if (pullFunds) {
-
             if (amount != DEPOSIT_EVERYTHING) {
-                token.safeTransferFrom(depositor, address(this), amount);
+                SafeERC20Upgradeable.safeTransferFrom(token, depositor, address(this), amount);
             } else {
-                token.safeTransferFrom(depositor, address(this), token.balanceOf(depositor));
+                SafeERC20Upgradeable.safeTransferFrom(token, depositor, address(this), token.balanceOf(depositor));
             }
         }
 
         if (token.allowance(address(this), address(_bestVault)) < amount) {
-            token.safeApprove(address(_bestVault), UNLIMITED_APPROVAL); // Vaults are trusted
+            SafeERC20Upgradeable.safeApprove(token, address(_bestVault), 0); // Avoid issues with some tokens requiring 0
+            SafeERC20Upgradeable.safeApprove(token, address(_bestVault), UNLIMITED_APPROVAL); // Vaults are trusted
         }
 
         // Depositing returns number of shares deposited
@@ -142,7 +174,7 @@ abstract contract BaseWrapperUpgradeable is Initializable {
         deposited = beforeBal.sub(afterBal);
         // `receiver` now has shares of `_bestVault` as balance, converted to `token` here
         // Issue a refund if not everything was deposited
-        if (depositor != address(this) && afterBal > 0) token.transfer(depositor, afterBal);
+        if (depositor != address(this) && afterBal > 0) SafeERC20Upgradeable.safeTransfer(token, depositor, afterBal);
     }
 
     function _withdraw(
@@ -156,6 +188,13 @@ abstract contract BaseWrapperUpgradeable is Initializable {
         VaultAPI[] memory vaults = allVaults();
         _updateVaultCache(vaults);
 
+        // NOTE: This loop will attempt to withdraw from each Vault in `allVaults` that `sender`
+        //       is deposited in, up to `amount` tokens. The withdraw action can be expensive,
+        //       so it if there is a denial of service issue in withdrawing, the downstream usage
+        //       of this wrapper contract must give an alternative method of withdrawing using
+        //       this function so that `amount` is less than the full amount requested to withdraw
+        //       (e.g. "piece-wise withdrawals"), leading to less loop iterations such that the
+        //       DoS issue is mitigated (at a tradeoff of requiring more txns from the end user).
         for (uint256 id = 0; id < vaults.length; id++) {
             if (!withdrawFromBest && vaults[id] == _bestVault) {
                 continue; // Don't withdraw from the best
@@ -180,14 +219,20 @@ abstract contract BaseWrapperUpgradeable is Initializable {
 
                 if (amount != WITHDRAW_EVERYTHING) {
                     // Compute amount to withdraw fully to satisfy the request
-                    uint256 estimatedShares = amount
-                        .sub(withdrawn) // NOTE: Changes every iteration
-                        .mul(10**uint256(vaults[id].decimals()))
-                        .div(vaults[id].pricePerShare()); // NOTE: Every Vault is different
+                    uint256 estimatedShares =
+                        amount
+                            .sub(withdrawn) // NOTE: Changes every iteration
+                            .mul(10**uint256(vaults[id].decimals()))
+                            .div(vaults[id].pricePerShare()); // NOTE: Every Vault is different
 
                     // Limit amount to withdraw to the maximum made available to this contract
-                    uint256 shares = MathUpgradeable.min(estimatedShares, availableShares);
-                    withdrawn = withdrawn.add(vaults[id].withdraw(shares));
+                    // NOTE: Avoid corner case where `estimatedShares` isn't precise enough
+                    // NOTE: If `0 < estimatedShares < 1` but `availableShares > 1`, this will withdraw more than necessary
+                    if (estimatedShares > 0 && estimatedShares < availableShares) {
+                        withdrawn = withdrawn.add(vaults[id].withdraw(estimatedShares));
+                    } else {
+                        withdrawn = withdrawn.add(vaults[id].withdraw(availableShares));
+                    }
                 } else {
                     withdrawn = withdrawn.add(vaults[id].withdraw());
                 }
@@ -200,10 +245,10 @@ abstract contract BaseWrapperUpgradeable is Initializable {
 
         // If we have extra, deposit back into `_bestVault` for `sender`
         // NOTE: Invariant is `withdrawn <= amount`
-        if (withdrawn > amount) {
+        if (withdrawn > amount && withdrawn.sub(amount) > _bestVault.pricePerShare().div(10**_bestVault.decimals())) {
             // Don't forget to approve the deposit
             if (token.allowance(address(this), address(_bestVault)) < withdrawn.sub(amount)) {
-                token.safeApprove(address(_bestVault), UNLIMITED_APPROVAL); // Vaults are trusted
+                SafeERC20Upgradeable.safeApprove(token, address(_bestVault), UNLIMITED_APPROVAL); // Vaults are trusted
             }
 
             _bestVault.deposit(withdrawn.sub(amount), sender);
@@ -211,7 +256,7 @@ abstract contract BaseWrapperUpgradeable is Initializable {
         }
 
         // `receiver` now has `withdrawn` tokens as balance
-        if (receiver != address(this)) token.safeTransfer(receiver, withdrawn);
+        if (receiver != address(this)) SafeERC20Upgradeable.safeTransfer(token, receiver, withdrawn);
     }
 
     function _migrate(address account) internal returns (uint256) {

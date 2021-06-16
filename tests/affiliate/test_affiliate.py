@@ -53,7 +53,7 @@ def test_setAffiliate(affiliate, affiliate_token, rando):
         affiliate_token.acceptAffiliate({"from": affiliate})
 
 
-def test_setRegistry(rando, affiliate, gov, affiliate_token, registry):
+def test_setRegistry(rando, affiliate, gov, affiliate_token, registry, new_registry):
     with brownie.reverts():
         affiliate_token.setRegistry(rando, {"from": rando})
 
@@ -62,8 +62,13 @@ def test_setRegistry(rando, affiliate, gov, affiliate_token, registry):
     with brownie.reverts():
         affiliate_token.setRegistry(rando, {"from": affiliate})
 
-    # Only yGov can call this method
-    affiliate_token.setRegistry(rando, {"from": gov})
+    assert registry.governance() == gov
+
+    # is not registry interface
+    with brownie.reverts():
+        affiliate_token.setRegistry(rando, {"from": gov})
+
+    affiliate_token.setRegistry(new_registry, {"from": gov})
 
 
 def test_deposit(token, registry, vault, affiliate_token, gov, rando):
@@ -85,7 +90,7 @@ def test_deposit_max_uint256(token, registry, vault, affiliate_token, gov, rando
     assert affiliate_token.balanceOf(rando) == vault.balanceOf(rando) == 0
 
     # NOTE: Must approve affiliate_token to deposit
-    token.approve(affiliate_token, 2**256-1, {"from": rando})
+    token.approve(affiliate_token, (2**256)-1, {"from": rando})
 
     affiliate_token.deposit({"from": rando})
     assert affiliate_token.balanceOf(rando) == 10000
@@ -93,16 +98,15 @@ def test_deposit_max_uint256(token, registry, vault, affiliate_token, gov, rando
 
 
 
-def test_migrate(token, registry, affiliate_token, gov, rando, affiliate, create_vault):
-    vault = create_vault(version="1.0.0", token=token)
-    registry.newRelease(vault, {"from": gov})
-    registry.endorseVault(vault, {"from": gov})
+def test_migrate(token, registry, create_vault, affiliate_token, gov, rando, affiliate):
+    vault1 = create_vault(version="1.0.0", token=token)
+    registry.newRelease(vault1, {"from": gov})
+    registry.endorseVault(vault1, {"from": gov})
     token.transfer(rando, 10000, {"from": gov})
     token.approve(affiliate_token, 10000, {"from": rando})
     affiliate_token.deposit(10000, {"from": rando})
     assert affiliate_token.balanceOf(rando) == 10000
-    assert vault.balanceOf(affiliate_token) == 10000
-
+    assert vault1.balanceOf(affiliate_token) == 10000
 
     vault2 = create_vault(version="2.0.0", token=token)
     registry.newRelease(vault2, {"from": gov})
@@ -114,7 +118,7 @@ def test_migrate(token, registry, affiliate_token, gov, rando, affiliate, create
     # Only affiliate can call this method
     affiliate_token.migrate({"from": affiliate})
     assert affiliate_token.balanceOf(rando) == 10000
-    assert vault.balanceOf(affiliate_token) == 0
+    assert vault1.balanceOf(affiliate_token) == 0
     assert vault2.balanceOf(affiliate_token) == 10000
 
 

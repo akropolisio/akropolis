@@ -119,6 +119,15 @@ def registry(deployer, gov, TestRegistryV2):
     yield registry
 
 @pytest.fixture(scope="function")
+def new_registry(deployer, gov, TestRegistryV2):
+    registry = deployer.deploy(TestRegistryV2)
+    registry.setGovernance(gov,  {"from": deployer})
+    registry.acceptGovernance({"from": gov})
+    assert registry.governance() == gov
+    yield registry
+
+
+@pytest.fixture(scope="function")
 def proxy_admin(deployer):
     proxy_admin = deploy_admin(deployer)
     yield proxy_admin
