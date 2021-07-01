@@ -66,10 +66,8 @@ def regular_user4(accounts):
 
 
 @pytest.fixture(scope="module")
-def akro(env_settings, Contract):
-    yield Contract.from_explorer(
-        os.getenv("MAINNET_AKRO_PROXY"), as_proxy_for=os.getenv("MAINNET_AKRO")
-    )
+def akro(Contract, env_settings):
+    yield Contract.from_explorer("0x8ab7404063ec4dbcfd4598215992dc3f8ec853d7", as_proxy_for="0xEaA04Ea9a674d755B9c2fD988d01F7A1C9D116dA")
 
 
 @pytest.fixture(scope="module")
@@ -78,21 +76,21 @@ def akroowner(env_settings):
 
 
 @pytest.fixture(scope="module")
-def adel(env_settings, Contract):
+def adel(Contract, env_settings):
     yield Contract.from_explorer(
         os.getenv("MAINNET_ADEL_PROXY"), as_proxy_for=os.getenv("MAINNET_ADEL")
     )
 
 
 @pytest.fixture(scope="module")
-def vakro(env_settings, Contract):
+def vakro(Contract, env_settings):
     yield Contract.from_explorer(
         os.getenv("MAINNET_VAKRO_PROXY"), as_proxy_for=os.getenv("MAINNET_VAKRO")
     )
 
 
 @pytest.fixture(scope="module")
-def adelstakingpool(env_settings, Contract):
+def adelstakingpool(Contract, env_settings):
     yield Contract.from_explorer(
         os.getenv("MAINNET_ADEL_STAKING_PROXY"),
         as_proxy_for=os.getenv("MAINNET_ADEL_STAKING"),
@@ -100,7 +98,7 @@ def adelstakingpool(env_settings, Contract):
 
 
 @pytest.fixture(scope="module")
-def akrostakingpool(env_settings, Contract):
+def akrostakingpool(Contract, env_settings):
     yield Contract.from_explorer(
         os.getenv("MAINNET_AKRO_STAKING_PROXY"),
         as_proxy_for=os.getenv("MAINNET_AKRO_STAKING"),
@@ -108,7 +106,7 @@ def akrostakingpool(env_settings, Contract):
 
 
 @pytest.fixture(scope="module")
-def vakroSwap(env_settings, Contract):
+def vakroSwap(Contract, env_settings):
     yield Contract.from_explorer(
         os.getenv("MAINNET_SWAP_PROXY"), as_proxy_for=os.getenv("MAINNET_SWAP")
     )

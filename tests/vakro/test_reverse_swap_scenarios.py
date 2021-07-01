@@ -89,12 +89,14 @@ def test_full_swap_with_reverse(
     tx = testVakroSwap.setSwapRate(ADEL_AKRO_RATE, 1, {"from": deployer})
     cur_time = tx.timestamp
 
-    assert testVakroSwap.swapRateChangeTimestamp() == cur_time
+    assert testVakroSwap.swapRateChangeTimestamp() == cur_time 
     assert (
         testVakroSwap.swappedUsersTimestamps(regular_user) == users_time
     )  # not changed
 
     # Can reverse swap now
+    time_to_start = cur_time + 200
+    vakro.setVestingStart(time_to_start, {"from": deployer})
     testVakroSwap.swapReverseAdel({"from": regular_user})
 
     assert (
