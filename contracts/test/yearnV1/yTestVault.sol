@@ -25,10 +25,7 @@ contract yTestVault is ERC20 {
 
     constructor(address _token, address _controller)
         public
-        ERC20(
-            string(abi.encodePacked("yearn ", ERC20(_token).name())),
-            string(abi.encodePacked("y", ERC20(_token).symbol()))
-        )
+        ERC20(string(abi.encodePacked("yearn ", ERC20(_token).name())), string(abi.encodePacked("y", ERC20(_token).symbol())))
     {
         token = IERC20(_token);
         governance = msg.sender;
@@ -60,7 +57,6 @@ contract yTestVault is ERC20 {
         return token.balanceOf(address(this)).mul(min).div(max);
     }
 
-
     //вызываем keeper
     function earn() public {
         uint256 _bal = available();
@@ -72,10 +68,7 @@ contract yTestVault is ERC20 {
         deposit(token.balanceOf(msg.sender));
     }
 
-
-    
     function deposit(uint256 _amount) public {
-
         //сумма с учетом контроллера
         uint256 _pool = balance();
         uint256 _before = token.balanceOf(address(this));
@@ -94,7 +87,6 @@ contract yTestVault is ERC20 {
     function withdrawAll() external {
         withdraw(balanceOf(msg.sender));
     }
-
 
     //сверх лимита заем
     // Used to swap any borrowed reserve over the debt limit to liquidate to 'token'
@@ -123,7 +115,6 @@ contract yTestVault is ERC20 {
 
         token.safeTransfer(msg.sender, r);
     }
-
 
     //прайс относительно того, сколько сминчено токенов
     function getPricePerFullShare() public view returns (uint256) {

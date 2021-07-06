@@ -5,6 +5,4 @@ pragma experimental ABIEncoderV2;
 
 import "@openzeppelin/contracts/proxy/ProxyAdmin.sol";
 
-contract UtilProxyAdmin is ProxyAdmin {
-  
-}
+contract UtilProxyAdmin is ProxyAdmin {}
