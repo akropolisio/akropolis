@@ -5,8 +5,8 @@ import "@ozUpgradesV3/contracts/token/ERC20/ERC20Upgradeable.sol";
 import "../../vakro/MinterRole.sol";
 
 contract TestADEL is ERC20Upgradeable, MinterRole {
-    string constant NAME    = 'Akropolis Delphi';
-    string constant SYMBOL  = 'ADEL';
+    string constant NAME = "Akropolis Delphi";
+    string constant SYMBOL = "ADEL";
     uint8 constant DECIMALS = 18;
 
     function initialize() public initializer {

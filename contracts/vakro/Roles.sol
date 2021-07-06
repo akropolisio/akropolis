@@ -7,7 +7,7 @@ pragma solidity ^0.6.12;
  */
 library Roles {
     struct Role {
-        mapping (address => bool) bearer;
+        mapping(address => bool) bearer;
     }
 
     /**

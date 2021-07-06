@@ -15,8 +15,8 @@
         "ganache": "npx ganache-cli --gasLimit 0xfffffffffff -e 100000000 --port 8545",
         "generate-abi": "npx truffle-abi -o ./abi",
         "generate-artifacts": "npm run compile && npm run generate-abi",
-        "install": "pip install -r requirements-dev.txt",
-        "postinstall": "npm run clone-packages && npm run generate-artifacts",
+        "install": "pip3 install -r requirements-dev.txt",
+        "postinstall": "npm run clone-packages && npm run generate-artifacts && npx husky install",
         "sec:flatten": "sh ./security/flattener-run.sh",
         "sec:slither": "sh ./security/slither/slither-run.sh",
         "sec:flatten-echidna": "sh ./security/flattener-run.sh echidna",
@@ -24,7 +24,13 @@
         "sec:echidna": "sh ./security/echidna/echidna-run.sh",
         "test": "brownie test",
         "test:add-fork": "brownie networks add Ethereum mainnet-test host=$ALCHEMY_ARCHIVE_NODE chainid=1 explorer=https://api.etherscan.io/api",
-        "test:swap-mainnet": "brownie test tests-mainnet/test_vakro_mainnet_fork.py --network mainnet-fork"
+        "test:swap-mainnet": "brownie test tests-mainnet/test_vakro_mainnet_fork.py --network mainnet-fork",
+        "format:fix": "npx prettier --write \"contracts/**/*.sol\" && npx prettier --write \"interfaces/**/*.sol\"",
+        "format:lint": "npx prettier --check \"contracts/**/*.sol\" && npx prettier --check \"interfaces/**/*.sol\"",
+        "format:test:lint": "black --check tests",
+        "format:test:fix": "black . tests",
+        "husky:hooks:install": "sh ./scripts/husky.sh",
+        "lint:check": "npx solhint contracts/**/*.sol  interfaces/**/*.sol"
     },
     "dependencies": {
         "@openzeppelin/cli": "^2.8.2",
@@ -38,6 +44,10 @@
         "@openzeppelin/contracts-upgradeable": "^3.3.0",
         "@truffle/hdwallet-provider": "^1.0.38",
         "ganache-cli": "^6.12.2",
-        "truffle": "^5.1.34"
+        "truffle": "^5.1.34",
+        "husky": "^6.0.0",
+        "prettier": "^2.2.1",
+        "prettier-plugin-solidity": "^1.0.0-beta.9",
+        "solhint": "^3.3.4"
     }
 }

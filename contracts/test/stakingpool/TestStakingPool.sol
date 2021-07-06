@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: AGPL V3.0
-pragma solidity ^0.6.12; 
+pragma solidity ^0.6.12;
 pragma experimental ABIEncoderV2;
 
 import "@ozUpgradesV3/contracts/math/SafeMathUpgradeable.sol";
@@ -23,7 +23,7 @@ contract TestStakingPool is TestStakingPoolBase {
     }
 
     struct UserRewardInfo {
-        mapping(address=>uint256) nextDistribution; //Next unclaimed distribution
+        mapping(address => uint256) nextDistribution; //Next unclaimed distribution
     }
 
     struct RewardData {
@@ -33,16 +33,15 @@ contract TestStakingPool is TestStakingPoolBase {
 
     TestRewardVestingModule public rewardVesting;
     address[] internal registeredRewardTokens;
-    mapping(address=>RewardData) public rewards;
-    mapping(address=>UserRewardInfo) internal userRewards;
+    mapping(address => RewardData) public rewards;
+    mapping(address => UserRewardInfo) internal userRewards;
 
     address public swapContract;
 
-
-//    modifier onlyRewardDistributionModule() {
-//        require(_msgSender() == getModuleAddress(MODULE_REWARD_DISTR), "StakingPool: calls allowed from RewardDistributionModule only");
-//        _;
-//    }
+    //    modifier onlyRewardDistributionModule() {
+    //        require(_msgSender() == getModuleAddress(MODULE_REWARD_DISTR), "StakingPool: calls allowed from RewardDistributionModule only");
+    //        _;
+    //    }
 
     function setRewardVesting(address _rewardVesting) public onlyOwner {
         rewardVesting = TestRewardVestingModule(_rewardVesting);
@@ -54,43 +53,43 @@ contract TestStakingPool is TestStakingPoolBase {
         emit RewardTokenRegistered(token);
     }
 
-    function claimRewardsFromVesting() public onlyCapper{
+    function claimRewardsFromVesting() public onlyCapper {
         _claimRewardsFromVesting();
     }
 
-    function isRegisteredRewardToken(address token) public view returns(bool) {
-        for(uint256 i=0; i<registeredRewardTokens.length; i++){
-            if(token == registeredRewardTokens[i]) return true;
+    function isRegisteredRewardToken(address token) public view returns (bool) {
+        for (uint256 i = 0; i < registeredRewardTokens.length; i++) {
+            if (token == registeredRewardTokens[i]) return true;
         }
         return false;
     }
 
-    function supportedRewardTokens() public view returns(address[] memory) {
+    function supportedRewardTokens() public view returns (address[] memory) {
         return registeredRewardTokens;
     }
 
-    function withdrawRewards() public returns(uint256[] memory){
+    function withdrawRewards() public returns (uint256[] memory) {
         return _withdrawRewards(_msgSender());
     }
 
-//    function withdrawRewardsFor(address user, address rewardToken) public onlyRewardDistributionModule returns(uint256) {
-//        return _withdrawRewards(user, rewardToken);
-//    }
+    //    function withdrawRewardsFor(address user, address rewardToken) public onlyRewardDistributionModule returns(uint256) {
+    //        return _withdrawRewards(user, rewardToken);
+    //    }
 
     // function withdrawRewardsFor(address user, address[] memory rewardTokens) onlyRewardDistributionModule {
     //     for(uint256 i=0; i < rewardTokens.length; i++) {
     //         _withdrawRewards(user, rewardTokens[i]);
     //     }
     // }
-    
-    function rewardBalanceOf(address user, address token) public view returns(uint256) {
+
+    function rewardBalanceOf(address user, address token) public view returns (uint256) {
         RewardData storage rd = rewards[token];
-        if(rd.unclaimed == 0) return 0; //Either token not registered or everything is already claimed
+        if (rd.unclaimed == 0) return 0; //Either token not registered or everything is already claimed
         uint256 shares = getPersonalStakeTotalAmount(user);
-        if(shares == 0) return 0;
+        if (shares == 0) return 0;
         UserRewardInfo storage uri = userRewards[user];
         uint256 reward;
-        for(uint256 i=uri.nextDistribution[token]; i < rd.distributions.length; i++) {
+        for (uint256 i = uri.nextDistribution[token]; i < rd.distributions.length; i++) {
             RewardDistribution storage rdistr = rd.distributions[i];
             uint256 r = shares.mul(rdistr.amount).div(rdistr.totalShares);
             reward = reward.add(r);
@@ -98,23 +97,24 @@ contract TestStakingPool is TestStakingPoolBase {
         return reward;
     }
 
-    function _withdrawRewards(address user) internal returns(uint256[] memory rwrds) {
+    function _withdrawRewards(address user) internal returns (uint256[] memory rwrds) {
         rwrds = new uint256[](registeredRewardTokens.length);
-        for(uint256 i=0; i<registeredRewardTokens.length; i++){
+        for (uint256 i = 0; i < registeredRewardTokens.length; i++) {
             rwrds[i] = _withdrawRewards(user, registeredRewardTokens[i]);
         }
         return rwrds;
     }
 
-    function _withdrawRewards(address user, address token) internal returns(uint256){
+    function _withdrawRewards(address user, address token) internal returns (uint256) {
         UserRewardInfo storage uri = userRewards[user];
         RewardData storage rd = rewards[token];
-        if(rd.distributions.length == 0) { //No distributions = nothing to do
+        if (rd.distributions.length == 0) {
+            //No distributions = nothing to do
             return 0;
         }
         uint256 rwrds = rewardBalanceOf(user, token);
         uri.nextDistribution[token] = rd.distributions.length;
-        if(rwrds > 0){
+        if (rwrds > 0) {
             rewards[token].unclaimed = rewards[token].unclaimed.sub(rwrds);
             IERC20Upgradeable(token).transfer(user, rwrds);
             emit RewardWithdraw(user, token, rwrds);
@@ -122,7 +122,12 @@ contract TestStakingPool is TestStakingPoolBase {
         return rwrds;
     }
 
-    function createStake(address _address, uint256 _amount, uint256 _lockInDuration, bytes memory _data) internal override {
+    function createStake(
+        address _address,
+        uint256 _amount,
+        uint256 _lockInDuration,
+        bytes memory _data
+    ) internal override {
         _withdrawRewards(_address);
         super.createStake(_address, _amount, _lockInDuration, _data);
     }
@@ -137,23 +142,19 @@ contract TestStakingPool is TestStakingPoolBase {
         return super.unstakeAllUnlocked(_data);
     }
 
-
     function _claimRewardsFromVesting() internal {
         rewardVesting.claimRewards();
-        for(uint256 i=0; i < registeredRewardTokens.length; i++){
+        for (uint256 i = 0; i < registeredRewardTokens.length; i++) {
             address rt = registeredRewardTokens[i];
             uint256 expectedBalance = rewards[rt].unclaimed;
-            if(rt == address(stakingToken)){
+            if (rt == address(stakingToken)) {
                 expectedBalance = expectedBalance.add(totalStaked());
             }
             uint256 actualBalance = IERC20Upgradeable(rt).balanceOf(address(this));
             uint256 distributionAmount = actualBalance.sub(expectedBalance);
-            if(actualBalance > expectedBalance) {
+            if (actualBalance > expectedBalance) {
                 uint256 totalShares = totalStaked();
-                rewards[rt].distributions.push(RewardDistribution({
-                    totalShares: totalShares,
-                    amount: distributionAmount
-                }));
+                rewards[rt].distributions.push(RewardDistribution({totalShares: totalShares, amount: distributionAmount}));
                 rewards[rt].unclaimed = rewards[rt].unclaimed.add(distributionAmount);
                 emit RewardDistributionCreated(rt, distributionAmount, totalShares);
             }
@@ -169,7 +170,7 @@ contract TestStakingPool is TestStakingPoolBase {
 
     /**
      * @notice Admin function to set the address of the ADEL/vAkro Swap contract
-     * @notice Default value is 0-address, which means, that swap is disabled 
+     * @notice Default value is 0-address, which means, that swap is disabled
      * @param _swapContract Adel to vAkro Swap contract.
      */
     function setSwapContract(address _swapContract) external onlyOwner {
@@ -184,13 +185,13 @@ contract TestStakingPool is TestStakingPoolBase {
      * @param _token Adel address.
      * @param _data Data for the event.
      */
-    function withdrawStakeForSwap(address _user, address _token, bytes calldata _data)
-            external
-            swapEligible(_user)
-            returns(uint256)
-    {
+    function withdrawStakeForSwap(
+        address _user,
+        address _token,
+        bytes calldata _data
+    ) external swapEligible(_user) returns (uint256) {
         uint256 returnValue = 0;
-        for(uint256 i = 0; i < registeredRewardTokens.length; i++) {
+        for (uint256 i = 0; i < registeredRewardTokens.length; i++) {
             uint256 rwrds = withdrawRewardForSwap(_user, registeredRewardTokens[i]);
             if (_token == registeredRewardTokens[i]) {
                 returnValue += rwrds;
@@ -206,9 +207,7 @@ contract TestStakingPool is TestStakingPoolBase {
      * @param _user User to withdraw the stake for.
      * @param _token Token to get the rewards (can be only ADEL).
      */
-    function withdrawRewardForSwap(address _user, address _token) public swapEligible(_user) 
-        returns(uint256)
-    {
+    function withdrawRewardForSwap(address _user, address _token) public swapEligible(_user) returns (uint256) {
         UserRewardInfo storage uri = userRewards[_user];
         RewardData storage rd = rewards[_token];
 
@@ -229,5 +228,4 @@ contract TestStakingPool is TestStakingPoolBase {
         emit RewardWithdraw(_user, _token, rwrds);
         return rwrds;
     }
-
 }

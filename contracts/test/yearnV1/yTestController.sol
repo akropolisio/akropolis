@@ -10,7 +10,6 @@ import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "../../../interfaces/yearnV1/IConverter.sol";
 import "../../../interfaces/yearnV1/IStrategy.sol";
 
-
 contract YTestController {
     using SafeERC20 for IERC20;
     using Address for address;
