@@ -89,11 +89,24 @@
       {
         "indexed": false,
         "internalType": "uint256",
-        "name": "profitFactor",
+        "name": "delay",
         "type": "uint256"
       }
     ],
-    "name": "UpdatedProfitFactor",
+    "name": "UpdatedMaxReportDelay",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "string",
+        "name": "metadataURI",
+        "type": "string"
+      }
+    ],
+    "name": "UpdatedMetadataURI",
     "type": "event"
   },
   {
@@ -106,7 +119,20 @@
         "type": "uint256"
       }
     ],
-    "name": "UpdatedReportDelay",
+    "name": "UpdatedMinReportDelay",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "profitFactor",
+        "type": "uint256"
+      }
+    ],
+    "name": "UpdatedProfitFactor",
     "type": "event"
   },
   {
@@ -266,6 +292,19 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "metadataURI",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "internalType": "address",
@@ -276,6 +315,19 @@
     "name": "migrate",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "minReportDelay",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -359,6 +411,32 @@
       }
     ],
     "name": "setMaxReportDelay",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "_metadataURI",
+        "type": "string"
+      }
+    ],
+    "name": "setMetadataURI",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_delay",
+        "type": "uint256"
+      }
+    ],
+    "name": "setMinReportDelay",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
