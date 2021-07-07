@@ -19,11 +19,13 @@ ADEL_TO_SWAP_USER1 = AVAILABLE_USER1 - 200
 
 
 @pytest.fixture(scope="module")
+
 def prepare_swap(deployer, adel, akro, vakro, stakingpool, vakroSwap, exploitCompVAkroSwap):
     vakro.addMinter(vakroSwap.address, {"from": deployer})
     vakro.addSender(vakroSwap.address, {"from": deployer})
     vakro.addMinter(exploitCompVAkroSwap.address, {'from': deployer})
     vakro.addSender(exploitCompVAkroSwap.address, {'from': deployer})
+
 
     adel.addMinter(vakroSwap.address, {"from": deployer})
 

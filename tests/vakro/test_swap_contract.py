@@ -25,6 +25,7 @@ def prepare_swap(
     vakro.addMinter(testExploitCompVAkroSwap.address, {'from': deployer})
     vakro.addSender(testExploitCompVAkroSwap.address, {'from': deployer})
 
+
     adel.addMinter(testVakroSwap.address, {"from": deployer})
 
     stakingpool.setSwapContract(testVakroSwap.address, {"from": deployer})
@@ -167,7 +168,6 @@ def test_swap_staked_adel(
 
     vakro.unlockAndRedeemAll({"from": regular_user2})
     testVakroSwap.withdrawAdel(deployer.address, {"from": deployer})
-
 
 def test_swap_rewards_adel(
     chain,
@@ -494,6 +494,7 @@ def test_reverse_swap(
     adel_swapped_before = testVakroSwap.adelSwapped(regular_user2)
     assert adel_swapped_before > 0
     adel.transfer(testVakroSwap.address, adel_swapped_before, {"from": deployer})
+
     adel_on_swap_before = adel.balanceOf(testVakroSwap.address)
     adel_user_before = adel.balanceOf(regular_user2)
     vakro_user_before = vakro.balanceOf(regular_user2)
@@ -520,8 +521,6 @@ def test_reverse_swap(
     assert adel_user_after - adel_user_before == adel_swapped_before
     assert vakro_user_before - vakro_user_after == adel_swapped_before * ADEL_AKRO_RATE
     assert adel_swapped_after == 0
-
-
 
 def test_swap_exploit_comp_vakro(chain, deployer, vakro, testExploitCompVAkroSwap, prepare_swap, regular_user):
     vakro_balance_before = vakro.balanceOf(regular_user)
