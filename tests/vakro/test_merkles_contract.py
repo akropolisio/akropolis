@@ -154,11 +154,14 @@ def test_swap_exploit_comp_vakro(chain, deployer, vakro, exploitCompVAkroSwap, p
         [regular_user3, AVAILABLE_USER3, root_1, h4],
         [regular_user4, AVAILABLE_USER4, root_1, h3]
     ]
-
+    with brownie.reverts("Merkle proofs not verified"):
+        exploitCompVAkroSwap.swap(0, AVAILABLE_USER1, [root_2, h2], {'from': regular_user2})
     for data in user_data:
 
         balance_before = vakro.balanceOf(data[0])
         # incorrect proof
+        with brownie.reverts("Merkle proofs not verified"):
+            exploitCompVAkroSwap.swap(0, data[1], [data[3], 0], {'from': data[0]})
         with brownie.reverts("Merkle proofs not verified"):
             exploitCompVAkroSwap.swap(0, data[1], [data[3], 0], {'from': data[0]})
         # incorrect proof

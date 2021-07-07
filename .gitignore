@@ -27,7 +27,7 @@ node_modules/
 
 # project artifacts
 build/*
-flattened/*
+contracts/flattened/*
 solc
 echidna-test*
 
