@@ -21,6 +21,8 @@ def main():
         AdelVAkroVestingSwap,
         UtilProxy,
         UtilProxyAdmin,
+        ExploitCompVAkroSwap
+
     ]
     _flattener(contracts_to_flatten)
 
