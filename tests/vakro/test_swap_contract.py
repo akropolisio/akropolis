@@ -16,10 +16,6 @@ ADEL_TOTAL_VESTING_REWARDS_MAX_ALLOWED = 2000
 
 
 @pytest.fixture(scope="module")
-<<<<<<< HEAD
-=======
-
->>>>>>> 1264732ef9f3200e76d78b201b9e05d8c80e9312
 def prepare_swap(deployer, adel, akro, vakro, stakingpool, testVakroSwap, testVakroVestingSwap, testExploitCompVAkroSwap):
     vakro.addMinter(testVakroSwap.address, {'from': deployer})
     vakro.addSender(testVakroSwap.address, {'from': deployer})
@@ -465,27 +461,6 @@ def test_swap_from_vesting_rewards(
     assert adel_on_swap_after == adel_on_swap_before
     assert adel_user_before == adel_user_after
     assert vakro_user_after == vakro_user_before + swapped_amount * ADEL_AKRO_RATE
-<<<<<<< HEAD
-=======
-    assert adel_swapped_from_rewards_after - adel_swapped_from_rewards_before == swapped_amount
-
-
-def test_swap_exploit_comp_vakro(chain, deployer, vakro, testExploitCompVAkroSwap, prepare_swap, regular_user):
-    vakro_balance_before = vakro.balanceOf(regular_user)
-
-    vakro.setVestingCliff(0, {'from': deployer})
-    start = chain.time() + 50
-    vakro.setVestingStart(start, {'from': deployer})
-    chain.mine(1)
-
-    assert testExploitCompVAkroSwap.swapped(regular_user) == 0
-    testExploitCompVAkroSwap.swap(0, AKRO_ON_SWAP, [], {'from': regular_user})
-    assert testExploitCompVAkroSwap.swapped(regular_user) == AKRO_ON_SWAP
-
-    vakro_balance_after = vakro.balanceOf(regular_user)
-
-    assert vakro_balance_after - vakro_balance_before == AKRO_ON_SWAP
->>>>>>> 1264732ef9f3200e76d78b201b9e05d8c80e9312
     assert (
         adel_swapped_from_rewards_after - adel_swapped_from_rewards_before
         == swapped_amount
@@ -543,7 +518,3 @@ def test_reverse_swap(
     assert adel_user_after - adel_user_before == adel_swapped_before
     assert vakro_user_before - vakro_user_after == adel_swapped_before * ADEL_AKRO_RATE
     assert adel_swapped_after == 0
-<<<<<<< HEAD
-=======
-
->>>>>>> 1264732ef9f3200e76d78b201b9e05d8c80e9312

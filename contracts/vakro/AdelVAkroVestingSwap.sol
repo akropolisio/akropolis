@@ -34,7 +34,10 @@ contract AdelVAkroVestingSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable 
     bytes32[] public merkleRootsTotalRewardsVested;
     mapping(address => uint256[2]) public swappedAdelRewards;
 
-    enum AdelRewardsSource {WALLET, VESTED}
+    enum AdelRewardsSource {
+        WALLET,
+        VESTED
+    }
 
     modifier swapEnabled() {
         require(swapRateNumerator != 0, "Swap is disabled");

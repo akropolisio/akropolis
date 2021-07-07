@@ -18,7 +18,11 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
 
     event AdelSwapped(address indexed receiver, uint256 adelAmount, uint256 akroAmount);
 
-    enum AdelSource {WALLET, STAKE, REWARDS}
+    enum AdelSource {
+        WALLET,
+        STAKE,
+        REWARDS
+    }
 
     //Addresses of affected contracts
     address public akro;
