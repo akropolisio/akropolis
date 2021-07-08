@@ -1,0 +1,101 @@
+INFO:Detectors:
+OwnableUpgradeable.__gap (Rewards.sol#893) shadows:
+	- ContextUpgradeable.__gap (Rewards.sol#685)
+PausableUpgradeable.__gap (Rewards.sol#986) shadows:
+	- ContextUpgradeable.__gap (Rewards.sol#685)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#state-variable-shadowing
+INFO:Detectors:
+Reentrancy in Rewards.claim(uint256,uint256,bytes32[]) (Rewards.sol#1052-1065):
+	External calls:
+	- token.safeTransfer(_msgSender(),availableAmount) (Rewards.sol#1063)
+	Event emitted after the call(s):
+	- Claimed(_msgSender(),availableAmount) (Rewards.sol#1064)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-3
+INFO:Detectors:
+Initializable.isConstructor() (Rewards.sol#52-64) uses assembly
+	- INLINE ASM (Rewards.sol#60-62)
+Address.isContract(address) (Rewards.sol#125-134) uses assembly
+	- INLINE ASM (Rewards.sol#132)
+Address._verifyCallResult(bool,bytes,string) (Rewards.sol#246-263) uses assembly
+	- INLINE ASM (Rewards.sol#255-258)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#assembly-usage
+INFO:Detectors:
+Address.functionCall(address,bytes) (Rewards.sol#178-180) is never used and should be removed
+Address.functionCallWithValue(address,bytes,uint256) (Rewards.sol#203-205) is never used and should be removed
+Address.functionStaticCall(address,bytes) (Rewards.sol#228-230) is never used and should be removed
+Address.functionStaticCall(address,bytes,string) (Rewards.sol#238-244) is never used and should be removed
+Address.sendValue(address,uint256) (Rewards.sol#152-158) is never used and should be removed
+ContextUpgradeable.__Context_init() (Rewards.sol#671-673) is never used and should be removed
+ContextUpgradeable._msgData() (Rewards.sol#681-684) is never used and should be removed
+SafeERC20.safeApprove(IERC20,address,uint256) (Rewards.sol#718-727) is never used and should be removed
+SafeERC20.safeDecreaseAllowance(IERC20,address,uint256) (Rewards.sol#734-737) is never used and should be removed
+SafeERC20.safeIncreaseAllowance(IERC20,address,uint256) (Rewards.sol#729-732) is never used and should be removed
+SafeERC20.safeTransferFrom(IERC20,address,address,uint256) (Rewards.sol#707-709) is never used and should be removed
+SafeMath.add(uint256,uint256) (Rewards.sol#368-373) is never used and should be removed
+SafeMath.div(uint256,uint256) (Rewards.sol#442-444) is never used and should be removed
+SafeMath.div(uint256,uint256,string) (Rewards.sol#458-464) is never used and should be removed
+SafeMath.mod(uint256,uint256) (Rewards.sol#478-480) is never used and should be removed
+SafeMath.mod(uint256,uint256,string) (Rewards.sol#494-497) is never used and should be removed
+SafeMath.mul(uint256,uint256) (Rewards.sol#416-428) is never used and should be removed
+SafeMath.sub(uint256,uint256) (Rewards.sol#385-387) is never used and should be removed
+SafeMath.sub(uint256,uint256,string) (Rewards.sol#399-404) is never used and should be removed
+SafeMathUpgradeable.div(uint256,uint256) (Rewards.sol#600-602) is never used and should be removed
+SafeMathUpgradeable.div(uint256,uint256,string) (Rewards.sol#616-622) is never used and should be removed
+SafeMathUpgradeable.mod(uint256,uint256) (Rewards.sol#636-638) is never used and should be removed
+SafeMathUpgradeable.mod(uint256,uint256,string) (Rewards.sol#652-655) is never used and should be removed
+SafeMathUpgradeable.mul(uint256,uint256) (Rewards.sol#574-586) is never used and should be removed
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#dead-code
+INFO:Detectors:
+Low level call in Address.sendValue(address,uint256) (Rewards.sol#152-158):
+	- (success) = recipient.call{value: amount}() (Rewards.sol#156)
+Low level call in Address.functionCallWithValue(address,bytes,uint256,string) (Rewards.sol#213-220):
+	- (success,returndata) = target.call{value: value}(data) (Rewards.sol#218)
+Low level call in Address.functionStaticCall(address,bytes,string) (Rewards.sol#238-244):
+	- (success,returndata) = target.staticcall(data) (Rewards.sol#242)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#low-level-calls
+INFO:Detectors:
+Variable Initializable.______gap (Rewards.sol#67) is not in mixedCase
+Function ContextUpgradeable.__Context_init() (Rewards.sol#671-673) is not in mixedCase
+Function ContextUpgradeable.__Context_init_unchained() (Rewards.sol#675-676) is not in mixedCase
+Variable ContextUpgradeable.__gap (Rewards.sol#685) is not in mixedCase
+Function ReentrancyGuardUpgradeable.__ReentrancyGuard_init() (Rewards.sol#793-795) is not in mixedCase
+Function ReentrancyGuardUpgradeable.__ReentrancyGuard_init_unchained() (Rewards.sol#797-799) is not in mixedCase
+Variable ReentrancyGuardUpgradeable.__gap (Rewards.sol#821) is not in mixedCase
+Function OwnableUpgradeable.__Ownable_init() (Rewards.sol#846-849) is not in mixedCase
+Function OwnableUpgradeable.__Ownable_init_unchained() (Rewards.sol#851-855) is not in mixedCase
+Variable OwnableUpgradeable.__gap (Rewards.sol#893) is not in mixedCase
+Function PausableUpgradeable.__Pausable_init() (Rewards.sol#923-926) is not in mixedCase
+Function PausableUpgradeable.__Pausable_init_unchained() (Rewards.sol#928-930) is not in mixedCase
+Variable PausableUpgradeable.__gap (Rewards.sol#986) is not in mixedCase
+Parameter Rewards.initialize(address)._token (Rewards.sol#1007) is not in mixedCase
+Parameter Rewards.setMinClaimAmount(uint256)._minAmount (Rewards.sol#1019) is not in mixedCase
+Parameter Rewards.setMerkleRoots(bytes32[])._merkleRoots (Rewards.sol#1027) is not in mixedCase
+Parameter Rewards.withdrawToken(address)._recipient (Rewards.sol#1040) is not in mixedCase
+Parameter Rewards.claim(uint256,uint256,bytes32[])._merkleRootIndex (Rewards.sol#1053) is not in mixedCase
+Parameter Rewards.claim(uint256,uint256,bytes32[])._amountAllowedToClaim (Rewards.sol#1054) is not in mixedCase
+Parameter Rewards.claim(uint256,uint256,bytes32[])._merkleProofs (Rewards.sol#1055) is not in mixedCase
+Parameter Rewards.verifyMerkleProofs(address,uint256,uint256,bytes32[])._account (Rewards.sol#1075) is not in mixedCase
+Parameter Rewards.verifyMerkleProofs(address,uint256,uint256,bytes32[])._merkleRootIndex (Rewards.sol#1076) is not in mixedCase
+Parameter Rewards.verifyMerkleProofs(address,uint256,uint256,bytes32[])._amountAllowedToClaim (Rewards.sol#1077) is not in mixedCase
+Parameter Rewards.verifyMerkleProofs(address,uint256,uint256,bytes32[])._merkleProofs (Rewards.sol#1078) is not in mixedCase
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#conformance-to-solidity-naming-conventions
+INFO:Detectors:
+Redundant expression "this (Rewards.sol#682)" inContextUpgradeable (Rewards.sol#670-686)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#redundant-statements
+INFO:Detectors:
+Initializable.______gap (Rewards.sol#67) is never used in Rewards (Rewards.sol#991-1100)
+PausableUpgradeable.__gap (Rewards.sol#986) is never used in Rewards (Rewards.sol#991-1100)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unused-state-variables
+INFO:Detectors:
+owner() should be declared external:
+	- OwnableUpgradeable.owner() (Rewards.sol#860-862)
+renounceOwnership() should be declared external:
+	- OwnableUpgradeable.renounceOwnership() (Rewards.sol#879-882)
+transferOwnership(address) should be declared external:
+	- OwnableUpgradeable.transferOwnership(address) (Rewards.sol#888-892)
+paused() should be declared external:
+	- PausableUpgradeable.paused() (Rewards.sol#935-937)
+initialize(address) should be declared external:
+	- Rewards.initialize(address) (Rewards.sol#1007-1013)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#public-function-that-could-be-declared-external
+INFO:Slither:Rewards.sol analyzed (12 contracts with 75 detectors), 65 result(s) found
