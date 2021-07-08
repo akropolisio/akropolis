@@ -22,8 +22,7 @@ def main():
         UtilProxy,
         UtilProxyAdmin,
         ExploitCompVAkroSwap,
-        Rewards
-
+        Rewards,
     ]
     _flattener(contracts_to_flatten)
 

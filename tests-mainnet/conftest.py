@@ -67,7 +67,10 @@ def regular_user4(accounts):
 
 @pytest.fixture(scope="module")
 def akro(Contract, env_settings):
-    yield Contract.from_explorer("0x8ab7404063ec4dbcfd4598215992dc3f8ec853d7", as_proxy_for="0xEaA04Ea9a674d755B9c2fD988d01F7A1C9D116dA")
+    yield Contract.from_explorer(
+        "0x8ab7404063ec4dbcfd4598215992dc3f8ec853d7",
+        as_proxy_for="0xEaA04Ea9a674d755B9c2fD988d01F7A1C9D116dA",
+    )
 
 
 @pytest.fixture(scope="module")

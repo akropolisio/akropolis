@@ -18,13 +18,14 @@ ADEL_TO_RECEIVE_BACK = 300
 ADEL_TO_SWAP_USER1 = AVAILABLE_USER1 - 200
 
 
-
 @pytest.fixture(scope="module")
-def prepare_swap(deployer, adel, akro, vakro, stakingpool, vakroSwap, exploitCompVAkroSwap):
-    vakro.addMinter(vakroSwap.address, {'from': deployer})
-    vakro.addSender(vakroSwap.address, {'from': deployer})
-    vakro.addMinter(exploitCompVAkroSwap.address, {'from': deployer})
-    vakro.addSender(exploitCompVAkroSwap.address, {'from': deployer})
+def prepare_swap(
+    deployer, adel, akro, vakro, stakingpool, vakroSwap, exploitCompVAkroSwap
+):
+    vakro.addMinter(vakroSwap.address, {"from": deployer})
+    vakro.addSender(vakroSwap.address, {"from": deployer})
+    vakro.addMinter(exploitCompVAkroSwap.address, {"from": deployer})
+    vakro.addSender(exploitCompVAkroSwap.address, {"from": deployer})
 
     stakingpool.setSwapContract(vakroSwap.address, {"from": deployer})
 
@@ -136,17 +137,32 @@ def test_swap_adel(
     assert adel.balanceOf(vakroSwap.address) == AVAILABLE_USER1
 
 
-def test_swap_exploit_comp_vakro(chain, deployer, vakro, exploitCompVAkroSwap, prepare_swap, regular_user, regular_user2, regular_user3, regular_user4):
-    root, hshs = prepare_root(regular_user.address, regular_user2.address, regular_user3.address, regular_user4.address)
+def test_swap_exploit_comp_vakro(
+    chain,
+    deployer,
+    vakro,
+    exploitCompVAkroSwap,
+    prepare_swap,
+    regular_user,
+    regular_user2,
+    regular_user3,
+    regular_user4,
+):
+    root, hshs = prepare_root(
+        regular_user.address,
+        regular_user2.address,
+        regular_user3.address,
+        regular_user4.address,
+    )
 
     h1, h2, h3, h4, root_1, root_2 = hshs
 
     # Set root and settings
-    exploitCompVAkroSwap.setMerkleRoots([root], {'from': deployer})
-    vakro.setVestingCliff(0, {'from': deployer})
+    exploitCompVAkroSwap.setMerkleRoots([root], {"from": deployer})
+    vakro.setVestingCliff(0, {"from": deployer})
     start = chain.time() + 50
-    vakro.setVestingStart(start, {'from': deployer})
+    vakro.setVestingStart(start, {"from": deployer})
     chain.mine(1)
 
-    exploitCompVAkroSwap.swap(0, AVAILABLE_USER1, [h2, root_2], {'from': regular_user})
+    exploitCompVAkroSwap.swap(0, AVAILABLE_USER1, [h2, root_2], {"from": regular_user})
     assert exploitCompVAkroSwap.swapped(regular_user) == AVAILABLE_USER1

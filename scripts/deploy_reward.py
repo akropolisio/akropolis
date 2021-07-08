@@ -1,17 +1,24 @@
 import os
 from dotenv import load_dotenv, find_dotenv
 from brownie import *
-#Rewards, accounts, network, web3
 
-from utils.deploy_helpers import deploy_proxy, deploy_admin, get_proxy_admin, upgrade_proxy
+# Rewards, accounts, network, web3
+
+from utils.deploy_helpers import (
+    deploy_proxy,
+    deploy_admin,
+    get_proxy_admin,
+    upgrade_proxy,
+)
+
 
 def main():
-    #load_dotenv(dotenv_path=Path('..')/".env", override=True)
+    # load_dotenv(dotenv_path=Path('..')/".env", override=True)
 
     load_dotenv(find_dotenv())
 
     print(f"You are using the '{network.show_active()}' network")
-    if (network.show_active() == 'development'):
+    if network.show_active() == "development":
         deployer = accounts[0]
         proxy_admin = accounts[1]
     else:
@@ -21,9 +28,9 @@ def main():
         # Admin is an account
         if admin_key:
             proxy_admin = accounts.add(admin_key)
-        elif proxy_admin_address: #Admin is a contract
+        elif proxy_admin_address:  # Admin is a contract
             proxy_admin = get_proxy_admin(proxy_admin_address)
-        else: #New proxy admin needed
+        else:  # New proxy admin needed
             proxy_admin = deploy_admin(deployer)
             print("ProxyAdmin deployed")
 
@@ -35,4 +42,3 @@ def main():
     reward = deployer.deploy(Rewards)
     reward.initialize(token_address, {"from": deployer})
     print(f"Rewards at {reward.address} with token {token_address}")
-
