@@ -27,7 +27,7 @@ node_modules/
 
 # project artifacts
 build/*
-flattened/*
+contracts/flattened/*
 solc
 echidna-test*
 
@@ -87,3 +87,5 @@ TestStakingPool.json
 UpgradeTestNew.json
 UpgradeTestOld.json
 /.idea/
+TestAdelVAkroSwap.json
+

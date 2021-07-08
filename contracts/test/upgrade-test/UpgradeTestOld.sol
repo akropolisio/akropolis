@@ -7,7 +7,6 @@ pragma experimental ABIEncoderV2;
 import "@ozUpgradesV3/contracts/access/OwnableUpgradeable.sol";
 import "@ozUpgradesV3/contracts/utils/ReentrancyGuardUpgradeable.sol";
 
-
 contract UpgradeTestOld is OwnableUpgradeable, ReentrancyGuardUpgradeable {
     uint256 public oldStorage;
 
@@ -17,7 +16,7 @@ contract UpgradeTestOld is OwnableUpgradeable, ReentrancyGuardUpgradeable {
         oldStorage = _oldStorage;
     }
 
-    function upgrateTest() public pure returns(uint256)   {
+    function upgrateTest() public pure returns (uint256) {
         return 1;
     }
 }

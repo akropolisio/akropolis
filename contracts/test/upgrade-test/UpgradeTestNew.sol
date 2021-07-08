@@ -15,8 +15,8 @@ contract UpgradeTestNew is OwnableUpgradeable, ReentrancyGuardUpgradeable {
         __ReentrancyGuard_init();
         oldStorage = _oldStorage;
     }
-        
-    function upgrateTest() public pure returns(uint256)   {
+
+    function upgrateTest() public pure returns (uint256) {
         return 2;
-    }  
+    }
 }

@@ -29,6 +29,7 @@ networks:
     cmd_settings:
       fork: mainnet-test
       unlock:
+        - 0x4B2A429b97A3022ae32c77eBdbdfB8BA08dd5254
         - 0x509e16558f1fdc4733efa73846da891a29797e43
         - 0x4454fc25daf515d1237d0ea76ac3ea931118eef0
         - 0xc97ad401c75e6bfb5694899cd3271485d27c6ea4
@@ -51,7 +52,7 @@ autofetch_sources: True
 
 # require OpenZepplin Contracts
 dependencies:
-  - iearn-finance/yearn-vaults@0.3.0
+  - iearn-finance/yearn-vaults@0.3.4
   - OpenZeppelin/openzeppelin-contracts@3.3.0
   - OpenZeppelin/openzeppelin-contracts-upgradeable@3.3.0
 # path remapping to support imports from GitHub/NPM
@@ -59,7 +60,7 @@ compiler:
   solc:
     version: 0.6.12
     remappings:
-      - "@yearnvaults=iearn-finance/yearn-vaults@0.3.0"
+      - "@yearnvaults=iearn-finance/yearn-vaults@0.3.4"
       - "@openzeppelin=OpenZeppelin/openzeppelin-contracts@3.3.0"
       - "@ozUpgradesV3=OpenZeppelin/openzeppelin-contracts-upgradeable@3.3.0"
     optimizer:
