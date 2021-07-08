@@ -136,7 +136,6 @@ def test_swap_adel(
     assert adel.balanceOf(vakroSwap.address) == AVAILABLE_USER1
 
 
-
 def test_swap_exploit_comp_vakro(chain, deployer, vakro, exploitCompVAkroSwap, prepare_swap, regular_user, regular_user2, regular_user3, regular_user4):
     root, hshs = prepare_root(regular_user.address, regular_user2.address, regular_user3.address, regular_user4.address)
 

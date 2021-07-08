@@ -262,7 +262,7 @@ contract AdelVAkroVestingSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable 
 
         swappedAdelRewards[_msgSender()][uint128(_index)] = newAmount;
         IERC20Mintable(vakro).mint(address(this), vAkroAmount);
-        IERC20Upgradeable(vakro).transfer(_msgSender(), vAkroAmount);
+        IERC20Upgradeable(vakro).safeTransfer(_msgSender(), vAkroAmount);
 
         emit AdelSwapped(_msgSender(), _adelAmount, vAkroAmount);
     }

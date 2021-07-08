@@ -227,7 +227,7 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
         holders[beneficiary].unlocked = 0;
         totalSupply = totalSupply.sub(amount);
 
-        akro.transfer(beneficiary, akroAmount);
+        akro.safeTransfer(beneficiary, akroAmount);
 
         emit Transfer(beneficiary, address(0), amount);
         return amount;

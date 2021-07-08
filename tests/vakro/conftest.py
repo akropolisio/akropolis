@@ -204,7 +204,9 @@ def exploitCompVAkroSwap(deployer, proxy_admin, adel, akro, vakro, ExploitCompVA
     assert vakroSwapProxy.admin.call({"from":proxy_admin.address}) == proxy_admin.address
     assert vakroSwapProxy.implementation.call({"from":proxy_admin.address}) == vakroSwapImpl.address
 
+
     yield vakroSwapImplFromProxy
+
 
 @pytest.fixture(scope="module")
 def testExploitCompVAkroSwap(deployer, proxy_admin, adel, akro, vakro, TestExploitCompVAkroSwap):

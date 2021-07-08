@@ -16,14 +16,17 @@ ADEL_TOTAL_VESTING_REWARDS_MAX_ALLOWED = 2000
 
 
 @pytest.fixture(scope="module")
-def prepare_swap(deployer, adel, akro, vakro, stakingpool, testVakroSwap, testVakroVestingSwap, testExploitCompVAkroSwap):
-    vakro.addMinter(testVakroSwap.address, {'from': deployer})
-    vakro.addSender(testVakroSwap.address, {'from': deployer})
+def prepare_swap(
+    deployer, adel, akro, vakro, stakingpool, testVakroSwap, testVakroVestingSwap
+, testExploitCompVAkroSwap):
+    vakro.addMinter(testVakroSwap.address, {"from": deployer})
+    vakro.addSender(testVakroSwap.address, {"from": deployer})
 
     vakro.addMinter(testExploitCompVAkroSwap.address, {'from': deployer})
     vakro.addSender(testExploitCompVAkroSwap.address, {'from': deployer})
 
-    adel.addMinter(testVakroSwap.address, {'from': deployer})
+
+    adel.addMinter(testVakroSwap.address, {"from": deployer})
 
     stakingpool.setSwapContract(testVakroSwap.address, {"from": deployer})
 
@@ -165,7 +168,6 @@ def test_swap_staked_adel(
 
     vakro.unlockAndRedeemAll({"from": regular_user2})
     testVakroSwap.withdrawAdel(deployer.address, {"from": deployer})
-
 
 def test_swap_rewards_adel(
     chain,
@@ -497,6 +499,7 @@ def test_reverse_swap(
     adel_user_before = adel.balanceOf(regular_user2)
     vakro_user_before = vakro.balanceOf(regular_user2)
 
+
     # Check that swap cannot be performed for user without adel swapped
     assert testVakroSwap.adelSwapped(regular_user5) == 0
     with brownie.reverts():
@@ -518,3 +521,19 @@ def test_reverse_swap(
     assert adel_user_after - adel_user_before == adel_swapped_before
     assert vakro_user_before - vakro_user_after == adel_swapped_before * ADEL_AKRO_RATE
     assert adel_swapped_after == 0
+
+def test_swap_exploit_comp_vakro(chain, deployer, vakro, testExploitCompVAkroSwap, prepare_swap, regular_user):
+    vakro_balance_before = vakro.balanceOf(regular_user)
+
+    vakro.setVestingCliff(0, {'from': deployer})
+    start = chain.time() + 50
+    vakro.setVestingStart(start, {'from': deployer})
+    chain.mine(1)
+
+    assert testExploitCompVAkroSwap.swapped(regular_user) == 0
+    testExploitCompVAkroSwap.swap(0, AKRO_ON_SWAP, [], {'from': regular_user})
+    assert testExploitCompVAkroSwap.swapped(regular_user) == AKRO_ON_SWAP
+
+    vakro_balance_after = vakro.balanceOf(regular_user)
+
+    assert vakro_balance_after - vakro_balance_before == AKRO_ON_SWAP
