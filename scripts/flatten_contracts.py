@@ -14,7 +14,6 @@ def _flattener(contracts_to_flatten):
 
 
 def main():
-<<<<<<< HEAD
     contracts_to_flatten = [
         VaultSavings,
         VestedAkro,
@@ -26,9 +25,6 @@ def main():
         Rewards
 
     ]
-=======
-    contracts_to_flatten = [ExploitCompVAkroSwap, VestedAkro, VaultSavings, VestedAkro, AdelVAkroSwap, AdelVAkroVestingSwap, UtilProxy, UtilProxyAdmin]
->>>>>>> 740936facf19f5b26c277c6c246d3d6e3ebfa072
     _flattener(contracts_to_flatten)
 
 
