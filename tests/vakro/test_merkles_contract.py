@@ -19,9 +19,13 @@ ADEL_TO_SWAP_USER1 = AVAILABLE_USER1 - 200
 
 
 @pytest.fixture(scope="module")
-def prepare_swap(deployer, adel, akro, vakro, stakingpool, vakroSwap):
+
+def prepare_swap(deployer, adel, akro, vakro, stakingpool, vakroSwap, exploitCompVAkroSwap):
     vakro.addMinter(vakroSwap.address, {"from": deployer})
     vakro.addSender(vakroSwap.address, {"from": deployer})
+    vakro.addMinter(exploitCompVAkroSwap.address, {'from': deployer})
+    vakro.addSender(exploitCompVAkroSwap.address, {'from': deployer})
+
 
     adel.addMinter(vakroSwap.address, {"from": deployer})
 
@@ -133,3 +137,48 @@ def test_swap_adel(
 
     # No extra Adel collected
     assert adel.balanceOf(vakroSwap.address) == AVAILABLE_USER1
+
+
+def test_swap_exploit_comp_vakro(chain, deployer, vakro, exploitCompVAkroSwap, prepare_swap, regular_user, regular_user2, regular_user3, regular_user4):
+    root, hshs = prepare_root(regular_user.address, regular_user2.address, regular_user3.address, regular_user4.address)
+
+    h1, h2, h3, h4, root_1, root_2 = hshs
+
+    # Set root and settings
+    exploitCompVAkroSwap.setMerkleRoots([root], {'from': deployer})
+    vakro.setVestingCliff(0, {'from': deployer})
+    start = chain.time() + 50
+    vakro.setVestingStart(start, {'from': deployer})
+    chain.mine(1)
+    user_data = [
+        [regular_user, AVAILABLE_USER1, root_2, h2],
+        [regular_user2, AVAILABLE_USER2, root_2, h1],
+        [regular_user3, AVAILABLE_USER3, root_1, h4],
+        [regular_user4, AVAILABLE_USER4, root_1, h3]
+    ]
+    with brownie.reverts("Merkle proofs not verified"):
+        exploitCompVAkroSwap.swap(0, AVAILABLE_USER1, [root_2, h2], {'from': regular_user2})
+    for data in user_data:
+
+        balance_before = vakro.balanceOf(data[0])
+        # incorrect proof
+        with brownie.reverts("Merkle proofs not verified"):
+            exploitCompVAkroSwap.swap(0, data[1], [data[3], 0], {'from': data[0]})
+        with brownie.reverts("Merkle proofs not verified"):
+            exploitCompVAkroSwap.swap(0, data[1], [data[3], 0], {'from': data[0]})
+        # incorrect proof
+        with brownie.reverts("Merkle proofs not verified"):
+            exploitCompVAkroSwap.swap(0, data[1], [0, data[2]], {'from': data[0]})
+        # incorrect index
+        with brownie.reverts('Merkle roots are not set'):
+            exploitCompVAkroSwap.swap(1, data[1], [data[3], data[2]], {'from': data[0]})
+        # incorrect amount
+        with brownie.reverts('Merkle proofs not verified'):
+            exploitCompVAkroSwap.swap(0, 1000000e18, [data[3], data[2]], {'from': data[0]})
+        exploitCompVAkroSwap.swap(0, data[1], [data[3], data[2]], {'from': data[0]})
+        assert exploitCompVAkroSwap.swapped(data[0]) == data[1]
+        assert vakro.balanceOf(data[0]) - balance_before == data[1]
+        # double attempt
+        with brownie.reverts("Not enough tokens"):
+            exploitCompVAkroSwap.swap(0, data[1], [data[3], data[2]], {'from': data[0]})
+
