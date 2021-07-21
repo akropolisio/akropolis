@@ -1474,6 +1474,13 @@
     "follow-redirects" "1.5.10"
     "is-buffer" "^2.0.2"
 
+"axios@^0.21.1":
+  "integrity" "sha512-dKQiRHxGD9PPRIUNIWvZhPTPpl1rf/OxTYKsqKUDjBwYylTvV7SjSHJb9ratfyzM6wCdLCOYLzs73qpg5c4iGA=="
+  "resolved" "https://registry.npmjs.org/axios/-/axios-0.21.1.tgz"
+  "version" "0.21.1"
+  dependencies:
+    "follow-redirects" "^1.10.0"
+
 "bach@^1.0.0":
   "integrity" "sha1-Szzpa/JxNPeaG0FKUcFONMO9mIA="
   "resolved" "https://registry.npmjs.org/bach/-/bach-1.2.0.tgz"
@@ -2046,6 +2053,11 @@
     "inherits" "^2.0.1"
     "safe-buffer" "^5.0.1"
 
+"circular@^1.0.5":
+  "integrity" "sha1-fad6+Yu96c5LWzWM1Va13e0tMUk="
+  "resolved" "https://registry.npmjs.org/circular/-/circular-1.0.5.tgz"
+  "version" "1.0.5"
+
 "class-is@^1.1.0":
   "integrity" "sha512-rhjH9AG1fvabIDoGRVH587413LPjTZgmDF9fOFCbFJQV4yuocX1mHxxvXI4g3cGwbVY9wAYIoKlg1N79frJKQw=="
   "resolved" "https://registry.npmjs.org/class-is/-/class-is-1.1.0.tgz"
@@ -2075,12 +2087,32 @@
   dependencies:
     "restore-cursor" "^3.1.0"
 
+"cli-logger@^0.5.40":
+  "integrity" "sha1-CX8OEbByx8aYomxH9YiinCC0iws="
+  "resolved" "https://registry.npmjs.org/cli-logger/-/cli-logger-0.5.40.tgz"
+  "version" "0.5.40"
+  dependencies:
+    "circular" "^1.0.5"
+    "cli-util" "~1.1.27"
+
+"cli-regexp@~0.1.0":
+  "integrity" "sha1-a82TsJ+y7RAl0woRVdWZeVSlNRI="
+  "resolved" "https://registry.npmjs.org/cli-regexp/-/cli-regexp-0.1.2.tgz"
+  "version" "0.1.2"
+
 "cli-table@^0.3.1":
   "integrity" "sha512-7uo2+RMNQUZ13M199udxqwk1qxTOS53EUak4gmu/aioUpdH5RvBz0JkJslcWz6ABKedZNqXXzikMZgHh+qF16A=="
   "resolved" "https://registry.npmjs.org/cli-table/-/cli-table-0.3.5.tgz"
   "version" "0.3.5"
   dependencies:
     "colors" "1.0.3"
+
+"cli-util@~1.1.27":
+  "integrity" "sha1-QtaeNqBAoyH8nPhRwVE8rcUJMFQ="
+  "resolved" "https://registry.npmjs.org/cli-util/-/cli-util-1.1.27.tgz"
+  "version" "1.1.27"
+  dependencies:
+    "cli-regexp" "~0.1.0"
 
 "cli-width@^2.0.0":
   "integrity" "sha512-GRMWDxpOB6Dgk2E5Uo+3eEBvtOOlimMmpbFiKuLFnQzYDavtLFY3K5ona41jgN/WdRZtG7utuVSVTL4HbZHGkw=="
@@ -2660,6 +2692,11 @@
   dependencies:
     "is-descriptor" "^1.0.2"
     "isobject" "^3.0.1"
+
+"delay@^5.0.0":
+  "integrity" "sha512-ReEBKkIfe4ya47wlPYf/gu5ib6yUG0/Aez0JQZQz94kiWtRQvZIQbTiehsnwHvLSWJnQdhVeqYue7Id1dKr0qw=="
+  "resolved" "https://registry.npmjs.org/delay/-/delay-5.0.0.tgz"
+  "version" "5.0.0"
 
 "delayed-stream@~1.0.0":
   "integrity" "sha1-3zrhmayt+31ECqrgsp4icrJOxhk="
@@ -3906,6 +3943,11 @@
   dependencies:
     "inherits" "^2.0.3"
     "readable-stream" "^2.3.6"
+
+"follow-redirects@^1.10.0":
+  "integrity" "sha512-HWqDgT7ZEkqRzBvc2s64vSZ/hfOceEol3ac/7tKwzuvEyWx3/4UegXh5oBOIotkGsObyk3xznnSRVADBgWSQVg=="
+  "resolved" "https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.14.1.tgz"
+  "version" "1.14.1"
 
 "follow-redirects@1.5.10":
   "integrity" "sha512-0V5l4Cizzvqt5D44aTXbFZz+FtyXV1vrDN6qrelxtfYQKW0KO0W2T/hkE8xvGa/540LkZlkaUjO4ailYTFtHVQ=="
@@ -6697,6 +6739,11 @@
     "object-assign" "^4.1.0"
     "strict-uri-encode" "^1.0.0"
 
+"querystring@^0.2.1":
+  "integrity" "sha512-wkvS7mL/JMugcup3/rMitHmd9ecIGd2lhFhK9N3UUQ450h66d1r3Y9nvXzQAW1Lq+wyx61k/1pfKS5KuKiyEbg=="
+  "resolved" "https://registry.npmjs.org/querystring/-/querystring-0.2.1.tgz"
+  "version" "0.2.1"
+
 "randombytes@^2.0.0", "randombytes@^2.0.1", "randombytes@^2.0.5", "randombytes@^2.0.6", "randombytes@^2.1.0":
   "integrity" "sha512-vYl3iOX+4CKUWuxGi9Ukhie6fsqXqS9FE2Zaic4tNFD2N2QQaXOMFbuKK4QmDHC0JO6B1Zp41J0LpT0oR68amQ=="
   "resolved" "https://registry.npmjs.org/randombytes/-/randombytes-2.1.0.tgz"
@@ -7942,6 +7989,16 @@
     "ethers" "^4.0.32"
     "lodash" "^4.17.13"
     "web3" "1.2.1"
+
+"truffle-plugin-verify@^0.5.11":
+  "integrity" "sha512-IL8DDsA3YCUQcrRXtarTEXoZJeb2Rlj8jwNjdiWWyDZ7r/EQZndJooorWo19qDpZf9s8ydpvTE/Bb/uyna6Zag=="
+  "resolved" "https://registry.npmjs.org/truffle-plugin-verify/-/truffle-plugin-verify-0.5.11.tgz"
+  "version" "0.5.11"
+  dependencies:
+    "axios" "^0.21.1"
+    "cli-logger" "^0.5.40"
+    "delay" "^5.0.0"
+    "querystring" "^0.2.1"
 
 "truffle-provider@^0.1.12":
   "integrity" "sha512-3d5WqSKIzZcpgW44mdfF97s+Tgh2a/3Ly6vHJirBV9OZDUtiAzP6WVnlRNvmlDJXFCDqt6Yb9qQWoXFHbYoR6w=="
