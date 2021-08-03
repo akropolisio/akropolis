@@ -26,6 +26,7 @@ jobs:
         shell: bash
         run: |
           npm run test
+          npm run strategies_test
         env:
           DEPLOYER_PRIVATE_KEY: 1
           ADMIN_PRIVATE_KEY: 1
