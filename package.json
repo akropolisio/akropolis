@@ -31,7 +31,7 @@
         "format:test:fix": "black . tests",
         "husky:hooks:install": "sh ./scripts/husky.sh",
         "lint:check": "npx solhint contracts/**/*.sol  interfaces/**/*.sol",
-        "mainnet-test": "brownie test tests-mainnet/Strategy --network mainnet-fork"
+        "test-mainnet": "brownie test tests-mainnet/Strategy --network mainnet-fork"
     },
     "dependencies": {
         "@openzeppelin/cli": "^2.8.2",
