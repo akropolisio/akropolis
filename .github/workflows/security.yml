@@ -27,7 +27,7 @@ jobs:
       - name: Run mainnet tests
         shell: bash
         run: |
-          npm install ganache-cli@6.12.2
+          npm install -g ganache-cli@6.12.2
           brownie test ./tests-mainnet/Strategy --network mainnet-fork
         env:
           ETHERSCAN: D8BJ6I7AP8X7D25WQN7A28E73Y72V2UETQ
