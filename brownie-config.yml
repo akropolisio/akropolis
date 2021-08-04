@@ -26,23 +26,23 @@ networks:
     chainid: 1
     gas_limit: max
     explorer: https://api.etherscan.io/api
-    cmd_settings:
-      fork: mainnet-test
-      unlock:
-        - 0x4B2A429b97A3022ae32c77eBdbdfB8BA08dd5254
-        - 0x509e16558f1fdc4733efa73846da891a29797e43
-        - 0x4454fc25daf515d1237d0ea76ac3ea931118eef0
-        - 0xc97ad401c75e6bfb5694899cd3271485d27c6ea4
-        - 0xf42a339f93c1fa4c5d9ace33db308a504e7b0bde
-        - 0xb1f9a358003ae5145805e936db3af3c22368e324
-        - 0xa215f1b06e7945d331f2df30961027123947a40d
-        - 0x8efd9addd8de6a4e64664d1893dec51f8c3339e9
-        - 0x19870de096523b6eaed10da9fbeb82285451c7bd
-        - 0x4dab9b8fca17a37e5ef0eef7d1ac09e2ac1580fb
-        - 0x8e3fabf5a1e4b773c227d2646eb2470263d3a1bf
-      accounts: 10
-      default_balance: 100
-      gas_limit: 6721975
+    # cmd_settings:
+    #   fork: mainnet-test
+    #   unlock:
+    #     - 0x4B2A429b97A3022ae32c77eBdbdfB8BA08dd5254
+    #     - 0x509e16558f1fdc4733efa73846da891a29797e43
+    #     - 0x4454fc25daf515d1237d0ea76ac3ea931118eef0
+    #     - 0xc97ad401c75e6bfb5694899cd3271485d27c6ea4
+    #     - 0xf42a339f93c1fa4c5d9ace33db308a504e7b0bde
+    #     - 0xb1f9a358003ae5145805e936db3af3c22368e324
+    #     - 0xa215f1b06e7945d331f2df30961027123947a40d
+    #     - 0x8efd9addd8de6a4e64664d1893dec51f8c3339e9
+    #     - 0x19870de096523b6eaed10da9fbeb82285451c7bd
+    #     - 0x4dab9b8fca17a37e5ef0eef7d1ac09e2ac1580fb
+    #     - 0x8e3fabf5a1e4b773c227d2646eb2470263d3a1bf
+    #   accounts: 10
+    #   default_balance: 100
+    #   gas_limit: 6721975
 
   rinkeby:
     gas_limit: max
