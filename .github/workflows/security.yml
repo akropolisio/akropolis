@@ -30,7 +30,7 @@ jobs:
           npm install -g ganache-cli@6.12.2
           brownie test ./tests-mainnet/Strategy --network mainnet-fork
         env:
-          ETHERSCAN: D8BJ6I7AP8X7D25WQN7A28E73Y72V2UETQ
+          ETHERSCAN_TOKEN: D8BJ6I7AP8X7D25WQN7A28E73Y72V2UETQ
           WEB3_INFURA_PROJECT_ID: 41dd6c6fb8594e668e2e71425be6d61c
           PROXY_OWNER: "0xc5af91f7d10dde118992ecf536ed227f276ec60d"
           VAULTSAVINGV2_PROXY: "0x6511d8686eb43eac9d4852458435c1bec4d67bc6"
