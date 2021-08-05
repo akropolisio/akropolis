@@ -8,12 +8,14 @@ import parametrize_from_file
 
 amount = 10e18
 SLIPPAGE = 1e17
+ACCURACY = 10e12
 
 json_file = "./valide_data.json"
 
+
 @parametrize_from_file(json_file, "test_parameter")
 def test_full_workflow(yearnVault, regular_user, lpToken, lptoken_owner, Governance, vault_savings, owner,
-                       regular_user1, Voter, Strategist, name):
+                        regular_user1, Voter, Strategist, name):
     # REGISTER THE VAULT
     contract = Contract.from_explorer(yearnVault)
     lpToken = Contract.from_explorer(lpToken)
@@ -38,6 +40,7 @@ def test_full_workflow(yearnVault, regular_user, lpToken, lptoken_owner, Governa
     tx = vault_savings.deposit["address,uint"](
         contract.address, amount, {"from": regular_user}
     )
+    balanceProofTokenLiquidity1= contract.balanceOf(regular_user)
     deposit_amount = tx.return_value
     user_balance_after = lpToken.balanceOf(regular_user)
     assert abs(user_balance_before - user_balance_after) == amount
@@ -76,6 +79,7 @@ def test_full_workflow(yearnVault, regular_user, lpToken, lptoken_owner, Governa
     vault_savings.deposit["address,uint"](
         contract.address, amount, {"from": regular_user1}
     )
+    balanceProofTokenLiquidity2 = contract.balanceOf(regular_user1)
     # second deposit
     lpToken.transfer(regular_user1, amount, {"from": lptoken_owner})
 
@@ -94,13 +98,15 @@ def test_full_workflow(yearnVault, regular_user, lpToken, lptoken_owner, Governa
     chain.snapshot()
 
     # withdraw user 1
-    contract.approve(vault_savings.address, amount, {"from": regular_user})
+    contract.approve(vault_savings.address, balanceProofTokenLiquidity1, {"from": regular_user})
     vault_savings.withdraw["address,uint"].transact(
-        contract.address, amount, {"from": regular_user}
+        contract.address, balanceProofTokenLiquidity1, {"from": regular_user}
     )
 
+
+
     balanceWithdraw = lpToken.balanceOf(regular_user)
-    assert balanceWithdraw > amount
+    assert abs(balanceWithdraw - amount) <= ACCURACY
 
     chain.revert()
     # harvest
@@ -108,9 +114,9 @@ def test_full_workflow(yearnVault, regular_user, lpToken, lptoken_owner, Governa
     voters.harvest({"from": strategist})
     chain.mine(100)
 
-    contract.approve(vault_savings.address, amount, {"from": regular_user})
+    contract.approve(vault_savings.address, balanceProofTokenLiquidity1, {"from": regular_user})
     vault_savings.withdraw["address,uint"].transact(
-        contract.address, amount, {"from": regular_user}
+        contract.address, balanceProofTokenLiquidity1, {"from": regular_user}
     )
 
     balancelpAfterHarvest = lpToken.balanceOf(regular_user)
@@ -119,10 +125,10 @@ def test_full_workflow(yearnVault, regular_user, lpToken, lptoken_owner, Governa
 
     chain.mine(100)
 
-    # user 2 withdraw
-    contract.approve(vault_savings.address, amount, {"from": regular_user1})
+     # user 2 withdraw
+    contract.approve(vault_savings.address, balanceProofTokenLiquidity2, {"from": regular_user1})
     vault_savings.withdraw["address,uint"].transact(
-        contract.address, amount, {"from": regular_user1}
+        contract.address, balanceProofTokenLiquidity2, {"from": regular_user1}
     )
 
     assert lpToken.balanceOf(regular_user1) > amount
