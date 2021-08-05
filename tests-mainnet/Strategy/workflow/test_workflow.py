@@ -71,7 +71,7 @@ def test_full_workflow(yearnVault, regular_user, lpToken, lptoken_owner, Governa
     vault_savings.deposit["address,uint"](
         contract.address, amount, {"from": regular_user}
     )
-    # first deposit
+    #second user deposit
     lpToken.transfer(regular_user1, amount, {"from": lptoken_owner})
 
     lpToken.approve(vault_savings.address, amount, {"from": regular_user1})
@@ -79,15 +79,9 @@ def test_full_workflow(yearnVault, regular_user, lpToken, lptoken_owner, Governa
     vault_savings.deposit["address,uint"](
         contract.address, amount, {"from": regular_user1}
     )
+    
     balanceProofTokenLiquidity2 = contract.balanceOf(regular_user1)
-    # second deposit
-    lpToken.transfer(regular_user1, amount, {"from": lptoken_owner})
 
-    lpToken.approve(vault_savings.address, amount, {"from": regular_user1})
-
-    vault_savings.deposit["address,uint"](
-        contract.address, amount, {"from": regular_user1}
-    )
 
     assert lpToken.balanceOf(vault_savings.address) == 0
     assert lpToken.balanceOf(contract) > balance_plugin_before
@@ -131,7 +125,7 @@ def test_full_workflow(yearnVault, regular_user, lpToken, lptoken_owner, Governa
         contract.address, balanceProofTokenLiquidity2, {"from": regular_user1}
     )
 
-    assert lpToken.balanceOf(regular_user1) > amount
+    assert abs(lpToken.balanceOf(regular_user1) - amount) <= SLIPPAGE
 
     lpToken.transfer(lpToken_owner, lpToken.balanceOf(regular_user), {"from": regular_user})
     assert lpToken.balanceOf(regular_user) == 0
