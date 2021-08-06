@@ -1,0 +1,25 @@
+{
+    "test_parameter": [
+        {
+            "name": "triCrypto",
+            "yearnVault": "0x3D980E50508CFd41a13837A60149927a11c03731",
+            "lpToken": "0xca3d75ac011bf5ad07a98d02f18225f9bd9a6bdf",
+            "lptoken_owner": "0xba12222222228d8ba445958a75a0704d566bf2c8",
+            "Governance": "0xfeb4acf3df3cdea7399794d0869ef76a6efaff52"
+        },
+        {
+            "name": "yvBoost",
+            "yearnVault": "0x9d409a0A012CFbA9B15F6D4B36Ac57A46966Ab9a",
+            "lpToken": "0xc5bDdf9843308380375a611c18B50Fb9341f502A",
+            "lptoken_owner": "0x1b9524b0f0b9f2e16b5f9e4bad331e01c2267981",
+            "Governance": "0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52"          
+        },
+        {   
+            "name": "ironBank",
+            "yearnVault": "0x27b7b1ad7288079A66d12350c828D3C00A6F07d7",
+            "lpToken": "0x5282a4ef67d9c33135340fb3289cc1711c13638c",
+            "lptoken_owner": "0xcd18ccf038f9c14ac244008e64ed3e60f40d154a",
+            "Governance": "0xFEB4acf3df3cDEA7399794D0869ef76A6EfAff52"      
+        }
+    ]
+}
