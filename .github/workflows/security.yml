@@ -31,7 +31,7 @@ jobs:
           brownie test ./tests-mainnet/Strategy --network mainnet-fork
           brownie test ./tests-mainnet/rewards --network mainnet-fork
         env:
-          ETHERSCAN_TOKEN: ${{ secrets.ETHERSCAN_TOKEN }
+          ETHERSCAN_TOKEN: ${{ secrets.ETHERSCAN_TOKEN }}
           WEB3_INFURA_PROJECT_ID: ${{ secrets.WEB3_INFURA_PROJECT_ID }}
           PROXY_OWNER: "0xc5af91f7d10dde118992ecf536ed227f276ec60d"
           VAULTSAVINGV2_PROXY: "0x6511d8686eb43eac9d4852458435c1bec4d67bc6"
