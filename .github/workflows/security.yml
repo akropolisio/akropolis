@@ -29,6 +29,7 @@ jobs:
         run: |
           npm install -g ganache-cli@6.12.2
           brownie test ./tests-mainnet/Strategy --network mainnet-fork
+          brownie test ./tests-mainnet/rewards --network mainnet-fork
         env:
           ETHERSCAN_TOKEN: D8BJ6I7AP8X7D25WQN7A28E73Y72V2UETQ
           WEB3_INFURA_PROJECT_ID: 41dd6c6fb8594e668e2e71425be6d61c

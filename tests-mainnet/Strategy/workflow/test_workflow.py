@@ -23,11 +23,10 @@ def test_full_workflow(yearnVault, regular_user, lpToken, lptoken_owner, Governa
     governance = accounts.at(Governance, force=True)
     voters = contract.from_explorer(Voter)
     strategist = accounts.at(Strategist, force=True)
-    assert vault_savings.isVaultRegistered(contract.address) == False
-    assert vault_savings.isVaultActive(contract.address) == False
-
-    vault_savings.registerVault(contract.address, {"from": owner})
-    vault_savings.activateVault(contract.address, {"from": owner})
+    if vault_savings.isVaultRegistered(contract.address) == False :
+        vault_savings.registerVault(contract.address, {"from": owner})
+    if vault_savings.isVaultActive(contract.address) == False:
+        vault_savings.activateVault(contract.address, {"from": owner})
 
     assert vault_savings.isVaultRegistered(contract.address) == True
     assert vault_savings.isVaultActive(contract.address) == True

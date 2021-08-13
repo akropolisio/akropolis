@@ -7,7 +7,7 @@
             "lptoken_owner": "0xba12222222228d8ba445958a75a0704d566bf2c8",
             "Governance": "0xfeb4acf3df3cdea7399794d0869ef76a6efaff52",
             "Voter": "0x4ce03bCFC3122eB0F724b94913629c6062949947" ,
-            "Strategist": "0x710295b5f326c2e47E6dD2E7F6b5b0F7c5AC2F24"  
+            "Strategist": "0x16388463d60FFE0661Cf7F1f31a7D658aC790ff7"  
         },
         {
             "name": "yvBoost",
@@ -27,5 +27,6 @@
             "Voter": "0x6D892A5585F45f3C45A238C717AA0a228aE69e2C" ,
             "Strategist": "0xBedf3Cf16ba1FcE6c3B751903Cf77E51d51E05b8"   
         }
+        
     ]
 }
