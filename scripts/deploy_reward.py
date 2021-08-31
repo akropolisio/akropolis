@@ -44,3 +44,4 @@ def main():
     (reward_akro_contract_impl_from_proxy,reward_akro_proxy_contract,reward_akro_contract_impl) = deploy_proxy(deployer, proxy_admin, Rewards, token_address_akro)
     print(f"Adel Rewards Implementation at {reward_adel_contract_impl_from_proxy}, Adel Rewards Proxy at {reward_adel_proxy_contract}, Adel Reward Contract Implementation at {reward_adel_contract_impl} with token {token_address_adel}")
     print(f"Akro Rewards Implementation at {reward_akro_contract_impl_from_proxy}, Akro Rewards Proxy at {reward_akro_proxy_contract}, Akro Reward Contract Implementation at {reward_akro_contract_impl} with token {token_address_akro}")
+
