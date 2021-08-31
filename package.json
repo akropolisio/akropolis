@@ -33,7 +33,9 @@
         "lint:check": "npx solhint contracts/**/*.sol  interfaces/**/*.sol"
     },
     "dependencies": {
+        "@commitlint/config-conventional": "^13.1.0",
         "@openzeppelin/cli": "^2.8.2",
+        "commitlint": "^13.1.0",
         "dotenv": "^8.2.0",
         "solc": "^0.6.12",
         "truffle-assertions": "^0.9.2",
