@@ -33,6 +33,9 @@
         "lint:check": "npx solhint contracts/**/*.sol  interfaces/**/*.sol"
     },
     "dependencies": {
+        "@0x/contracts-erc20": "^3.3.17",
+        "@0x/contracts-utils": "^4.7.17",
+        "@0x/contracts-zero-ex": "^0.28.2",
         "@openzeppelin/cli": "^2.8.2",
         "dotenv": "^8.2.0",
         "solc": "^0.6.12",

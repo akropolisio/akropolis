@@ -64,7 +64,7 @@ compiler:
       - "@openzeppelin=OpenZeppelin/openzeppelin-contracts@3.3.0"
       - "@ozUpgradesV3=OpenZeppelin/openzeppelin-contracts-upgradeable@3.3.0"
     optimizer:
-      runs: 99999
+      runs: 1000000
 
   vyper:
     version: 0.2.8
