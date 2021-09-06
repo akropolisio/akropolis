@@ -41,6 +41,8 @@ interface ICurveRegistry {
     function getPoolTokens(address swapAddress) external view returns (address[4] memory poolTokens);
 
     function getNumTokens(address swapAddress) external view returns (uint8 numTokens);
+
+    function isUnderlyingToken(address swapAddress, address tokenContractAddress) external view returns (bool, uint8);
 }
 
 
@@ -49,6 +51,8 @@ contract Zap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
     using SafeMath for uint256;
     using Address for address;
 
+    ICurveRegistry public curveReg;
+
     address private constant wethTokenAddress =
         0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
     
@@ -56,8 +60,11 @@ contract Zap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
     mapping(address => bool) public approvedTargets;
 
 
-    constructor() public {
+    constructor(
+        ICurveRegistry _curveRegistry
+    ) public {
         approvedTargets[0xDef1C0ded9bec7F1a1670819833240f027b25EfF] = true;
+        curveReg = _curveRegistry;
     }
 
 
@@ -115,6 +122,64 @@ contract Zap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
 
        
     }
+
+
+    function _performCurveZapIn(
+        address _fromToken,
+        address _toToken,
+        address _curveSwapAddress,
+        uint256 amountToPutIn,
+        address _swapTarget,
+        bytes memory data
+    ) internal returns (uint256 crvTokensBought) {
+        uint256 tokensBought = _fillQuote(
+            _fromToken,
+            _toToken,
+            amountToPutIn,
+            _swapTarget,
+            data
+        );
+
+        // (uint256 tokens, uint8 index) = _enterMetaPool(_curveSwapAddress, tokens, index);
+    }
+
+
+    function _enterMetaPool(
+        address _swapAddress,
+        address _toTokenAddress,
+        uint256 swapToken
+    ) internal returns (uint256 tokenBought, uint8 index) {
+        address[4] memory poolTokens = curveReg.getPoolTokens(_swapAddress);
+        for (uint8 i=0; i<4; i++) {
+            address intermediateSwapAddress = curveReg.getSwapAddress(poolTokens[i]);
+            //todo implement addLiquidity logic with or without underlying token
+            if (intermediateSwapAddress != address(0)) {
+                (, index) = curveReg.isUnderlyingToken(intermediateSwapAddress, _toTokenAddress);
+                tokenBought = _enterCurve(
+                    intermediateSwapAddress,
+                    swapToken,
+                    index
+                );
+
+                return (tokenBought, i);
+            }
+        }
+    }
+
+
+    function _enterCurve(
+        address _swapAddress,
+        uint256 amount,
+        uint8 index
+    ) internal returns (uint256 crvTokensBought) {
+        address tokenAddress = curveReg.getTokenAddress(_swapAddress);
+        address depositAddress = curveReg.getDepositAddress(_swapAddress);
+        uint256 initalBalance = _getBalance(tokenAddress);
+        address entryToken = curveReg.getPoolTokens(_swapAddress)[index];
+        // if(entryToken != ETHAddress) {
+            
+        // }
+    }   
     
 
     function _approveToken(address _token, address _spender) internal {
