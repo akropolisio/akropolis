@@ -4,7 +4,7 @@ pragma solidity 0.6.12;
 
 
 
-// Part: AddressUpgradeable
+// Part: OpenZeppelin/openzeppelin-contracts-upgradeable@3.3.0/AddressUpgradeable
 
 /**
  * @dev Collection of functions related to the address type
@@ -168,7 +168,7 @@ library AddressUpgradeable {
     }
 }
 
-// Part: IERC20Upgradeable
+// Part: OpenZeppelin/openzeppelin-contracts-upgradeable@3.3.0/IERC20Upgradeable
 
 /**
  * @dev Interface of the ERC20 standard as defined in the EIP.
@@ -244,52 +244,53 @@ interface IERC20Upgradeable {
     event Approval(address indexed owner, address indexed spender, uint256 value);
 }
 
-// Part: Initializable
+// Part: OpenZeppelin/openzeppelin-contracts-upgradeable@3.3.0/Initializable
 
 /**
- * @title Initializable
- *
- * @dev Helper contract to support initializer functions. To use it, replace
- * the constructor with a function that has the `initializer` modifier.
- * WARNING: Unlike constructors, initializer functions must be manually
- * invoked. This applies both to deploying an Initializable contract, as well
- * as extending an Initializable contract via inheritance.
- * WARNING: When used with inheritance, manual care must be taken to not invoke
- * a parent initializer twice, or ensure that all initializers are idempotent,
- * because this is not dealt with automatically as with constructors.
+ * @dev This is a base contract to aid in writing upgradeable contracts, or any kind of contract that will be deployed
+ * behind a proxy. Since a proxied contract can't have a constructor, it's common to move constructor logic to an
+ * external initializer function, usually called `initialize`. It then becomes necessary to protect this initializer
+ * function so it can only be called once. The {initializer} modifier provided by this contract will have this effect.
+ * 
+ * TIP: To avoid leaving the proxy in an uninitialized state, the initializer function should be called as early as
+ * possible by providing the encoded function call as the `_data` argument to {UpgradeableProxy-constructor}.
+ * 
+ * CAUTION: When used with inheritance, manual care must be taken to not invoke a parent initializer twice, or to ensure
+ * that all initializers are idempotent. This is not verified automatically as constructors are by Solidity.
  */
-contract Initializable {
+abstract contract Initializable {
+
     /**
      * @dev Indicates that the contract has been initialized.
      */
-    bool private initialized;
+    bool private _initialized;
 
     /**
      * @dev Indicates that the contract is in the process of being initialized.
      */
-    bool private initializing;
+    bool private _initializing;
 
     /**
-     * @dev Modifier to use in the initializer function of a contract.
+     * @dev Modifier to protect an initializer function from being invoked twice.
      */
     modifier initializer() {
-        require(initializing || isConstructor() || !initialized, "Contract instance has already been initialized");
+        require(_initializing || _isConstructor() || !_initialized, "Initializable: contract is already initialized");
 
-        bool isTopLevelCall = !initializing;
+        bool isTopLevelCall = !_initializing;
         if (isTopLevelCall) {
-            initializing = true;
-            initialized = true;
+            _initializing = true;
+            _initialized = true;
         }
 
         _;
 
         if (isTopLevelCall) {
-            initializing = false;
+            _initializing = false;
         }
     }
 
     /// @dev Returns true if and only if the function is running in the constructor
-    function isConstructor() private view returns (bool) {
+    function _isConstructor() private view returns (bool) {
         // extcodesize checks the size of the code stored in an address, and
         // address returns the current address. Since the code is still not
         // deployed when running a constructor, any checks on its code size will
@@ -297,54 +298,13 @@ contract Initializable {
         // under construction or not.
         address self = address(this);
         uint256 cs;
-        assembly {
-            cs := extcodesize(self)
-        }
+        // solhint-disable-next-line no-inline-assembly
+        assembly { cs := extcodesize(self) }
         return cs == 0;
     }
-
-    // Reserved storage space to allow for layout changes in the future.
-    uint256[50] private ______gap;
 }
 
-// Part: Roles
-
-/**
- * @title Roles
- * @dev Library for managing addresses assigned to a Role.
- */
-library Roles {
-    struct Role {
-        mapping(address => bool) bearer;
-    }
-
-    /**
-     * @dev Give an account access to this role.
-     */
-    function add(Role storage role, address account) internal {
-        require(!has(role, account), "Roles: account already has role");
-        role.bearer[account] = true;
-    }
-
-    /**
-     * @dev Remove an account's access to this role.
-     */
-    function remove(Role storage role, address account) internal {
-        require(has(role, account), "Roles: account does not have role");
-        role.bearer[account] = false;
-    }
-
-    /**
-     * @dev Check if an account has this role.
-     * @return bool
-     */
-    function has(Role storage role, address account) internal view returns (bool) {
-        require(account != address(0), "Roles: account is the zero address");
-        return role.bearer[account];
-    }
-}
-
-// Part: SafeMathUpgradeable
+// Part: OpenZeppelin/openzeppelin-contracts-upgradeable@3.3.0/SafeMathUpgradeable
 
 /**
  * @dev Wrappers over Solidity's arithmetic operations with added overflow
@@ -502,7 +462,44 @@ library SafeMathUpgradeable {
     }
 }
 
-// Part: ContextUpgradeable
+// Part: Roles
+
+/**
+ * @title Roles
+ * @dev Library for managing addresses assigned to a Role.
+ */
+library Roles {
+    struct Role {
+        mapping(address => bool) bearer;
+    }
+
+    /**
+     * @dev Give an account access to this role.
+     */
+    function add(Role storage role, address account) internal {
+        require(!has(role, account), "Roles: account already has role");
+        role.bearer[account] = true;
+    }
+
+    /**
+     * @dev Remove an account's access to this role.
+     */
+    function remove(Role storage role, address account) internal {
+        require(has(role, account), "Roles: account does not have role");
+        role.bearer[account] = false;
+    }
+
+    /**
+     * @dev Check if an account has this role.
+     * @return bool
+     */
+    function has(Role storage role, address account) internal view returns (bool) {
+        require(account != address(0), "Roles: account is the zero address");
+        return role.bearer[account];
+    }
+}
+
+// Part: OpenZeppelin/openzeppelin-contracts-upgradeable@3.3.0/ContextUpgradeable
 
 /*
  * @dev Provides information about the current execution context, including the
@@ -532,7 +529,7 @@ abstract contract ContextUpgradeable is Initializable {
     uint256[50] private __gap;
 }
 
-// Part: SafeERC20Upgradeable
+// Part: OpenZeppelin/openzeppelin-contracts-upgradeable@3.3.0/SafeERC20Upgradeable
 
 /**
  * @title SafeERC20
@@ -649,7 +646,7 @@ contract MinterRole is Initializable, ContextUpgradeable {
     uint256[50] private ______gap;
 }
 
-// Part: OwnableUpgradeable
+// Part: OpenZeppelin/openzeppelin-contracts-upgradeable@3.3.0/OwnableUpgradeable
 
 /**
  * @dev Contract module which provides a basic access control mechanism, where

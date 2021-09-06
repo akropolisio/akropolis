@@ -1,0 +1,65 @@
+{
+    "schemaVersion": "2.0.0",
+    "contractName": "LibMathRichErrors",
+    "compilerOutput": {
+        "abi": [],
+        "devdoc": {
+            "methods": {}
+        },
+        "evm": {
+            "bytecode": {
+                "linkReferences": {},
+                "object": "0x60556023600b82828239805160001a607314601657fe5b30600052607381538281f3fe73000000000000000000000000000000000000000030146080604052600080fdfea265627a7a72315820329816fc37a43040e33afde4db25eb92aa1b02249911b6a9bf0dc668ab0ec24e64736f6c63430005110032",
+                "opcodes": "PUSH1 0x55 PUSH1 0x23 PUSH1 0xB DUP3 DUP3 DUP3 CODECOPY DUP1 MLOAD PUSH1 0x0 BYTE PUSH1 0x73 EQ PUSH1 0x16 JUMPI INVALID JUMPDEST ADDRESS PUSH1 0x0 MSTORE PUSH1 0x73 DUP2 MSTORE8 DUP3 DUP2 RETURN INVALID PUSH20 0x0 ADDRESS EQ PUSH1 0x80 PUSH1 0x40 MSTORE PUSH1 0x0 DUP1 REVERT INVALID LOG2 PUSH6 0x627A7A723158 KECCAK256 ORIGIN SWAP9 AND 0xFC CALLDATACOPY LOG4 ADDRESS BLOCKHASH 0xE3 GASPRICE REVERT 0xE4 0xDB 0x25 0xEB SWAP3 0xAA SHL MUL 0x24 SWAP10 GT 0xB6 0xA9 0xBF 0xD 0xC6 PUSH9 0xAB0EC24E64736F6C63 NUMBER STOP SDIV GT STOP ORIGIN ",
+                "sourceMap": "26:831:13:-;;132:2:-1;166:7;155:9;146:7;137:37;255:7;249:14;246:1;241:23;235:4;232:33;222:2;;269:9;222:2;293:9;290:1;283:20;323:4;314:7;306:22;347:7;338;331:24"
+            },
+            "deployedBytecode": {
+                "linkReferences": {},
+                "object": "0x73000000000000000000000000000000000000000030146080604052600080fdfea265627a7a72315820329816fc37a43040e33afde4db25eb92aa1b02249911b6a9bf0dc668ab0ec24e64736f6c63430005110032",
+                "opcodes": "PUSH20 0x0 ADDRESS EQ PUSH1 0x80 PUSH1 0x40 MSTORE PUSH1 0x0 DUP1 REVERT INVALID LOG2 PUSH6 0x627A7A723158 KECCAK256 ORIGIN SWAP9 AND 0xFC CALLDATACOPY LOG4 ADDRESS BLOCKHASH 0xE3 GASPRICE REVERT 0xE4 0xDB 0x25 0xEB SWAP3 0xAA SHL MUL 0x24 SWAP10 GT 0xB6 0xA9 0xBF 0xD 0xC6 PUSH9 0xAB0EC24E64736F6C63 NUMBER STOP SDIV GT STOP ORIGIN ",
+                "sourceMap": "26:831:13:-;;;;;;;;"
+            }
+        }
+    },
+    "sourceTreeHashHex": "0xd2d047534facd6051467dd7a22d7ee9fd4e54e63bb5a5fae2511eac7332fad3d",
+    "sources": {
+        "./LibMathRichErrors.sol": {
+            "id": 13,
+            "content": "pragma solidity ^0.5.9;\n\n\nlibrary LibMathRichErrors {\n\n    // bytes4(keccak256(\"DivisionByZeroError()\"))\n    bytes internal constant DIVISION_BY_ZERO_ERROR =\n        hex\"a791837c\";\n\n    // bytes4(keccak256(\"RoundingError(uint256,uint256,uint256)\"))\n    bytes4 internal constant ROUNDING_ERROR_SELECTOR =\n        0x339f3de2;\n\n    // solhint-disable func-name-mixedcase\n    function DivisionByZeroError()\n        internal\n        pure\n        returns (bytes memory)\n    {\n        return DIVISION_BY_ZERO_ERROR;\n    }\n\n    function RoundingError(\n        uint256 numerator,\n        uint256 denominator,\n        uint256 target\n    )\n        internal\n        pure\n        returns (bytes memory)\n    {\n        return abi.encodeWithSelector(\n            ROUNDING_ERROR_SELECTOR,\n            numerator,\n            denominator,\n            target\n        );\n    }\n}\n"
+        }
+    },
+    "sourceCodes": {
+        "./LibMathRichErrors.sol": "pragma solidity ^0.5.9;\n\n\nlibrary LibMathRichErrors {\n\n    // bytes4(keccak256(\"DivisionByZeroError()\"))\n    bytes internal constant DIVISION_BY_ZERO_ERROR =\n        hex\"a791837c\";\n\n    // bytes4(keccak256(\"RoundingError(uint256,uint256,uint256)\"))\n    bytes4 internal constant ROUNDING_ERROR_SELECTOR =\n        0x339f3de2;\n\n    // solhint-disable func-name-mixedcase\n    function DivisionByZeroError()\n        internal\n        pure\n        returns (bytes memory)\n    {\n        return DIVISION_BY_ZERO_ERROR;\n    }\n\n    function RoundingError(\n        uint256 numerator,\n        uint256 denominator,\n        uint256 target\n    )\n        internal\n        pure\n        returns (bytes memory)\n    {\n        return abi.encodeWithSelector(\n            ROUNDING_ERROR_SELECTOR,\n            numerator,\n            denominator,\n            target\n        );\n    }\n}\n"
+    },
+    "compiler": {
+        "name": "solc",
+        "version": "0.5.17+commit.d19bba13",
+        "settings": {
+            "remappings": [],
+            "optimizer": {
+                "enabled": true,
+                "runs": 1000000,
+                "details": {
+                    "yul": true,
+                    "deduplicate": true,
+                    "cse": true,
+                    "constantOptimizer": true
+                }
+            },
+            "outputSelection": {
+                "*": {
+                    "*": [
+                        "abi",
+                        "devdoc",
+                        "evm.bytecode.object",
+                        "evm.bytecode.sourceMap",
+                        "evm.deployedBytecode.object",
+                        "evm.deployedBytecode.sourceMap"
+                    ]
+                }
+            },
+            "evmVersion": "istanbul"
+        }
+    },
+    "chains": {}
+}

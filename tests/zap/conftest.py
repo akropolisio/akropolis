@@ -4,6 +4,13 @@ from brownie import accounts
 from brownie import Contract
 import sys
 from utils.deploy_helpers import deploy_proxy, deploy_admin
+from web3 import Web3, HTTPProvider
+
+
+node = 'https://mainnet.infura.io/v3/8dd752f655754f9cacbe55ca32427737'
+
+web3  = Web3(HTTPProvider(node))
+
 
 from dotenv import load_dotenv, find_dotenv
 
@@ -45,8 +52,8 @@ def user2():
 
 
 @pytest.fixture
-def zap(deployer, Zap, weth):
-    zapContract = deployer.deploy(Zap, weth)
+def zap(deployer, Zap):
+    zapContract = deployer.deploy(Zap)
     yield zapContract
 
 @pytest.fixture
@@ -54,17 +61,23 @@ def dai_owner():
     yield accounts.at("0x47ac0fb4f2d84898e4d9e7b4dab3c24507a6d503", force=True)
 
 
-# @pytest.fixture
-# def target():
-#     abi=[{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"stateMutability":"payable","type":"fallback"},{"inputs":[{"internalType":"bytes4","name":"selector","type":"bytes4"}],"name":"getFunctionImplementation","outputs":[{"internalType":"address","name":"impl","type":"address"}],"stateMutability":"view","type":"function"},{"stateMutability":"payable","type":"receive"}]
-#     swapTarget = Contract.from_abi("ZeroEx", "0xDef1C0ded9bec7F1a1670819833240f027b25EfF", abi)
-#     yield swapTarget
+@pytest.fixture
+def target1():
+    target = Contract.from_explorer("0xDef1C0ded9bec7F1a1670819833240f027b25EfF", as_proxy_for="0x8b2AA451F98cc7eA61f5c462c94eF76CD5F131Cf")
+    yield target
 
 
 @pytest.fixture
 def target():
-    swapAddress = Contract("0xDef1C0ded9bec7F1a1670819833240f027b25EfF")
-    yield swapAddress
+    
+    abi=[{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"stateMutability":"payable","type":"fallback"},{"inputs":[{"internalType":"bytes4","name":"selector","type":"bytes4"}],"name":"getFunctionImplementation","outputs":[{"internalType":"address","name":"impl","type":"address"}],"stateMutability":"view","type":"function"},{"stateMutability":"payable","type":"receive"}]
+    address1 = "0xDef1C0ded9bec7F1a1670819833240f027b25EfF"
+    targetTocheck = Contract.from_abi("ZeroEx", address1, abi=abi)
+    yield targetTocheck
 
 
 
+@pytest.fixture
+def weth_owner():
+    owner = accounts.at("0x08638ef1a205be6762a8b935f5da9b700cf7322c", force=True)
+    yield owner

@@ -15,112 +15,136 @@ interface IWETH is IERC20 {
 }
 
 
+interface ICurve {
+    function coins(int128 arg0) external view returns (address);
+
+    function add_liquidity(uint256[4] calldata amounts, uint256 min_mint_amount) external; 
+
+    function add_liquidity(uint256[4] calldata amounts, uint256 min_mint_amount, bool underlying) external;
+
+    function add_liquidity(uint256[3] calldata amounts, uint256 min_mint_amount) external;
+
+    function add_liquidity(uint256[3] calldata amounts, uint256 min_mint_amount, bool underlying) external;
+
+    function add_liquidity(uint256[2] calldata amounts, uint256 min_mint_amount) external;
+
+    function add_liquidity(uint256[2] calldata amounts, uint256 min_mint_amount, bool underlying) external;
+}
+
+interface ICurveRegistry {
+    function getSwapAddress(address tokenAddress) external view returns (address swapAddress);
+
+    function getTokenAddress(address swapAddress) external view returns (address tokenAddress);
+
+    function getDepositAddress(address swapAddress) external view returns (address depoisitAddress);
+
+    function getPoolTokens(address swapAddress) external view returns (address[4] memory poolTokens);
+
+    function getNumTokens(address swapAddress) external view returns (uint8 numTokens);
+}
+
+
 contract Zap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
     using Address for address;
 
-    IWETH public immutable WETH;
-    constructor(
-        IWETH weth
-    ) public {
-        WETH = weth;
+    address private constant wethTokenAddress =
+        0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
+    
+
+    mapping(address => bool) public approvedTargets;
+
+
+    constructor() public {
+        approvedTargets[0xDef1C0ded9bec7F1a1670819833240f027b25EfF] = true;
     }
 
-    
-    /**
-    @dev Must attach ETH equal to the `value` field from the API response.
-    @param sellAddress 'sellAddress' from the API response
-    @param buyAddress The 'buyAddress' field from the API response
-    @param sellQuantity The 'sellAmount' field from the API response
-    @param zapContract The 'to' field from the API response
-    @param data The 'data' field from the API response
-    */
-    function ZapIn(
-        IERC20 sellAddress,
-        IERC20 buyAddress,
-        uint256 sellQuantity,
-        address payable zapContract,
-        bytes calldata data
+
+    function zapIn(
+        address _fromToken,
+        address _toToken,
+        uint256 _amount,
+        address _swapTarget,
+        bytes calldata _swapData
     ) external payable returns (uint256) {
-        if(address(sellAddress) != address(0)) {
-            IERC20(sellAddress).safeTransferFrom(
-                msg.sender,
-                address(this),
-                sellQuantity
-            );
-        }
-
-        uint256 tokenReceive = _fillQuote(
-            sellAddress,
-            buyAddress,
-            zapContract,
-            data
+        //transfer token to this address
+        IERC20(_fromToken).safeTransferFrom(msg.sender, address(this), _amount);
+        //initiate the swap via 0x
+        uint256 amountToSend = _fillQuote(
+            _fromToken,
+            _toToken,
+            _amount,
+            _swapTarget,
+            _swapData
         );
-
-        if (address(buyAddress) != address(0)) {
-            _withdrawToken(buyAddress, tokenReceive);
-        } else {
-            _withdrawETH(tokenReceive);
-        }
+        //transfer bought token to user
+        IERC20(_toToken).transfer(msg.sender, amountToSend);
     }
 
-
-
-    // Swaps ERC20->ERC20 tokens held by this contract using a 0x-API quote.
     function _fillQuote(
-        // The `sellTokenAddress` field from the API response.
-        IERC20 sellToken,
-        // The `buyTokenAddress` field from the API response.
-        IERC20 buyToken,
-        // The `to` field from the API response.
-        address payable swapTarget,
-        // The `data` field from the API response.
-        bytes calldata swapCallData 
-    ) internal returns (uint256) {
-        // Track our balance of the buyToken to determine how much we've bought.
-        uint256 boughtAmount = buyToken.balanceOf(address(this));
-        // Give `spender` an infinite allowance to spend this contract's `sellToken`.
-        // Note that for some tokens (e.g., USDT, KNC), you must first reset any existing
-        // allowance to 0 before being able to update it.]
-        require(sellToken.approve(swapTarget, uint256(-1)));
+        address _fromTokens,
+        address _toTokens,
+        uint256 _amount,
+        address _swapTarget,
+        bytes memory swapData
+    ) internal returns (uint256 amtBought) {
+        if(_fromTokens == _toTokens) {
+            return _amount;
+        }
 
-        (bool success, ) = swapTarget.call{value: msg.value}(swapCallData);
-        require(success, "SWAP_FAILED");
+        if(_fromTokens == address(0) && _toTokens == wethTokenAddress) {
+            IWETH(wethTokenAddress).deposit{value: _amount}();
+            return _amount;
+        }
 
-        // Refund any unspent protocol fees to the sender.
-        msg.sender.transfer(address(this).balance);
-        // Use our current buyToken balance to determine how much we've bought.
-        boughtAmount = buyToken.balanceOf(address(this)).sub(boughtAmount);
+        uint256 valueToSend;
+        if(_fromTokens == address(0)) {
+            valueToSend = _amount;
+        } else {
+            _approveToken(_fromTokens, _swapTarget);
+        }
 
-        return boughtAmount;
-    }
+        uint256 initBal = _getBalance(_toTokens);
+        require(approvedTargets[_swapTarget], "Target not Autorizhed");
+        (bool success, ) = _swapTarget.call{value: valueToSend}(swapData);
+        require(success, "SWAP_CALL_FAILED");
+        uint256 finalBal = _getBalance(_toTokens);
 
-        // Transfer tokens held by this contrat to the sender/owner.
-    function _withdrawToken(IERC20 token, uint256 amount)
-        internal
-        
-    {
-        require(token.transfer(msg.sender, amount));
-    }
+        amtBought = finalBal - initBal;
 
-    // Transfer ETH held by this contrat to the sender/owner.
-    function _withdrawETH(uint256 amount)
-        internal
-    {
-        msg.sender.transfer(amount);
-    }
-
-    // Payable fallback to allow this contract to receive protocol fee refunds.
-    receive() external payable {}
-
-
-    // Transfer ETH into this contract and wrap it into WETH.
-    function depositETH()
-        external
-        payable
-    {
-        WETH.deposit{value: msg.value}();
+       
     }
     
+
+    function _approveToken(address _token, address _spender) internal {
+        IERC20 token = IERC20(_token);
+        if(token.allowance(address(this), _spender) >0) return;
+        else {
+            token.safeApprove(_spender, type(uint256).max);
+        }
+    }
+
+
+    function _approveToken(address _token, address _spender, uint256 _amount) internal {
+        IERC20(_token).safeApprove(_spender, 0);
+        IERC20(_token).safeApprove(_spender, _amount);
+    }
+
+
+    function _getBalance(address token)
+        internal
+        view
+        returns (uint256 balance)
+    {
+        if (token == address(0)) {
+            balance = address(this).balance;
+        } else {
+            balance = IERC20(token).balanceOf(address(this));
+        }
+    }
+
+    receive() external payable {
+        require(msg.sender != tx.origin, "Do not send ETH directly");
+    }
 }

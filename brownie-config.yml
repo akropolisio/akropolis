@@ -63,8 +63,9 @@ compiler:
       - "@yearnvaults=iearn-finance/yearn-vaults@0.3.4"
       - "@openzeppelin=OpenZeppelin/openzeppelin-contracts@3.3.0"
       - "@ozUpgradesV3=OpenZeppelin/openzeppelin-contracts-upgradeable@3.3.0"
+      - "@0x=0x"
     optimizer:
-      runs: 1000000
+      runs: 99999
 
   vyper:
     version: 0.2.8
