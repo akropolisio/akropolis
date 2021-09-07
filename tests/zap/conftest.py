@@ -49,11 +49,15 @@ def user1():
 def user2():
     yield accounts[2]
 
-
+@pytest.fixture(scope="function")
+def curveRegistry():
+    registry = Contract.from_explorer(os.getenv("CURVEREG"), as_proxy_for=None)
+    yield registry
 
 @pytest.fixture
 def zap(deployer, Zap):
-    zapContract = deployer.deploy(Zap)
+    registry = Contract.from_explorer(os.getenv("CURVEREG"), as_proxy_for=None)
+    zapContract = deployer.deploy(Zap, registry)
     yield zapContract
 
 @pytest.fixture
@@ -62,9 +66,31 @@ def dai_owner():
 
 
 @pytest.fixture
-def target1():
-    target = Contract.from_explorer("0xDef1C0ded9bec7F1a1670819833240f027b25EfF", as_proxy_for="0x8b2AA451F98cc7eA61f5c462c94eF76CD5F131Cf")
-    yield target
+def akro():
+    akro_token = Contract.from_explorer(os.getenv("MAINNET_AKRO_TOKEN"), as_proxy_for=None)
+    yield akro_token
+
+@pytest.fixture
+def usdt():
+    usdt_token = Contract.from_explorer(os.getenv("MAINNET_USDT"), as_proxy_for=None)
+    yield usdt_token
+
+
+@pytest.fixture
+def curve_swap_address():
+    swapAddress = Contract.from_explorer(os.getenv("TRICRYPTO_SWAP_ADDRESS"), as_proxy_for=None)
+    yield swapAddress
+
+@pytest.fixture
+def curve_token():
+    token = Contract.from_explorer(os.getenv("TRICRYPTO_TOKEN"), as_proxy_for=None)
+    yield token
+
+
+@pytest.fixture(scope="module")
+def akro_owner():
+    owner = accounts.at(os.getenv("MAINNET_AKRO_HOLDER"), force=True)
+    yield owner
 
 
 @pytest.fixture

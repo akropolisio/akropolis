@@ -15,10 +15,10 @@ def prepare_swap():
 ACCURACY = 2e17
 
 
-def test_zap(dai, crv, zap, user1, dai_owner, weth_owner, weth, target):
+def test_zap(usdt, akro, akro_owner,  zap, curve_token, curve_swap_address, target, user1):
     parameters = {
-            "buyToken": "DAI",
-            "sellToken": "WETH",
+            "buyToken": "USDT",
+            "sellToken": "AKRO",
             "sellAmount": 10000000000000000000
         }
     request = requests.get(quote, params=parameters)
@@ -26,26 +26,21 @@ def test_zap(dai, crv, zap, user1, dai_owner, weth_owner, weth, target):
     sellToken = data["sellTokenAddress"]
     buyToken = data["buyTokenAddress"]
     sellAmount = data["sellAmount"]
+    buyAmount = data["buyAmount"]
     swapTarget = data["to"]
-    swapAllowance = data["allowanceTarget"]
     dataSwap = data["data"]
     gas_price = data["gasPrice"]
     value = data["value"]
-    # fund the contract first
+    
+    #fund user with akro token
+    akro.transfer(user1, sellAmount, {"from": akro_owner})
+    akro.approve(zap, sellAmount, {"from": user1})
+    akro.approve(swapTarget, sellAmount, {"from": user1})
+    usdt.approve(curve_swap_address, buyAmount, {"from": user1})
+    #call the zap function
+    zap.zapIn(sellToken, buyToken, curve_swap_address, sellAmount, swapTarget, dataSwap, {"from": user1, "gas_price": gas_price, "amount": value})
+    assert curve_token.balanceOf(user1) > 0
 
-    # zap.depositETH({"from": user1, "amount": 10e18})
-    # weth.approve(zap, amount, {"from": user1})
-    # weth.approve(swapAllowance, amount, {"from": user1})
-    # zap.fillQuote(sellToken, buyToken, swapAllowance, swapTarget, dataSwap, {"from": user1, "gas_price": gas_price, "amount": value})
-    weth.transfer(user1, sellAmount, {"from": weth_owner})
-    weth.approve(zap, sellAmount, {"from": user1})
-    balanceWehBefore = weth.balanceOf(user1)
-    assert balanceWehBefore == sellAmount
-    zap.zapIn(sellToken, buyToken, sellAmount, swapTarget, dataSwap, {"from": user1, "amount": value})
-    balanceAfter = weth.balanceOf(user1)
-    assert balanceAfter == 0
-    assert dai.balanceOf(user1) > 0
-    assert abs(dai.balanceOf(user1) - data["buyAmount"]) <= ACCURACY
-    # assert crv.balanceOf(zap) > 0
+
     
     
