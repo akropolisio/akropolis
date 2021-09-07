@@ -8,47 +8,13 @@ import "@ozUpgradesV3/contracts/utils/ReentrancyGuardUpgradeable.sol";
 
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
+import "../../interfaces/Curve/ICurve.sol";
+import "../../interfaces/Curve/ICurveRegistry.sol";
+
+import "../../interfaces/IWETH.sol";
 
 
-interface IWETH is IERC20 {
-    function deposit() external payable;
-}
 
-
-interface ICurve {
-    function coins(int128 arg0) external view returns (address);
-
-    function add_liquidity(uint256[4] calldata amounts, uint256 min_mint_amount) external; 
-
-    function add_liquidity(uint256[4] calldata amounts, uint256 min_mint_amount, bool underlying) external;
-
-    function add_liquidity(uint256[3] calldata amounts, uint256 min_mint_amount) external;
-
-    function add_liquidity(uint256[3] calldata amounts, uint256 min_mint_amount, bool underlying) external;
-
-    function add_liquidity(uint256[2] calldata amounts, uint256 min_mint_amount) external;
-
-    function add_liquidity(uint256[2] calldata amounts, uint256 min_mint_amount, bool underlying) external;
-}
-
-interface ICurveRegistry {
-    function getSwapAddress(address tokenAddress) external view returns (address swapAddress);
-
-    function getTokenAddress(address swapAddress) external view returns (address tokenAddress);
-
-    function getDepositAddress(address swapAddress) external view returns (address depoisitAddress);
-
-    function getPoolTokens(address swapAddress) external view returns (address[4] memory poolTokens);
-
-    function getNumTokens(address swapAddress) external view returns (uint8 numTokens);
-
-    function isUnderlyingToken(address swapAddress, address tokenContractAddress) external view returns (bool, uint8);
-
-    function shouldAddUnderlying(address swapAddress)
-        external
-        view
-        returns (bool);
-}
 
 
 contract Zap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
