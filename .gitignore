@@ -4,6 +4,7 @@ __pycache__
 .hypothesis/
 build/
 reports/
+abi/
 
 # Logs
 logs
@@ -90,9 +91,7 @@ UpgradeTestOld.json
 TestAdelVAkroSwap.json
 ExploitCompVAkroSwap.json
 TestExploitCompVAkroSwap.json
-IWETH.json
-Rewards.json
-Zap.json
+
 
 
 
