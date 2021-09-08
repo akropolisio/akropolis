@@ -90,8 +90,9 @@ UpgradeTestOld.json
 TestAdelVAkroSwap.json
 ExploitCompVAkroSwap.json
 TestExploitCompVAkroSwap.json
-
-abi/*
+IWETH.json
+Rewards.json
+Zap.json
 
 
 
