@@ -20,16 +20,10 @@ jobs:
       - name: Prepare environment
         run:  |
           npm install
-      - name: Run tests
-        shell: bash
-        run: |
-          npm run test
       - name: Run mainnet tests
         shell: bash
         run: |
           npm install -g ganache-cli@6.12.2
-          brownie test ./tests-mainnet/Strategy --network mainnet-fork
-          brownie test ./tests-mainnet/rewards --network mainnet-fork
           brownie test ./tests-mainnet/zap --network mainnet-fork
         env:
           ETHERSCAN_TOKEN: ${{ secrets.ETHERSCAN_TOKEN }}
@@ -110,3 +104,4 @@ jobs:
         shell: bash
         run: |
           sh ./security/echidna/echidna-check-report.sh
+
