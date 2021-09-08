@@ -37,7 +37,3 @@ def zap(deployer, Zap):
     zapContract = deployer.deploy(Zap, registry, vaultSavings)
     yield zapContract
 
-
-@pytest.fixture
-def dai_owner():
-    yield accounts.at("0x47ac0fb4f2d84898e4d9e7b4dab3c24507a6d503", force=True)
