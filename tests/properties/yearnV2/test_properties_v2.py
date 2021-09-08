@@ -140,7 +140,8 @@ def test_deposit_array(register_vault, token, vault, vaultSavings, user, deploye
 
 
 @given(
-    user=strategy("address", length=10), test_vault=strategy("address", length=10),
+    user=strategy("address", length=10),
+    test_vault=strategy("address", length=10),
 )
 @settings(max_examples=50)
 def test_deposit_with_failed_vault(
@@ -157,7 +158,8 @@ def test_deposit_with_failed_vault(
 
 
 @given(
-    user=strategy("address", length=10), test_vault=strategy("address", length=10),
+    user=strategy("address", length=10),
+    test_vault=strategy("address", length=10),
 )
 @settings(max_examples=50)
 def test_deposit_array_with_failed_vault(

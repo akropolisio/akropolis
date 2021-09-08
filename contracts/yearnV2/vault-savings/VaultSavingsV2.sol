@@ -16,16 +16,12 @@ import "../../../interfaces/yearnV1/IVaultSavings.sol";
 
 import "@ozUpgradesV3/contracts/utils/PausableUpgradeable.sol";
 
-
-
 contract VaultSavingsV2 is IVaultSavings, OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgradeable {
     uint256 constant MAX_UINT256 = uint256(-1);
 
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using AddressUpgradeable for address;
     using SafeMathUpgradeable for uint256;
-
-
 
     struct VaultInfo {
         bool isActive;

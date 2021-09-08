@@ -31,7 +31,6 @@
         "format:test:fix": "black . tests",
         "husky:hooks:install": "sh ./scripts/husky.sh",
         "lint:check": "npx solhint contracts/**/*.sol  interfaces/**/*.sol",
-        "just-test": "npx mocha --exit --recursive --timeout 200000 ./tests/zap/truffle-test/Zap.test.js --network mainnet_fork",
         "truffle:test": "truffle compile  && npm run just-test"
     },
     "dependencies": {

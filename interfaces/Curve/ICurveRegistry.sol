@@ -14,8 +14,5 @@ interface ICurveRegistry {
 
     function isUnderlyingToken(address swapAddress, address tokenContractAddress) external view returns (bool, uint8);
 
-    function shouldAddUnderlying(address swapAddress)
-        external
-        view
-        returns (bool);
+    function shouldAddUnderlying(address swapAddress) external view returns (bool);
 }

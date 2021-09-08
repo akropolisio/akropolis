@@ -14,8 +14,6 @@ def env_settings():
     yield load_dotenv(find_dotenv())
 
 
-
-
 @pytest.fixture(scope="module")
 def owner(env_settings):
     yield accounts.at(os.getenv("PROXY_OWNER"), force=True)

@@ -1,4 +1,3 @@
-
 // SPDX-License-Identifier: AGPL V3.0
 pragma solidity ^0.6.12;
 
@@ -22,7 +21,7 @@ contract Rewards is OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgr
 
     uint256 public minAmountToClaim = 0;
     bytes32[] public merkleRoots;
-    mapping (address => uint256) public claimed;
+    mapping(address => uint256) public claimed;
     IERC20 public token;
 
     modifier enough(uint256 _claimAmount) {
@@ -30,7 +29,7 @@ contract Rewards is OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgr
         _;
     }
 
-    function initialize(address _token) virtual public initializer {
+    function initialize(address _token) public virtual initializer {
         __Ownable_init();
         __Pausable_init();
         __ReentrancyGuard_init();
@@ -79,9 +78,7 @@ contract Rewards is OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgr
         uint256 _merkleRootIndex,
         uint256 _amountAllowedToClaim,
         bytes32[] memory _merkleProofs
-    )
-        external nonReentrant whenNotPaused enough(_amountAllowedToClaim)
-    {
+    ) external nonReentrant whenNotPaused enough(_amountAllowedToClaim) {
         require(verifyMerkleProofs(_msgSender(), _merkleRootIndex, _amountAllowedToClaim, _merkleProofs), "Merkle proofs not verified");
         uint256 availableAmount = _amountAllowedToClaim.sub(claimed[_msgSender()]);
         require(availableAmount != 0 && availableAmount >= minAmountToClaim, "Not enough tokens");
@@ -101,8 +98,8 @@ contract Rewards is OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgr
         address _account,
         uint256 _merkleRootIndex,
         uint256 _amountAllowedToClaim,
-        bytes32[] memory _merkleProofs) virtual public view returns(bool)
-    {
+        bytes32[] memory _merkleProofs
+    ) public view virtual returns (bool) {
         require(_merkleProofs.length > 0, "No Merkle proofs");
         require(_merkleRootIndex < merkleRoots.length, "Merkle roots are not set");
 
@@ -113,14 +110,14 @@ contract Rewards is OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgr
     /**
      * @notice Called by the owner to pause, deny claim reward
      */
-    function pause() onlyOwner whenNotPaused external {
+    function pause() external onlyOwner whenNotPaused {
         _pause();
     }
 
     /**
      * @notice Called by the owner to unpause, allow claim reward
      */
-    function unpause() onlyOwner whenPaused external {
+    function unpause() external onlyOwner whenPaused {
         _unpause();
     }
 }
