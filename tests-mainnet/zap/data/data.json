@@ -1,0 +1,18 @@
+{
+    "data_zap": [
+        {
+            "sellTokenName": "AKRO",
+            "buyTokenName": "USDT",
+            "whale": "0x86904e32b0d7a8e1ab4dc4a02bae7ff93e9a2d33",
+            "curve_address": "0xD51a44d3FaE010294C616388b506AcdA1bfAAE46",
+            "yearn_vault": "0xE537B5cc158EB71037D4125BDD7538421981E6AA"
+        },
+        {
+            "sellTokenName": "CRV",
+            "buyTokenName": "USDT",
+            "whale": "0x7a16ff8270133f063aab6c9977183d9e72835428",
+            "curve_address": "0xD51a44d3FaE010294C616388b506AcdA1bfAAE46",
+            "yearn_vault": "0xE537B5cc158EB71037D4125BDD7538421981E6AA"
+        }
+    ]
+}
