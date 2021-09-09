@@ -30,15 +30,13 @@ def test_paramater(yearnVault, regular_user2, lpToken, lptoken_owner, Governance
     balanceBefore = lpToken.balanceOf(regular_user2)
     assert lpToken.balanceOf(regular_user2) == amount
     lpToken.approve(contract.address, amount, {"from": regular_user2})
-    contract.deposit["uint"](
-        amount, {"from": regular_user2}
-    )
+    contract.deposit["uint"](amount, {"from": regular_user2})
     assert lpToken.balanceOf(regular_user2) == 0
     # TEST WITHDRAW
     lpToken.approve(contract.address, amount, {"from": regular_user2})
     shares = contract.balanceOf(regular_user2)
 
-    contract.withdraw['uint'](shares, {"from": regular_user2})
+    contract.withdraw["uint"](shares, {"from": regular_user2})
     assert abs(balanceBefore - lpToken.balanceOf(regular_user2)) <= SLIPPAGE
 
     # EMERGENCY DEPOSIT
@@ -47,9 +45,7 @@ def test_paramater(yearnVault, regular_user2, lpToken, lptoken_owner, Governance
     lpToken.transfer(regular_user2, amount, {"from": token_owner})
     lpToken.approve(contract.address, amount, {"from": regular_user2})
     with brownie.reverts():
-        contract.deposit["uint"].transact(
-            amount, {"from": regular_user2}
-        )
+        contract.deposit["uint"].transact(amount, {"from": regular_user2})
 
     contract.setEmergencyShutdown(False, {"from": governance})
 
@@ -59,11 +55,11 @@ def test_paramater(yearnVault, regular_user2, lpToken, lptoken_owner, Governance
     assert contract.emergencyShutdown() == True
 
     with brownie.reverts():
-        contract.withdraw["uint"].transact(
-            amount, {"from": regular_user2}
-        )
+        contract.withdraw["uint"].transact(amount, {"from": regular_user2})
     contract.setEmergencyShutdown(False, {"from": governance})
 
     # SEND amount to address lptoken owner
-    lpToken.transfer(lptoken_owner, lpToken.balanceOf(regular_user2), {"from": regular_user2})
+    lpToken.transfer(
+        lptoken_owner, lpToken.balanceOf(regular_user2), {"from": regular_user2}
+    )
     assert lpToken.balanceOf(regular_user2) == 0
