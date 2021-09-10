@@ -38,7 +38,7 @@ def test_zap(
     tokenToSell.transfer(user1, sellAmount, {"from": token_whale})
     tokenToSell.approve(zap, sellAmount, {"from": user1})
     # start zapIn
-    zap.zapIn(
+    tx = zap.zapIn(
         sellToken,
         buyToken,
         curve_swap_address,
@@ -50,10 +50,12 @@ def test_zap(
     )
     # verify if sellToken balance
     assert tokenToSell.balanceOf(user1) == 0
+    
 
     shares_balance = vault.balanceOf(user1)
     # verify if user received yearn shares
     assert shares_balance > 0
+    assert (tx.events["ZapIn"]["tokensRec"] == shares_balance)
     # approve shares on yearn vault
     vault.approve(zap, shares_balance, {"from": user1})
     # configure 0x api for zapOut to AKRO
@@ -72,7 +74,7 @@ def test_zap(
     swapTarget1 = data2["to"]
     dataSwap1 = data2["data"]
     # call zapOut
-    zap.zapOut(
+    tx = zap.zapOut(
         curve_swap_address,
         vault,
         shares_balance,
@@ -84,3 +86,4 @@ def test_zap(
     )
     # check if AKRO balance is > 0
     assert tokenToSell.balanceOf(user1) > 0
+    assert (tx.events["ZapOut"]["tokensRec"] == tokenToSell.balanceOf(user1))

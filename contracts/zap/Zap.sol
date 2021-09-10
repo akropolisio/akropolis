@@ -141,6 +141,16 @@ contract Zap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
         emit ZapOut(msg.sender, _toToken, toTokensBought);
     }
 
+
+    /**
+        @notice update the registry
+        @param newRegistry , new registry to point to
+    */
+    function updateRegistry(ICurveRegistry newRegistry) external onlyOwner {
+        require(newRegistry != curveReg, "already used");
+        curveReg = newRegistry;
+    }
+
     /**
         @notice This function execute the swap on 0x exchange
         @param _fromToken token address use for entry
@@ -181,6 +191,8 @@ contract Zap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
         uint256 finalBal = _getBalance(_toToken);
 
         amtBought = finalBal - initBal;
+
+        require(amtBought > 0, "invalid token");
     }
 
     //function to deposit on curve Pool
