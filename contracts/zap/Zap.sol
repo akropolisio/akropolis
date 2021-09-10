@@ -11,6 +11,8 @@ import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import "../../interfaces/Curve/ICurve.sol";
 import "../../interfaces/Curve/ICurveRegistry.sol";
 
+import "../../interfaces/Curve/ICurveEthSwap.sol";
+
 import "../../interfaces/IWETH.sol";
 
 import "../../interfaces/VaultSavings/IVaultSavingsV2.sol";
@@ -359,7 +361,10 @@ contract Zap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
         } else {
             uint256[2] memory amounts;
             amounts[index] = amount;
-            if (addUnderlying) {
+            // get if pool is an Eth pool and send msgvalue to the contract
+            if(curveReg.isEthPool(depositAddress)){
+                ICurveEthSwap(depositAddress).add_liquidity{value: amount}(amounts, 0);
+            } else if (addUnderlying) {
                 ICurve(depositAddress).add_liquidity(amounts, 0, true);
             } else {
                 ICurve(depositAddress).add_liquidity(amounts, 0);
