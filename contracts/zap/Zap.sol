@@ -173,8 +173,17 @@ contract Zap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
             return _amount;
         }
 
-        if (_fromToken == address(0) && _toToken == wethTokenAddress) {
-            IWETH(wethTokenAddress).deposit{value: _amount}();
+        if (
+            _fromToken == wethTokenAddress &&
+            _toToken == address(0)
+        ) {
+            IWETH(wethTokenAddress).withdraw(_amount);
+            return _amount;
+        } else if (
+            _fromToken == address(0) &&
+            _toToken == wethTokenAddress
+        ) {
+            IWETH(wethTokenAddress).deposit{ value: _amount }();
             return _amount;
         }
 
