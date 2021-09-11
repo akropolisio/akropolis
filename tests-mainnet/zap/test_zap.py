@@ -102,7 +102,7 @@ def test_zap_low_liquidity(
     parameters1 = {
         "buyToken": buyTokenName,
         "sellToken": sellTokenName,
-        "sellAmount": 1000000000000000000,
+        "sellAmount": 10000000000000,
     }
     request1 = requests.get(quote, params=parameters1)
     data1 = request1.json()
