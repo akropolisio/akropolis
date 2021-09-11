@@ -91,7 +91,7 @@ def test_zap_high_liquidity(
     assert (tx.events["ZapOut"]["tokensRec"] == tokenToSell.balanceOf(user1))
 
 
-# high value token
+# high value tokens
 @parametrize_from_file(data, "data_zap_high")
 def test_zap_low_liquidity(
     zap, user1, yearn_vault, sellTokenName, buyTokenName, whale, curve_address
