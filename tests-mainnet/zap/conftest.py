@@ -13,8 +13,9 @@ def env_settings():
     yield load_dotenv(find_dotenv())
 
 
-@pytest.fixture
+@pytest.fixture(scope="function", autouse=True)
 def deployer():
+    accounts.default = accounts[0]
     yield accounts[0]
 
 
@@ -28,13 +29,14 @@ def user2():
     yield accounts[2]
 
 
-@pytest.fixture
+@pytest.fixture(scope="function", autouse=True)
 def zap(deployer, Zap):
     registry = Contract.from_explorer(os.getenv("CURVEREG"), as_proxy_for=None)
     vaultSavings = Contract.from_explorer(
         os.getenv("VAULTSAVINGV2_PROXY"), as_proxy_for=os.getenv("VAULTSAVINGV2")
     )
-    zapContract = deployer.deploy(Zap, registry, vaultSavings)
+    zapContract = deployer.deploy(Zap)
+    zapContract.initialize(registry, vaultSavings, {"from": deployer})
     yield zapContract
 
 

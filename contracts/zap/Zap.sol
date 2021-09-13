@@ -6,6 +6,8 @@ import "@ozUpgradesV3/contracts/token/ERC20/SafeERC20Upgradeable.sol";
 import "@ozUpgradesV3/contracts/math/SafeMathUpgradeable.sol";
 import "@ozUpgradesV3/contracts/utils/ReentrancyGuardUpgradeable.sol";
 
+import "@ozUpgradesV3/contracts/utils/PausableUpgradeable.sol";
+
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 
 import "../../interfaces/Curve/ICurve.sol";
@@ -17,10 +19,9 @@ import "../../interfaces/IWETH.sol";
 
 import "../../interfaces/VaultSavings/IVaultSavingsV2.sol";
 
-contract Zap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
+contract Zap is OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgradeable {
     using SafeERC20 for IERC20;
     using SafeMath for uint256;
-    using Address for address;
 
     ICurveRegistry public curveReg;
 
@@ -32,7 +33,7 @@ contract Zap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
 
     mapping(address => bool) public approvedTargets;
 
-    mapping(address => bool) internal V2Pool;
+    mapping(address => bool) public approvedTokens;
 
     event ZapIn(address sender, address vault, uint256 tokensRec);
 
@@ -40,10 +41,20 @@ contract Zap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
 
     event AddLiquidity(address sender, address token, uint256 amount);
 
-    constructor(ICurveRegistry _curveRegistry, IVaultSavingsV2 _vault) public {
+    // constructor(ICurveRegistry _curveRegistry, IVaultSavingsV2 _vault) public {
+    //     approvedTargets[0xDef1C0ded9bec7F1a1670819833240f027b25EfF] = true;
+    //     //set Tricrypto as V2Pool
+    //     // V2Pool[0xD51a44d3FaE010294C616388b506AcdA1bfAAE46] = true;
+    //     curveReg = _curveRegistry;
+    //     vaultsavings = _vault;
+    // }
+
+
+    function initialize(ICurveRegistry _curveRegistry, IVaultSavingsV2 _vault) virtual public initializer {
+        __Ownable_init();
+        __Pausable_init();
+        __ReentrancyGuard_init();
         approvedTargets[0xDef1C0ded9bec7F1a1670819833240f027b25EfF] = true;
-        //set Tricrypto as V2Pool
-        // V2Pool[0xD51a44d3FaE010294C616388b506AcdA1bfAAE46] = true;
         curveReg = _curveRegistry;
         vaultsavings = _vault;
     }
@@ -68,13 +79,13 @@ contract Zap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
         address _vault,
         bytes calldata _swapData
     ) external payable returns (uint256 yearnLp) {
-        //transfer token to this address
 
-        if(_fromToken != address(0)){
-            require(_amount > 0, "amount can't be empty");
-            IERC20(_fromToken).safeTransferFrom(msg.sender, address(this), _amount);
+        if(_fromToken == address(0)) {
+            _fromToken = ETHAddress;
         } else {
-            require(msg.value > 0, "no eth sent");
+            require(_amount > 0, "amount can't be empty");
+            require(approvedTokens[_fromToken] = true, "token doesn't allow");
+            IERC20(_fromToken).safeTransferFrom(msg.sender, address(this), _amount);
         }
         
 
@@ -478,6 +489,17 @@ contract Zap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
             balance = address(this).balance;
         } else {
             balance = IERC20(token).balanceOf(address(this));
+        }
+    }
+
+    function setApprovedTokens(
+        address[] calldata tokens,
+        bool[] calldata isApproved
+    ) external onlyOwner {
+        require(tokens.length == isApproved.length, "invalid input length");
+
+        for(uint256 i = 0; i < tokens.length; i++) {
+            approvedTokens[tokens[i]] == isApproved[i];
         }
     }
 

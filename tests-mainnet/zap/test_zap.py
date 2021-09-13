@@ -1,7 +1,7 @@
 import pytest
 import brownie
 import time
-from brownie import accounts
+from brownie import accounts, chain
 import requests, json
 from brownie import Contract
 import parametrize_from_file
@@ -15,7 +15,7 @@ amount = 100e18
 
 @parametrize_from_file(data, "data_zap_high")
 def test_zap_high_liquidity(
-    zap, user1, yearn_vault, sellTokenName, buyTokenName, whale, curve_address, vault_owner
+    zap, user1, yearn_vault, sellTokenName, buyTokenName, whale, curve_address, vault_owner, amount_in, deployer
 ):
     curve_swap_address = Contract.from_explorer(curve_address, as_proxy_for=None)
     vault = Contract.from_explorer(yearn_vault, as_proxy_for=None)
@@ -24,7 +24,7 @@ def test_zap_high_liquidity(
     parameters1 = {
         "buyToken": buyTokenName,
         "sellToken": sellTokenName,
-        "sellAmount": 100000000000000,
+        "sellAmount": amount_in,
     }
     request1 = requests.get(quote, params=parameters1)
     data1 = request1.json()
@@ -37,6 +37,10 @@ def test_zap_high_liquidity(
     gas_price = data1["gasPrice"]
     value = data1["value"]
 
+    zap.setApprovedTokens([sellToken], [True], {"from": deployer})
+
+    chain.mine(100)
+
     tokenToSell = Contract.from_explorer(sellToken, as_proxy_for=None)
     # fund user with sell Token
     tokenToSell.transfer(user1, sellAmount, {"from": token_whale})
@@ -48,6 +52,8 @@ def test_zap_high_liquidity(
     #test slippage 3%
     slippage = 0.3 * min_amount
     amount_min = min_amount - slippage
+    #add the token to approve array
+
     # start zapIn
     tx = zap.zapIn(
         sellToken,
@@ -72,7 +78,7 @@ def test_zap_high_liquidity(
 
 
 @parametrize_from_file(data, "data_zap_high")
-def test_zap_out(zap, user1, yearn_vault, sellTokenName, buyTokenName, vault_owner, curve_address, whale, zapperData):
+def test_zap_out(zap, user1, yearn_vault, sellTokenName, buyTokenName, vault_owner, curve_address, whale, zapperData, amount_in):
     vault = Contract.from_explorer(yearn_vault, as_proxy_for=None)
     curve_swap_address = Contract.from_explorer(curve_address, as_proxy_for=None)
     account_owner = accounts.at(vault_owner, force=True)
@@ -107,4 +113,9 @@ def test_zap_out(zap, user1, yearn_vault, sellTokenName, buyTokenName, vault_own
     
 
     assert(tx.events["ZapOut"]["tokensRec"] ==  wantedToken.balanceOf(user1))
-    
+
+
+
+
+
+
