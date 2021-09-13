@@ -41,14 +41,6 @@ contract Zap is OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgradea
 
     event AddLiquidity(address sender, address token, uint256 amount);
 
-    // constructor(ICurveRegistry _curveRegistry, IVaultSavingsV2 _vault) public {
-    //     approvedTargets[0xDef1C0ded9bec7F1a1670819833240f027b25EfF] = true;
-    //     //set Tricrypto as V2Pool
-    //     // V2Pool[0xD51a44d3FaE010294C616388b506AcdA1bfAAE46] = true;
-    //     curveReg = _curveRegistry;
-    //     vaultsavings = _vault;
-    // }
-
 
     function initialize(ICurveRegistry _curveRegistry, IVaultSavingsV2 _vault) virtual public initializer {
         __Ownable_init();
@@ -87,9 +79,6 @@ contract Zap is OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgradea
             require(approvedTokens[_fromToken] = true, "token doesn't allow");
             IERC20(_fromToken).safeTransferFrom(msg.sender, address(this), _amount);
         }
-        
-
-        //get the token address related to the curve Pool
 
         // perform the curve process, add liquidity
         uint256 crvTokensBought = _performCurveZapIn(_fromToken, _toToken, _curvePool, _amount, _swapTarget, _swapData);
