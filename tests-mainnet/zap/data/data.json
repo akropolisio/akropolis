@@ -1,30 +1,21 @@
 {
-    "data_zap_low": [
+    "data_zap_high": [
+
         {
-            "sellTokenName": "CRV",
+            "sellTokenName": "YFI",
             "buyTokenName": "USDT",
-            "whale": "0x7a16fF8270133F063aAb6C9977183D9e72835428",
+            "whale": "0x675938d86a6A4651b6dbba7529117fb0b557cCf2",
+            "vault_owner": "0x835ad203958d01e5f2b0f3a6c3b0bd76ab14ca34",
             "curve_address": "0xD51a44d3FaE010294C616388b506AcdA1bfAAE46",
             "yearn_vault": "0xE537B5cc158EB71037D4125BDD7538421981E6AA"
         },
         {
-            "sellTokenName": "AKRO",
-            "buyTokenName": "USDT",
-            "whale": "0xD6216fC19DB775Df9774a6E33526131dA7D19a2c",
-            "curve_address": "0xD51a44d3FaE010294C616388b506AcdA1bfAAE46",
-            "yearn_vault": "0xE537B5cc158EB71037D4125BDD7538421981E6AA"
-        }
-
-
-        
-    ],
-    "data_zap_high": [
-        {
             "sellTokenName": "WETH",
             "buyTokenName": "USDT",
-            "whale": "0x2F0b23f53734252Bda2277357e97e1517d6B042A",
-            "curve_address": "0xD51a44d3FaE010294C616388b506AcdA1bfAAE46",
-            "yearn_vault": "0xE537B5cc158EB71037D4125BDD7538421981E6AA"
-        }      
+            "whale": "0x1e3D6eAb4BCF24bcD04721caA11C478a2e59852D",
+            "vault_owner": "0xd6d16B110ea9173d7cEB6CFe8Ca4060749A75f5c",
+            "curve_address": "0x2dded6Da1BF5DBdF597C45fcFaa3194e53EcfeAF",
+            "yearn_vault": "0x27b7b1ad7288079A66d12350c828D3C00A6F07d7"
+        }          
     ]
 }

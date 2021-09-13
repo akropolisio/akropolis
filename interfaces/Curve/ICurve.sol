@@ -36,7 +36,7 @@ interface ICurve {
 
     function remove_liquidity_one_coin(
         uint256 _amount,
-        uint256 i,
+        int128 i,
         uint256 min_amount,
         bool isUnderlying
     ) external;

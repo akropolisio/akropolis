@@ -38,6 +38,8 @@ contract Zap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
 
     event ZapOut(address sender, address token, uint256 tokensRec);
 
+    event AddLiquidity(address sender, address token, uint256 amount);
+
     constructor(ICurveRegistry _curveRegistry, IVaultSavingsV2 _vault) public {
         approvedTargets[0xDef1C0ded9bec7F1a1670819833240f027b25EfF] = true;
         //set Tricrypto as V2Pool
@@ -61,17 +63,29 @@ contract Zap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
         address _toToken,
         address _curvePool,
         uint256 _amount,
+        uint256 _minPoolAmount,
         address _swapTarget,
         address _vault,
         bytes calldata _swapData
     ) external payable returns (uint256 yearnLp) {
         //transfer token to this address
-        IERC20(_fromToken).safeTransferFrom(msg.sender, address(this), _amount);
+
+        if(_fromToken != address(0)){
+            require(_amount > 0, "amount can't be empty");
+            IERC20(_fromToken).safeTransferFrom(msg.sender, address(this), _amount);
+        } else {
+            require(msg.value > 0, "no eth sent");
+        }
+        
 
         //get the token address related to the curve Pool
 
         // perform the curve process, add liquidity
         uint256 crvTokensBought = _performCurveZapIn(_fromToken, _toToken, _curvePool, _amount, _swapTarget, _swapData);
+        
+
+        require(crvTokensBought >= _minPoolAmount, "received less than expected");
+        
 
         address curveTokenAddress = curveReg.getTokenAddress(_curvePool);
 
@@ -110,14 +124,33 @@ contract Zap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
         address _swapAddress,
         address _vault,
         uint256 yLpToken,
+        uint256 _min_toToken,
         address _swapTarget,
         address _fromToken,
         address _toToken,
         bytes calldata _swapData
     ) external payable returns (uint256 toTokensBought) {
+
+        address tokenAdress = curveReg.getTokenAddress(_swapAddress);
+
+        uint256 crvAmount = withdrawFromVault(_vault, yLpToken, tokenAdress);
+
+        toTokensBought = _performCurveZapOut(_swapAddress, crvAmount, _fromToken, _toToken, _swapTarget, _swapData);
+
+
+        require(toTokensBought > _min_toToken, "slippage error");
+        //transfer token receive to user
+        IERC20(_toToken).transfer(msg.sender, toTokensBought);
+
+        emit ZapOut(msg.sender, _toToken, toTokensBought);
+    }
+
+
+    function withdrawFromVault(address _vault, uint256 yLpToken, address _token) internal returns (uint256 crvBalance){
+        uint256 iniBalance = _getBalance(_token);
+
         //transfer lpToken to zapContract
         IERC20(_vault).transferFrom(msg.sender, address(this), yLpToken);
-        // unstake lpToken from yearn vault
 
         // approve vault savings
         IERC20(_vault).approve(address(vaultsavings), yLpToken);
@@ -127,21 +160,11 @@ contract Zap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
         // remove approval
         IERC20(_vault).approve(address(vaultsavings), 0);
 
-        //get crvTokens
-        address tokenAddress = curveReg.getTokenAddress(_swapAddress);
-
-        //balance crvTokens
-        uint256 crvAmount = IERC20(tokenAddress).balanceOf(address(this));
-
-        // perform curve zap out
-
-        toTokensBought = _performCurveZapOut(_swapAddress, crvAmount, _fromToken, _toToken, _swapTarget, _swapData);
-
-        //transfer token receive to user
-        IERC20(_toToken).transfer(msg.sender, toTokensBought);
-
-        emit ZapOut(msg.sender, _toToken, toTokensBought);
+        crvBalance = _getBalance(_token).sub(iniBalance);
+            
     }
+
+
 
 
     /**
@@ -381,6 +404,8 @@ contract Zap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
         }
 
         crvTokensBought = _getBalance(tokenAddress) - initalBalance;
+
+        
     }
 
     /**
@@ -409,7 +434,7 @@ contract Zap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
         uint256 iniBalance = _getBalance(bToken);
 
         if (curveReg.shouldAddUnderlying(_swapAddress)) {
-            ICurve(depositAddress).remove_liquidity_one_coin(crvToken, index, 0, true);
+            ICurve(depositAddress).remove_liquidity_one_coin(crvToken, int128(index), 0, true);
         } else {
             ICurve(depositAddress).remove_liquidity_one_coin(crvToken, index, 0);
         }

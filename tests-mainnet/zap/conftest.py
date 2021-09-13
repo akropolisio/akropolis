@@ -36,3 +36,16 @@ def zap(deployer, Zap):
     )
     zapContract = deployer.deploy(Zap, registry, vaultSavings)
     yield zapContract
+
+
+
+@pytest.fixture
+def target():
+    a = [{"inputs":[],"stateMutability":"nonpayable","type":"constructor"},{"stateMutability":"payable","type":"fallback"},{"inputs":[{"internalType":"bytes4","name":"selector","type":"bytes4"}],"name":"getFunctionImplementation","outputs":[{"internalType":"address","name":"impl","type":"address"}],"stateMutability":"view","type":"function"},{"stateMutability":"payable","type":"receive"}]
+    ex = Contract.from_abi("ZeroEx", "0xDef1C0ded9bec7F1a1670819833240f027b25EfF", abi=a)
+    yield ex
+
+@pytest.fixture
+def zapperData():
+    contract = Contract.from_explorer("0xE03A338d5c305613AfC3877389DD3B0617233387", as_proxy_for=None)
+    yield contract
