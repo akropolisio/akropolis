@@ -76,7 +76,7 @@ contract Zap is OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgradea
             _fromToken = ETHAddress;
         } else {
             require(_amount > 0, "amount can't be empty");
-            require(approvedTokens[_fromToken] = true, "token doesn't allow");
+            require(approvedTokens[_fromToken], "token isn't allowed for zap");
             IERC20(_fromToken).safeTransferFrom(msg.sender, address(this), _amount);
         }
 
@@ -84,7 +84,7 @@ contract Zap is OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgradea
         uint256 crvTokensBought = _performCurveZapIn(_fromToken, _toToken, _curvePool, _amount, _swapTarget, _swapData);
         
 
-        require(crvTokensBought >= _minPoolAmount, "received less than expected");
+        require(crvTokensBought >= _minPoolAmount, "slippage error");
         
 
         address curveTokenAddress = curveReg.getTokenAddress(_curvePool);
@@ -130,6 +130,8 @@ contract Zap is OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgradea
         address _toToken,
         bytes calldata _swapData
     ) external payable returns (uint256 toTokensBought) {
+        
+        require(approvedTokens[_toToken], "token isn't allowed for zap");
 
         address tokenAdress = curveReg.getTokenAddress(_swapAddress);
 
@@ -192,6 +194,7 @@ contract Zap is OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgradea
         address _swapTarget,
         bytes memory swapData
     ) internal returns (uint256 amtBought) {
+
         if (_fromToken == _toToken) {
             return _amount;
         }
@@ -485,10 +488,10 @@ contract Zap is OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgradea
         address[] calldata tokens,
         bool[] calldata isApproved
     ) external onlyOwner {
-        require(tokens.length == isApproved.length, "invalid input length");
+        require(tokens.length == isApproved.length, "Invalid Input length");
 
-        for(uint256 i = 0; i < tokens.length; i++) {
-            approvedTokens[tokens[i]] == isApproved[i];
+        for (uint256 i = 0; i < tokens.length; i++) {
+            approvedTokens[tokens[i]] = isApproved[i];
         }
     }
 

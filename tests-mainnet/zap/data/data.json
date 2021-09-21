@@ -5,20 +5,13 @@
             "sellTokenName": "YFI",
             "buyTokenName": "USDT",
             "amount_in": 1000000000000000000,
+            "amount_out": 100000000,
             "whale": "0x675938d86a6A4651b6dbba7529117fb0b557cCf2",
             "vault_owner": "0x835ad203958d01e5f2b0f3a6c3b0bd76ab14ca34",
             "curve_address": "0xD51a44d3FaE010294C616388b506AcdA1bfAAE46",
             "yearn_vault": "0xE537B5cc158EB71037D4125BDD7538421981E6AA"
-        },
-        {
-            "sellTokenName": "WETH",
-            "buyTokenName": "USDT",
-            "amount_in": 1000000000000000000,
-            "whale": "0x1e3D6eAb4BCF24bcD04721caA11C478a2e59852D",
-            "vault_owner": "0xd6d16B110ea9173d7cEB6CFe8Ca4060749A75f5c",
-            "curve_address": "0x2dded6Da1BF5DBdF597C45fcFaa3194e53EcfeAF",
-            "yearn_vault": "0x27b7b1ad7288079A66d12350c828D3C00A6F07d7"
         }
+
 
     ]
 }
