@@ -9,6 +9,7 @@ on:
 jobs:
   unittests:
     runs-on: ubuntu-latest
+    name: Unit Tests
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1.4.4
@@ -39,6 +40,26 @@ jobs:
           VAULTSAVINGV2: "0x1fb043a4fc9aeec7415c804dd3347800456cfac9"
           CURVEREG: "0x8AEE0a8A05A319BfCa41fF2E95C48f3F86383211"
 
+  mythx:
+    runs-on: ubuntu-latest
+    name: Mythx Scan
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1.4.4
+        with:
+          node-version: '12'
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+      - name: Prepare environment
+        run:  |
+          npm install
+      - name: Run Mythx Scan
+        shell: bash
+        run: |
+          npm run sec:mythx
+        env:
+          MYTHX_API_KEY: ${{ secrets.MYTHX_API_KEY }}
 
   slither:
     runs-on: ubuntu-latest
