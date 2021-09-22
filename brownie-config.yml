@@ -72,4 +72,4 @@ compiler:
 reports:
   exclude_contracts:
     - SafeMath
-dotenv: .env
+# dotenv: .env

@@ -51,3 +51,15 @@ def target():
 def zapperData():
     contract = Contract.from_explorer("0xE03A338d5c305613AfC3877389DD3B0617233387", as_proxy_for=None)
     yield contract
+
+
+@pytest.fixture
+def dai_token():
+    contract_DAI = Contract.from_explorer("0x6b175474e89094c44da98b954eedeac495271d0f", as_proxy_for=None)
+    yield contract_DAI
+
+
+@pytest.fixture
+def registry():
+    address_registry = Contract.from_explorer(os.getenv("CURVEREG"), as_proxy_for=None)
+    yield address_registry

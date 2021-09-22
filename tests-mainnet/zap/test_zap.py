@@ -185,7 +185,7 @@ def test_unregister_zapOut_coin(zap, user1, yearn_vault, sellTokenName, buyToken
     
     with  brownie.reverts("token isn't allowed for zap"):
     # min_amount = zapperData.removeLiquidityReturn(curve_swap_address, sellToken, )
-        tx = zap.zapOut(
+        zap.zapOut(
             curve_swap_address,
             vault,
             amount,
@@ -198,7 +198,7 @@ def test_unregister_zapOut_coin(zap, user1, yearn_vault, sellTokenName, buyToken
         )
 
 
-@parametrize_from_file(data, "data_zap_high")
+@parametrize_from_file(data, "data_zap_slippage")
 def test_slippage_zapIn(zap, user1, yearn_vault, sellTokenName, buyTokenName, vault_owner, curve_address, whale, zapperData, amount_in, amount_out, deployer):
     curve_swap_address = Contract.from_explorer(curve_address, as_proxy_for=None)
     vault = Contract.from_explorer(yearn_vault, as_proxy_for=None)
@@ -247,3 +247,14 @@ def test_slippage_zapIn(zap, user1, yearn_vault, sellTokenName, buyTokenName, va
             dataSwap,
             {"from": user1, "gas_price": gas_price, "amount": value},
         )
+
+
+def test_setApproveToken_onlyOwner(user1, dai_token, zap):
+    with brownie.reverts(""):
+        zap.setApprovedTokens([dai_token], [True], {"from": user1})
+
+
+
+def test_update_registry_onlyOwner(user1, zap, registry):
+    with brownie.reverts(""):
+        zap.updateRegistry(registry, {"from": user1})
