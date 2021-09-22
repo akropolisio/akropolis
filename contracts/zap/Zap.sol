@@ -195,25 +195,12 @@ contract Zap is OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgradea
         bytes memory swapData
     ) internal returns (uint256 amtBought) {
 
+        uint256 valueToSend;
+
         if (_fromToken == _toToken) {
             return _amount;
         }
-
-        if (
-            _fromToken == wethTokenAddress &&
-            _toToken == address(0)
-        ) {
-            IWETH(wethTokenAddress).withdraw(_amount);
-            return _amount;
-        } else if (
-            _fromToken == address(0) &&
-            _toToken == wethTokenAddress
-        ) {
-            IWETH(wethTokenAddress).deposit{ value: _amount }();
-            return _amount;
-        }
-
-        uint256 valueToSend;
+      
         if (_fromToken == address(0)) {
             valueToSend = _amount;
         } else {
