@@ -31,8 +31,9 @@ def regular_user1(accounts):
 
 @pytest.fixture(scope="module")
 def vault_savings(env_settings, Contract):
-    yield Contract.from_explorer(os.getenv("VAULTSAVINGV2_PROXY"), as_proxy_for=os.getenv("VAULTSAVINGV2"))
-
+    yield Contract.from_explorer(
+        os.getenv("VAULTSAVINGV2_PROXY"), as_proxy_for=os.getenv("VAULTSAVINGV2")
+    )
 
 
 @pytest.fixture(scope="module")

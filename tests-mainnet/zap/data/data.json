@@ -1,0 +1,32 @@
+{
+    "data_zap_high": [
+        {
+            "sellTokenName": "WETH",
+            "buyTokenName": "USDT",
+            "amount_in": 100000000000000000,
+            "amount_out": 100000000,
+            "whale": "0xd51a44d3fae010294c616388b506acda1bfaae46",
+            "vault_owner": "0x835ad203958d01e5f2b0f3a6c3b0bd76ab14ca34",
+            "curve_address": "0xD51a44d3FaE010294C616388b506AcdA1bfAAE46",
+            "yearn_vault": "0xE537B5cc158EB71037D4125BDD7538421981E6AA"
+        }
+
+
+    ],
+    "data_zap_slippage": [
+
+        {
+            "sellTokenName": "DAI",
+            "buyTokenName": "USDT",
+            "amount_in": 100000000000000000000,
+            "amount_out": 100000000,
+            "whale": "0x47ac0fb4f2d84898e4d9e7b4dab3c24507a6d503",
+            "vault_owner": "0x835ad203958d01e5f2b0f3a6c3b0bd76ab14ca34",
+            "curve_address": "0xD51a44d3FaE010294C616388b506AcdA1bfAAE46",
+            "yearn_vault": "0xE537B5cc158EB71037D4125BDD7538421981E6AA"
+        }
+
+
+    ]
+    
+}
