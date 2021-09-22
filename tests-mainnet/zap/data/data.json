@@ -4,7 +4,7 @@
         {
             "sellTokenName": "YFI",
             "buyTokenName": "USDT",
-            "amount_in": 1000000000000000000,
+            "amount_in": 10000000000000000,
             "amount_out": 100000000,
             "whale": "0x675938d86a6A4651b6dbba7529117fb0b557cCf2",
             "vault_owner": "0x835ad203958d01e5f2b0f3a6c3b0bd76ab14ca34",
