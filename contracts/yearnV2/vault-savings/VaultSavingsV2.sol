@@ -17,7 +17,6 @@ import "../../../interfaces/yearnV1/IVaultSavings.sol";
 import "@ozUpgradesV3/contracts/utils/PausableUpgradeable.sol";
 
 contract VaultSavingsV2 is IVaultSavings, OwnableUpgradeable, ReentrancyGuardUpgradeable, PausableUpgradeable {
-    uint256 constant MAX_UINT256 = uint256(-1);
 
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using AddressUpgradeable for address;
@@ -25,6 +24,7 @@ contract VaultSavingsV2 is IVaultSavings, OwnableUpgradeable, ReentrancyGuardUpg
 
     struct VaultInfo {
         bool isActive;
+        bool isRegister;
         uint256 blockNumber;
     }
 
@@ -70,7 +70,7 @@ contract VaultSavingsV2 is IVaultSavings, OwnableUpgradeable, ReentrancyGuardUpg
 
         lpAmount = IERC20Upgradeable(_vault).balanceOf(address(this));
         //send new tokens to user
-        IERC20Upgradeable(_vault).safeTransfer(msg.sender, lpAmount);
+        if (lpAmount > 0) IERC20Upgradeable(_vault).safeTransfer(msg.sender, lpAmount);
 
         emit Deposit(_vault, msg.sender, _amount, lpAmount);
     }
@@ -109,11 +109,12 @@ contract VaultSavingsV2 is IVaultSavings, OwnableUpgradeable, ReentrancyGuardUpg
     }
 
     function registerVault(address _vault) external override onlyOwner {
+        require(_vault != address(0), "Incorrect vault address");
         require(!isVaultRegistered(_vault), "Vault is already registered");
 
         registeredVaults.push(_vault);
 
-        vaults[_vault] = VaultInfo({isActive: true, blockNumber: block.number});
+        vaults[_vault] = VaultInfo({isActive: true, blockNumber: block.number, isRegister: true});
 
         address baseToken = IVaultV2(_vault).token();
 
@@ -121,17 +122,19 @@ contract VaultSavingsV2 is IVaultSavings, OwnableUpgradeable, ReentrancyGuardUpg
     }
 
     function activateVault(address _vault) external override onlyOwner {
+        require(_vault != address(0), "Incorrect vault address");
         require(isVaultRegistered(_vault), "Vault is not registered");
 
-        vaults[_vault] = VaultInfo({isActive: true, blockNumber: block.number});
+        vaults[_vault] = VaultInfo({isActive: true, blockNumber: block.number, isRegister: true});
 
         emit VaultActivated(_vault);
     }
 
     function deactivateVault(address _vault) external override onlyOwner {
+        require(_vault != address(0), "Incorrect vault address");
         require(isVaultRegistered(_vault), "Vault is not registered");
 
-        vaults[_vault] = VaultInfo({isActive: false, blockNumber: block.number});
+        vaults[_vault] = VaultInfo({isActive: false, blockNumber: block.number, isRegister: true});
 
         emit VaultDisabled(_vault);
     }
@@ -149,7 +152,7 @@ contract VaultSavingsV2 is IVaultSavings, OwnableUpgradeable, ReentrancyGuardUpg
         for (uint256 i = 0; i < registeredVaults.length; i++) {
             if (registeredVaults[i] == _vault) return true;
         }
-        return false;
+        return vaults[_vault].isRegister;
     }
 
     function isVaultActive(address _vault) public view override returns (bool) {
