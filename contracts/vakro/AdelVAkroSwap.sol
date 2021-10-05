@@ -16,7 +16,7 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
     using SafeERC20Upgradeable for IERC20Upgradeable;
     using SafeMathUpgradeable for uint256;
 
-    event AdelSwapped(address indexed receiver, uint256 adelAmount, uint256 akroAmount);
+    event AdelSwapped(address indexed receiver, uint256 adelAmount, uint256 vakroAmount);
 
     enum AdelSource {WALLET, STAKE, REWARDS}
 
@@ -70,6 +70,7 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
         require(_vakro != address(0), "Zero address");
 
         __Ownable_init();
+        __ReentrancyGuard_init();
 
         akro = _akro;
         adel = _adel;
@@ -107,7 +108,7 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
     }
 
     /**
-     * @notice Sets the rate of ADEL to vAKRO swap: 1 ADEL = _swapRateNumerator/_swapRateDenominator vAKRO
+     * @notice Sets the rate of ADEL to vAKRO swap: 1 vAKRO = _swapRateNumerator/_swapRateDenominator ADEL
      * @notice By default is set to 0, that means that swap is disabled
      * @param _swapRateNumerator Numerator for Adel converting. Can be set to 0 - that stops the swap.
      * @param _swapRateDenominator Denominator for Adel converting. Can't be set to 0
@@ -211,7 +212,7 @@ contract AdelVAkroSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable {
 
         require(adelAfter - adelBefore == _adelAmount, "ADEL was not transferred");
 
-        if (akroAfter - akroBefore > 0) {
+        if (akroAfter > akroBefore) {
             IERC20Upgradeable(akro).safeTransfer(_msgSender(), akroAfter - akroBefore);
         }
 

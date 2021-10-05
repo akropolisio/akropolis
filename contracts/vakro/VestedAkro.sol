@@ -36,6 +36,7 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
         uint256 firstUnclaimedBatch; // First batch which is not fully claimed
     }
 
+    // these values need to be add on the same orders for the next versions
     string private _name;
     string private _symbol;
     uint8 private _decimals;
@@ -52,6 +53,7 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
     uint256 public swapToAkroRateDenominator;
 
     function initialize(address _akro, uint256 _vestingPeriod) public initializer {
+        require(_akro != address(0), "Incorrect address");
         __Ownable_init();
         MinterRole.initialize(_msgSender());
         VestedAkroSenderRole.initialize(_msgSender());
@@ -123,12 +125,12 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
      * @param _vestingStart Unix timestamp.
      */
     function setVestingStart(uint256 _vestingStart) public onlyOwner {
-        require(_vestingStart > 0, "VestedAkro: vestingStart should be > 0");
+        require(_vestingStart > vestingStart, "Incorrect value");
         vestingStart = _vestingStart;
     }
 
     /**
-     * @notice Sets vesting start date (as unix timestamp). Owner only
+     * @notice Sets vesting cliff date (as unix timestamp). Owner only
      * @param _vestingCliff Cliff in seconds (1 month by default)
      */
     function setVestingCliff(uint256 _vestingCliff) public onlyOwner {
@@ -148,6 +150,7 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
     }
 
     function mint(address beneficiary, uint256 amount) public onlyMinter {
+        require(beneficiary != address(0) && amount > 0, "Incorrect input");
         totalSupply = totalSupply.add(amount);
         holders[beneficiary].unlocked = holders[beneficiary].unlocked.add(amount);
         emit Transfer(address(0), beneficiary, amount);
@@ -206,7 +209,9 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
      * @return Amount redeemed
      */
     function unlockAndRedeemAll() public returns (uint256) {
+        
         address beneficiary = _msgSender();
+        require(holders[beneficiary].batches.length > 0, "VestedAkro: nothing to unlock");
         claimAllFromBatches(beneficiary);
         return redeemAllUnlocked();
     }
@@ -279,6 +284,7 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
             uint256 claimable
         )
     {
+        require(batch < holders[account].batches.length, "Incorrect batch index");
         VestedBatch storage vb = holders[account].batches[batch];
         (claimable, ) = calculateClaimableFromBatch(vb);
         return (vb.amount, vestingStart, vestingStart.add(vestingPeriod), vb.claimed, claimable);
@@ -336,6 +342,13 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
             if (claimable > 0) {
                 b.batches[i].claimed = b.batches[i].claimed.add(claimable);
                 claiming = claiming.add(claimable);
+            }
+            if (gasleft() < 61000) {
+                if(!firstUnclaimedFound) {                
+                    b.firstUnclaimedBatch = i;
+                    firstUnclaimedFound = true;
+                }
+                break;
             }
             if (!fullyClaimable && !firstUnclaimedFound) {
                 b.firstUnclaimedBatch = i;

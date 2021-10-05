@@ -18,6 +18,8 @@ contract AdelVAkroVestingSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable 
 
     event AdelSwapped(address indexed receiver, uint256 adelAmount, uint256 akroAmount);
 
+    event newMinAmountToSwap(uint256 minAmount);
+
     //Addresses of affected contracts
     address public akro;
     address public adel;
@@ -61,6 +63,7 @@ contract AdelVAkroVestingSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable 
         require(_vakro != address(0), "Zero address");
 
         __Ownable_init();
+        __ReentrancyGuard_init();
 
         akro = _akro;
         adel = _adel;
@@ -77,6 +80,7 @@ contract AdelVAkroVestingSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable 
      */
     function setMinSwapAmount(uint256 _minAmount) external onlyOwner {
         minAmountToSwap = _minAmount;
+        emit newMinAmountToSwap(minAmountToSwap);
     }
 
     /**
@@ -185,8 +189,9 @@ contract AdelVAkroVestingSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable 
     /**
      * @notice Toggles vested swap flag from active to inactive or vice versa
      */
-    function toggleVestedSwap() public onlyOwner {
+    function toggleVestedSwap() public onlyOwner returns (bool) {
         isVestedSwapEnabled = !isVestedSwapEnabled;
+        return isVestedSwapEnabled;
     }
 
     /**
@@ -262,5 +267,6 @@ contract AdelVAkroVestingSwap is OwnableUpgradeable, ReentrancyGuardUpgradeable 
         IERC20Upgradeable(vakro).safeTransfer(_msgSender(), vAkroAmount);
 
         emit AdelSwapped(_msgSender(), _adelAmount, vAkroAmount);
+
     }
 }

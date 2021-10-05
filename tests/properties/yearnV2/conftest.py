@@ -7,6 +7,12 @@ from utils.deploy_helpers import deploy_proxy, deploy_admin
 TOTAL_TOKENS = 100000000000000
 
 
+@pytest.fixture(scope="function", autouse=True)
+def isolate_func(fn_isolation):
+    # perform a chain rewind after completing each test, to ensure proper isolation
+    # https://eth-brownie.readthedocs.io/en/v1.10.3/tests-pytest-intro.html#isolation-fixtures
+    pass
+
 @pytest.fixture(scope="module")
 def deployer():
     yield accounts.add(
