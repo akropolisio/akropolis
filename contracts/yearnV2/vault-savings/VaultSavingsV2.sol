@@ -124,6 +124,7 @@ contract VaultSavingsV2 is IVaultSavings, OwnableUpgradeable, ReentrancyGuardUpg
     function activateVault(address _vault) external override onlyOwner {
         require(_vault != address(0), "Incorrect vault address");
         require(isVaultRegistered(_vault), "Vault is not registered");
+        require(!isVaultActive(_vault), "vault is already active");
 
         vaults[_vault] = VaultInfo({isActive: true, blockNumber: block.number, isRegister: true});
 
@@ -133,6 +134,7 @@ contract VaultSavingsV2 is IVaultSavings, OwnableUpgradeable, ReentrancyGuardUpg
     function deactivateVault(address _vault) external override onlyOwner {
         require(_vault != address(0), "Incorrect vault address");
         require(isVaultRegistered(_vault), "Vault is not registered");
+        require(isVaultActive(_vault), "vault is already inactive");
 
         vaults[_vault] = VaultInfo({isActive: false, blockNumber: block.number, isRegister: true});
 

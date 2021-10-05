@@ -526,7 +526,7 @@ def test_swap_exploit_comp_vakro(chain, deployer, vakro, testExploitCompVAkroSwa
     vakro_balance_before = vakro.balanceOf(regular_user)
 
     vakro.setVestingCliff(0, {'from': deployer})
-    start = chain.time() + 100
+    start = chain.time() + 300
     vakro.setVestingStart(start, {'from': deployer})
     chain.mine(1)
 

@@ -130,7 +130,7 @@ contract VestedAkro is OwnableUpgradeable, IERC20Upgradeable, MinterRole, Vested
     }
 
     /**
-     * @notice Sets vesting start date (as unix timestamp). Owner only
+     * @notice Sets vesting cliff date (as unix timestamp). Owner only
      * @param _vestingCliff Cliff in seconds (1 month by default)
      */
     function setVestingCliff(uint256 _vestingCliff) public onlyOwner {

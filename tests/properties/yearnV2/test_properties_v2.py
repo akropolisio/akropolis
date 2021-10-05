@@ -379,22 +379,29 @@ def test_withdraw_deactivated_vault_reverts(token, vault, vaultSavings, deployer
         )
 
     vaultSavings.activateVault(vault.address, {"from": deployer})
+    assert vaultSavings.isVaultActive(vault.address) == True
+    #close by deactivating the vault
+    
 
 
 @given(user=strategy("address", length=10))
 @settings(max_examples=50)
 def test_activated_vault_reverts(token, vault, vaultSavings, deployer, user):
-
+    vaultSavings.deactivateVault(vault.address, {"from": deployer})
     with brownie.reverts():
         vaultSavings.activateVault(vault.address, {"from": user})
 
     vaultSavings.activateVault(vault.address, {"from": deployer})
+    assert vaultSavings.isVaultActive(vault.address) == True
+    #close the by deactivatng
+    vaultSavings.deactivateVault(vault.address, {"from": deployer})
 
 
 @given(user=strategy("address", length=10))
 @settings(max_examples=50)
 def test_deactivated_vault_reverts(token, vault, vaultSavings, deployer, user):
-
+    vaultSavings.deactivateVault(vault.address, {"from": deployer})
+    
     with brownie.reverts():
         vaultSavings.deactivateVault(vault.address, {"from": user})
 
